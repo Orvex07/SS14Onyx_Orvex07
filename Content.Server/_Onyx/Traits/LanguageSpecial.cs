@@ -22,7 +22,6 @@ public sealed partial class LanguageSpecial : JobSpecial
         var entities = IoCManager.Resolve<IEntityManager>();
         var knowledge = entities.EnsureComponent<LanguageTraitComponent>(mob);
         knowledge.Languages.UnionWith(Languages);
-        entities.Dirty(mob, knowledge);
         entities.System<LanguageSystem>().UpdateLanguages(mob);
     }
 }

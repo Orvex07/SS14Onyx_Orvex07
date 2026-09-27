@@ -36,8 +36,7 @@ public sealed partial class MarkingActivitySystem : EntitySystem
 
     private void OnShutdown(Entity<MarkingActivityComponent> ent, ref ComponentShutdown args)
     {
-        if (ent.Comp.ActionOwner is { } owner)
-            _actions.RemoveAction(owner, ent.Comp.ActionEntity);
+        _actions.RemoveAction(ent.Comp.ActionEntity);
     }
 
     private void OnMarkingsChanged(Entity<MarkingActivityComponent> ent, ref VisualBodyMarkingsChangedEvent args)
@@ -189,8 +188,7 @@ public sealed partial class MarkingActivitySystem : EntitySystem
 
     private void RemoveAction(Entity<MarkingActivityComponent> ent)
     {
-        if (ent.Comp.ActionOwner is { } owner)
-            _actions.RemoveAction(owner, ent.Comp.ActionEntity);
+        _actions.RemoveAction(ent.Comp.ActionEntity);
         ent.Comp.ActionEntity = null;
         ent.Comp.ActionOwner = null;
         Dirty(ent);

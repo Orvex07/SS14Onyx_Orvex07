@@ -6,12 +6,13 @@
   components:
   - type: Action
     raiseOnUser: true
-    icon:
-      sprite: _Onyx/Actions/actions_revenant.rsi
-      state: transmit
     checkCanInteract: false
     checkConsciousness: false
     itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _Onyx/Actions/actions_revenant.rsi
+    layers:
+    - state: transmit
   - type: TargetAction
     interactOnMiss: false
     range: 15

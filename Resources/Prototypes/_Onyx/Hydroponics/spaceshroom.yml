@@ -7,8 +7,7 @@
   - type: Sprite
     sprite: _Onyx/Objects/Specific/Hydroponics/spaceshroom.rsi
   - type: PlantData
-    name: seeds-spaceshroom-name
-    displayName: seeds-spaceshroom-display-name
+    name: seeds-spaceshroom-display-name
     packetPrototype: SpaceshroomSeeds
     productPrototypes: [ FoodSpaceshroom ]
   - type: Plant

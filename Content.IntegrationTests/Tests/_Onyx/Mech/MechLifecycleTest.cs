@@ -59,6 +59,7 @@ public sealed class MechLifecycleTest : GameTest
   - type: Sprite
   - type: InputMover
   - type: Physics
+  - type: MobState
   - type: Hands
     hands:
       hand_right:
@@ -80,6 +81,7 @@ public sealed class MechLifecycleTest : GameTest
   components:
   - type: InputMover
   - type: Physics
+  - type: MobState
   - type: Hands
     hands:
       hand_right:
@@ -93,6 +95,7 @@ public sealed class MechLifecycleTest : GameTest
   components:
   - type: InputMover
   - type: Physics
+  - type: MobState
 
 - type: entity
   id: TestHamsterMechPilot
@@ -119,8 +122,8 @@ public sealed class MechLifecycleTest : GameTest
   id: TestWhitelistMech
   parent: TestMech
   components:
-  - type: Mech
-    pilotWhitelist:
+  - type: Vehicle
+    operatorWhitelist:
       components:
       - Hands
 

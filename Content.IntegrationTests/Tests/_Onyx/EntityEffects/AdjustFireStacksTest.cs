@@ -14,6 +14,7 @@ public sealed class AdjustFireStacksTest : GameTest
 - type: entity
   id: TestOnyxFlammable
   components:
+  - type: Appearance
   - type: Flammable
     damage: {}
 ";

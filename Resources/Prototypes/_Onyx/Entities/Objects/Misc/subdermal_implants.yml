@@ -90,3 +90,28 @@
   components:
   - type: Implanter
     implant: CommandTrackingImplant
+
+- type: entity
+  parent: DeathRattleImplant
+  id: DeathRattleLavalandImplant
+  name: lavaland death rattle implant
+  description: Reports the user's coordinates over the supply radio channel if they die on Lavaland.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: RattleOnTrigger
+    radioChannel: Supply
+    reportCoordinates: true
+    messages:
+      Dead: rattle-on-trigger-dead-message
+  - type: TriggerBlocker
+    mapWhitelist:
+      components:
+      - LavalandMap
+
+- type: entity
+  id: DeathRattleLavalandImplanter
+  name: lavaland death rattle implanter
+  parent: BaseImplantOnlyImplanter
+  components:
+  - type: Implanter
+    implant: DeathRattleLavalandImplant

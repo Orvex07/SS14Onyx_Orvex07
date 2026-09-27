@@ -258,10 +258,7 @@
       flashlight:
         name: weapon-upgrade-slot-name-flashlight
         priority: 1
-        insertDelay: 0.4
-        ejectDelay: 0.2
         ejectOnBreak: true
-        occludesLight: false
         whitelist:
           components:
           - GunUpgradeFlashlight

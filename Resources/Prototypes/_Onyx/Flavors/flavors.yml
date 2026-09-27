@@ -37,3 +37,8 @@
   id: unicorntears
   flavorType: Complex
   description: flavor-complex-unicorntears
+
+- type: flavor
+  id: offensive
+  flavorType: Base
+  description: flavor-base-offensive

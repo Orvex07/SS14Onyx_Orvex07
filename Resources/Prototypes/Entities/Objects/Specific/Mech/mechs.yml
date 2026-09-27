@@ -6,11 +6,6 @@
   components:
   - type: MobMover
   - type: Mech
-    # <MechPilotBlacklist>
-    pilotBlacklist:
-      components:
-      - Zombie
-    # </MechPilotBlacklist>
   - type: MechAir
   # <Onyx-MechFeedback>
   - type: Speech
@@ -30,6 +25,11 @@
   # </Onyx-MechFeedback>
   - type: Vehicle
     canAttack: true
+    # <Onyx-MechPilotBlacklist>
+    operatorBlacklist:
+      components:
+      - Zombie
+    # </Onyx-MechPilotBlacklist>
   - type: ContainerVehicle
     containerId: "mech-pilot-slot"
   - type: ContainerVehicleEntry

@@ -323,7 +323,7 @@ public sealed partial class VehicleSystem : EntitySystem
         if (!Resolve(entity, ref entity.Comp))
             return false;
 
-        if (_entityWhitelist.IsWhitelistFail(entity.Comp.OperatorWhitelist, uid))
+        if (!_entityWhitelist.CheckBoth(uid, entity.Comp.OperatorBlacklist, entity.Comp.OperatorWhitelist)) // <Onyx-MechPilotBlacklist-edited>
             return false;
 
         if (entity.Comp.RequiresHands && (!_handsQuery.HasComp(uid) || !_actionBlocker.CanInteract(uid, entity)))

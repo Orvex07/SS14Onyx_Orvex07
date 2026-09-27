@@ -10,9 +10,10 @@
     checkCanInteract: false
     checkConsciousness: false
     itemIconStyle: NoItem
-    icon:
-      sprite: Interface/Actions/actions_borg.rsi
-      state: syndicate-martyr-module
     useDelay: 1
+  - type: Sprite
+    sprite: Interface/Actions/actions_borg.rsi
+    layers:
+    - state: syndicate-martyr-module
   - type: InstantAction
     event: !type:SECBorgSelfDestructEvent

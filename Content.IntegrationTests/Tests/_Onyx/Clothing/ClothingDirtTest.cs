@@ -6,6 +6,7 @@ using Content.Shared.Chemistry.Reagent;
 using Content.Shared.FixedPoint;
 using Content.Shared.Inventory;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
 using System.Numerics;
 
 namespace Content.IntegrationTests.Tests._Onyx.Clothing;
@@ -24,6 +25,7 @@ public sealed class ClothingDirtTest : GameTest
         var server = Pair.Server;
         await server.WaitIdleAsync();
         var entityManager = server.ResolveDependency<IEntityManager>();
+        var mapSystem = entityManager.System<SharedMapSystem>();
         var map = await Pair.CreateTestMap();
 
         await server.WaitAssertion(() =>
@@ -64,5 +66,7 @@ public sealed class ClothingDirtTest : GameTest
 
             Assert.That(entityManager.GetComponent<ClothingDirtableComponent>(shoes).DirtColor, Is.Not.Null);
         });
+
+        await server.WaitPost(() => mapSystem.DeleteMap(map.MapId));
     }
 }

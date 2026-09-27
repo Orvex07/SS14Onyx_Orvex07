@@ -27,6 +27,14 @@ public sealed partial class VehicleComponent : Component
     [DataField, AutoNetworkedField]
     public EntityWhitelist? OperatorWhitelist;
 
+    // <Onyx-MechPilotBlacklist>
+    /// <summary>
+    /// Simple blacklist for determining who cannot operate this vehicle.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public EntityWhitelist? OperatorBlacklist;
+    // </Onyx-MechPilotBlacklist>
+
     /// <summary>
     /// If true, damage to the vehicle will be transferred to the operator.
     /// This damage is modified by <see cref="TransferDamageModifier"/>
