@@ -149,7 +149,6 @@
       blacklist:
         tags:
         - PetOnly
-    # <Onyx-Underwear>
     - name: underwearb
       slotTexture: underwearb
       slotFlags: UNDERWEARB
@@ -170,4 +169,3 @@
       whitelist:
         tags:
         - OnyxUnderwearT
-    # </Onyx-Underwear>

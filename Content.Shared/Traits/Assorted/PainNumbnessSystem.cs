@@ -1,4 +1,5 @@
 using Content.Shared.Damage.Events;
+using Content.Shared._Onyx.Wounds; // <Onyx-PainNumbness>
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Events;
 using Content.Shared.Mobs.Systems;
@@ -20,6 +21,7 @@ public sealed partial class PainNumbnessSystem : EntitySystem
 
     private void OnEffectApplied(Entity<PainNumbnessStatusEffectComponent> ent, ref StatusEffectAppliedEvent args)
     {
+        RaiseLocalEvent(args.Target, new PainNumbnessChangedEvent()); // <Onyx-PainNumbness>
         if (!HasComp<MobThresholdsComponent>(args.Target))
             return;
 
@@ -28,6 +30,7 @@ public sealed partial class PainNumbnessSystem : EntitySystem
 
     private void OnEffectRemoved(Entity<PainNumbnessStatusEffectComponent> ent, ref StatusEffectRemovedEvent args)
     {
+        RaiseLocalEvent(args.Target, new PainNumbnessChangedEvent()); // <Onyx-PainNumbness>
         if (!HasComp<MobThresholdsComponent>(args.Target))
             return;
 

@@ -29,6 +29,7 @@ public abstract partial class SharedSurgerySystem
         SubscribeLocalEvent<SurgeryMissingPartConditionComponent, SurgeryValidEvent>(OnMissingPartConditionValid);
         SubscribeLocalEvent<SurgeryDetachablePartConditionComponent, SurgeryValidEvent>(OnDetachablePartConditionValid);
         SubscribeLocalEvent<SurgeryComponentConditionComponent, SurgeryValidEvent>(OnComponentConditionValid);
+        SubscribeLocalEvent<SurgeryComponentConditionComponent, SurgeryCanPerformStepEvent>(OnComponentConditionCanPerform);
         SubscribeLocalEvent<SurgeryOrganConditionComponent, SurgeryValidEvent>(OnOrganConditionValid);
         SubscribeLocalEvent<SurgeryOrganHealEffectComponent, SurgeryValidEvent>(OnOrganHealValid);
         SubscribeLocalEvent<SurgeryOrganHealEffectComponent, SurgeryStepEvent>(OnOrganHeal);
@@ -43,6 +44,8 @@ public abstract partial class SharedSurgerySystem
         SubscribeLocalEvent<SurgeryStepComponent, SurgeryStepCompleteCheckEvent>(OnToolCheck);
         SubscribeLocalEvent<SurgeryStepComponent, SurgeryCanPerformStepEvent>(OnToolCanPerform);
         SubscribeLocalEvent<SurgeryStepPainInflicterComponent, SurgeryStepEvent>(OnPainInflicterStep);
+        SubscribeLocalEvent<SurgeryDamageEffectComponent, SurgeryStepEvent>(OnDamageEffect);
+        SubscribeLocalEvent<SurgeryFailureDamageComponent, SurgeryStepFailedEvent>(OnFailureDamage);
         SubscribeLocalEvent<SurgeryDetachPartEffectComponent, SurgeryStepEvent>(OnDetachPart);
         SubscribeLocalEvent<SurgeryDetachPartEffectComponent, SurgeryStepCompleteCheckEvent>(OnDetachPartCheck);
         SubscribeLocalEvent<SurgeryAttachPartEffectComponent, SurgeryStepEvent>(OnAttachPart);

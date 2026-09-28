@@ -20,6 +20,14 @@
   abstract: true
   components:
   - type: Armor #Values seem to let the user survive one extra hit if attacked consistently.
+    # <Onyx-TraumaProtection>
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+      NerveDamage: 0
+    # </Onyx-TraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.9
@@ -333,6 +341,14 @@
       - state: inhand-left
       right:
       - state: inhand-right
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+  # </Onyx-GoobTraumaProtection>
 
 #Atmos Fire Helmet
 - type: entity
@@ -370,6 +386,14 @@
       Hair: HEAD
       Snout: HEAD
   - type: BreathMask
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+  # </Onyx-GoobTraumaProtection>
   - type: Item
     inhandVisuals:
       left:
@@ -389,6 +413,13 @@
   - type: Clothing
     sprite: Clothing/Head/Helmets/linghelmet.rsi
   - type: Armor #admeme item so it should be fine being overpowered while helmets are still intentionally kneecapped.
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.4
+      Dismemberment: 0.4
+      OrganDamage: 0.4
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.5
@@ -486,6 +517,13 @@
   - type: Clothing
     sprite: Clothing/Head/Helmets/syndie-raid.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    # </Onyx-GoobTraumaProtection>
     modifiers: #There's gotta be SOME reason to use this over other helmets.
       coefficients:
         Blunt: 0.85

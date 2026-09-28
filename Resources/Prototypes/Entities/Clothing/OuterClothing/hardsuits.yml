@@ -216,6 +216,12 @@
     walkModifier: 1.0
     sprintModifier: 1.0
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 0.3
+      Dismemberment: 0.3
+      OrganDamage: 0.3
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.6
@@ -253,6 +259,12 @@
     damageCoefficient: 0.7
   # </Onyx-StaminaArmor>
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 0.3
+      Dismemberment: 0.3
+      OrganDamage: 0.3
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.6
@@ -323,6 +335,12 @@
     damageCoefficient: 0.65
   # </Onyx-StaminaArmor>
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 0.3
+      Dismemberment: 0.3
+      OrganDamage: 0.3
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.4
@@ -358,6 +376,12 @@
     damageCoefficient: 0.6
   # </Onyx-StaminaArmor>
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 0.3
+      Dismemberment: 0.3
+      OrganDamage: 0.3
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.8
@@ -525,6 +549,12 @@
     damageCoefficient: 0.6
   # </Onyx-StaminaArmor>
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 0.3
+      Dismemberment: 0.3
+      OrganDamage: 0.3
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.6
@@ -605,6 +635,12 @@
   - type: StaminaResistance # do not add these to other equipment or mobs, we don't want to microbalance these everywhere
     damageCoefficient: 0.75
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 0.5
+      Dismemberment: 0.5
+      OrganDamage: 0.5
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.5
@@ -667,6 +703,12 @@
   - type: StaminaResistance # do not add these to other equipment or mobs, we don't want to microbalance these everywhere
     damageCoefficient: 0.6
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 0.5
+      Dismemberment: 0.5
+      OrganDamage: 0.5
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.6
@@ -709,6 +751,12 @@
   - type: StaminaResistance # do not add these to other equipment or mobs, we don't want to microbalance these everywhere
     damageCoefficient: 0.6
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 0.6
+      Dismemberment: 0.6
+      OrganDamage: 0.6
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.4
@@ -749,6 +797,13 @@
     damageCoefficient: 1
   # </Onyx-StaminaArmor>
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 1
+      Dismemberment: 1
+      OrganDamage: 1
+      NerveDamage: 1
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.2
@@ -786,6 +841,13 @@
   - type: ExplosionResistance
     damageCoefficient: 0.5
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 1
+      Dismemberment: 1
+      OrganDamage: 1
+      NerveDamage: 1
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.6
@@ -1057,6 +1119,13 @@
   - type: StaminaResistance # do not add these to other equipment or mobs, we don't want to microbalance these everywhere
     damageCoefficient: 0.15 # Needs 21 hits with a disabler to stun :godo:
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Fracture: 1
+      Dismemberment: 1
+      OrganDamage: 1
+      NerveDamage: 1
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.1 #best armor in the game

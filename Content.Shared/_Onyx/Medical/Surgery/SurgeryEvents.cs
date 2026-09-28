@@ -38,8 +38,15 @@ public enum StepInvalidReason
     IncompatibleTransplantType,
 }
 
-[ByRefEvent] public record struct SurgeryValidEvent(EntityUid Body, EntityUid Part, bool Cancelled = false);
+[ByRefEvent]
+public record struct SurgeryValidEvent(
+    EntityUid Body,
+    EntityUid Part,
+    EntityUid? User = null,
+    IReadOnlyList<EntityUid>? Tools = null,
+    bool Cancelled = false);
 [ByRefEvent] public record struct SurgeryStepEvent(EntityUid User, EntityUid Body, EntityUid Part, List<EntityUid> Tools);
+[ByRefEvent] public readonly record struct SurgeryStepFailedEvent(EntityUid User, EntityUid Body, EntityUid Part);
 [ByRefEvent] public record struct SurgeryStepCompleteCheckEvent(EntityUid Body, EntityUid Part, bool Cancelled = false);
 [ByRefEvent] public record struct SurgeryOrganInsertedEvent(EntityUid User, EntityUid Body, EntityUid Part);
 [ByRefEvent] public record struct SurgeryGetStepSequenceContextEvent(EntityUid Body, EntityUid Part, List<EntityUid> Tools, EntityUid? Context = null);

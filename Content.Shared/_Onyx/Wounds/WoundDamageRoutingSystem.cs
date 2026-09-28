@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Shared.Body.Systems;
 using Content.Shared.Bed.Components;
+using Content.Shared.CCVar;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Prototypes;
@@ -14,7 +15,9 @@ using Content.Shared.Light.Components;
 using Content.Shared.Medical;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
+using Content.Shared.Explosion;
 using Content.Shared._Onyx.Targeting;
+using Robust.Shared.Configuration;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
@@ -31,9 +34,9 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private InventorySystem _inventory = default!;
     [Dependency] private TargetResolverSystem _targetResolver = default!;
-    [Dependency] private PainSystem _pain = default!;
     [Dependency] private MobThresholdSystem _mobThreshold = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private IConfigurationManager _configuration = default!;
 
     private readonly HashSet<EntityUid> _routing = new();
     private readonly Dictionary<EntityUid, EntityUid> _requestedParts = new();
@@ -43,13 +46,43 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
     private readonly Dictionary<EntityUid, EntityUid> _explosionAmputationCandidates = new();
     private readonly Dictionary<EntityUid, float> _woundSeverityMultipliers = new();
     private readonly Dictionary<EntityUid, IReadOnlySet<TreatmentCapability>> _treatmentCapabilities = new();
+    private readonly Dictionary<EntityUid, DamageSpecifier> _pendingExplosionDamage = new();
+    private readonly HashSet<EntityUid> _vanillaExplosionDamage = new();
+    private readonly HashSet<EntityUid> _skipPartArmor = new();
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<WoundHostComponent, BeforeDamageChangedEvent>(OnBeforeDamageChanged);
         SubscribeLocalEvent<WoundHostComponent, DamageDealtEvent>(OnDamageDealt, before: [typeof(DamageableSystem)]);
+        SubscribeLocalEvent<WoundHostComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<WoundHostComponent, BeforeExplodeEvent>(OnBeforeExplode);
         SubscribeLocalEvent<WoundableComponent, BeforeDamageChangedEvent>(OnBeforePartDamageChanged);
+        SubscribeLocalEvent<WoundHostComponent, ComponentRemove>(OnWoundHostRemoved);
+    }
+
+    private void OnBeforeExplode(Entity<WoundHostComponent> ent, ref BeforeExplodeEvent args)
+    {
+        if (_net.IsServer && HasComp<DamageableComponent>(ent))
+            _pendingExplosionDamage[ent] = args.Damage;
+    }
+
+    private void OnDamageChanged(Entity<WoundHostComponent> ent, ref DamageChangedEvent args)
+    {
+        if (!_net.IsServer || args.DamageDelta is not { } damage || !_vanillaExplosionDamage.Remove(ent))
+            return;
+
+        ApplyExplosionDamageAfterVanilla(ent,
+            damage.Clone(),
+            args.Origin,
+            Math.Max(0f, _configuration.GetCVar(CCVars.ExplosionLimbDamageVariation)),
+            Math.Max(0f, _configuration.GetCVar(CCVars.ExplosionWoundMultiplier)));
+    }
+
+    private void OnWoundHostRemoved(Entity<WoundHostComponent> ent, ref ComponentRemove args)
+    {
+        _pendingExplosionDamage.Remove(ent);
+        _vanillaExplosionDamage.Remove(ent);
     }
 
     private void OnBeforeDamageChanged(Entity<WoundHostComponent> ent, ref BeforeDamageChangedEvent args)
@@ -57,18 +90,67 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         if (!_net.IsServer || _routing.Contains(ent))
             return;
 
+        _vanillaExplosionDamage.Remove(ent);
+        if (_pendingExplosionDamage.Remove(ent, out var explosionDamage) &&
+            ReferenceEquals(explosionDamage, args.Damage))
+        {
+            _vanillaExplosionDamage.Add(ent);
+            return;
+        }
+
+        if (ResolveDamagePart(ent, null) is null)
+            return;
+
         args.Cancelled = true;
-        RouteThroughBodyModifiers(ent, args.Damage, args.Origin);
+        RouteThroughBodyModifiers(ent, args.Damage.Clone(), args.Origin);
     }
 
     private void OnDamageDealt(Entity<WoundHostComponent> ent, ref DamageDealtEvent args)
     {
-        if (!_net.IsServer || !_routing.Contains(ent))
+        if (!_net.IsServer || !_routing.Contains(ent) || _vanillaExplosionDamage.Contains(ent))
             return;
 
         var damage = args.Damage.Clone();
         args.Damage.DamageDict.Clear();
         RouteAppliedDamage(ent, damage, args.Origin, args.InterruptsDoAfters);
+    }
+
+    public bool ApplyExplosionDamageAfterVanilla(
+        EntityUid body,
+        DamageSpecifier damage,
+        EntityUid? origin,
+        float variation,
+        float woundSeverityMultiplier)
+    {
+        if (!TryComp(body, out WoundHostComponent? host) || !_net.IsServer || _routing.Contains(body))
+            return false;
+
+        var parts = _body.GetBodyChildren(body).Select(part => part.Id).ToList();
+        parts.RemoveAll(part => !IsAttachedWoundablePart(body, part));
+        if (parts.Count == 0)
+            return false;
+
+        _projection.BeginDeferredProjection(body);
+        try
+        {
+            return ApplyDistributedDamage(body,
+                damage,
+                parts,
+                DamageDistribution.SplitWithVariation,
+                origin,
+                true,
+                false,
+                variation,
+                true,
+                woundSeverityMultiplier,
+                host,
+                skipPartArmor: true,
+                damageAlreadyApplied: true);
+        }
+        finally
+        {
+            _projection.EndDeferredProjection(body);
+        }
     }
 
     public void WithTreatmentCapabilities(EntityUid body, IReadOnlySet<TreatmentCapability> capabilities, Action action)
@@ -186,6 +268,33 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         return TryApplyDamage(body, damage, origin, part, ignoreResistances, healWounds);
     }
 
+    /// <summary>
+    /// Applies amputation damage while preserving an in-progress routed hit that caused the amputation.
+    /// </summary>
+    public bool TryApplyAmputationDamage(EntityUid body, EntityUid parent, DamageSpecifier damage)
+    {
+        if (!_routing.Remove(body))
+            return TryApplyDamage(body, damage.Clone(), requestedPart: parent);
+
+        var hadRequestedPart = _requestedParts.Remove(body, out var requestedPart);
+        var hadAppliedDamage = _applied.Remove(body);
+        var skippedWoundHealing = _skipWoundHealing.Remove(body);
+        try
+        {
+            return TryApplyDamage(body, damage.Clone(), requestedPart: parent);
+        }
+        finally
+        {
+            _routing.Add(body);
+            if (hadRequestedPart)
+                _requestedParts[body] = requestedPart;
+            if (hadAppliedDamage)
+                _applied.Add(body);
+            if (skippedWoundHealing)
+                _skipWoundHealing.Add(body);
+        }
+    }
+
     public bool TryApplyDistributedDamage(
         EntityUid body,
         DamageSpecifier damage,
@@ -202,50 +311,84 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
             mode is not DamageDistribution.SplitEvenly and not DamageDistribution.SplitByPartWeight and not DamageDistribution.SplitWithVariation)
             return false;
 
+        var parts = _targetResolver.GetMatchingParts(body, mask);
+        return ApplyDistributedDamage(body, damage, parts, mode, origin, ignoreResistances, interruptsDoAfters,
+            variation, isExplosion, woundSeverityMultiplier, host);
+    }
+
+    private bool ApplyDistributedDamage(
+        EntityUid body,
+        DamageSpecifier damage,
+        List<EntityUid> parts,
+        DamageDistribution mode,
+        EntityUid? origin,
+        bool ignoreResistances,
+        bool interruptsDoAfters,
+        float variation,
+        bool isExplosion,
+        float woundSeverityMultiplier,
+        WoundHostComponent? host = null,
+        bool skipPartArmor = false,
+        bool damageAlreadyApplied = false)
+    {
+        if (!Resolve(body, ref host))
+            return false;
+
         var systemic = new DamageSpecifier();
         var localized = new DamageSpecifier();
         foreach (var (type, amount) in damage.DamageDict)
             (host.LocalizedDamageTypes.Contains(type) ? localized : systemic).DamageDict[type] = amount;
 
-        var parts = _targetResolver.GetMatchingParts(body, mask);
         parts.RemoveAll(part => !IsAttachedWoundablePart(body, part));
         var applied = false;
 
         if (!systemic.Empty)
-            applied |= RouteThroughBodyModifiers((body, host), systemic, origin, ignoreResistances, interruptsDoAfters);
+            applied |= damageAlreadyApplied
+                ? ApplySystemicDamage(body, systemic)
+                : RouteThroughBodyModifiers((body, host), systemic, origin, ignoreResistances, interruptsDoAfters);
 
         if (localized.Empty || parts.Count == 0)
             return applied;
-
-        var weights = new float[parts.Count];
-        var totalWeight = 0f;
-        for (var i = 0; i < parts.Count; i++)
-        {
-            var weight = 1f;
-            if (mode != DamageDistribution.SplitEvenly && TryComp(parts[i], out BodyPartComponent? part))
-                weight = host.TargetWeights.GetValueOrDefault(part.PartType, 1f);
-            if (!float.IsFinite(weight) || weight <= 0f)
-                weight = 1f;
-            if (mode == DamageDistribution.SplitWithVariation && variation > 0f)
-                weight *= _random.NextFloat() * variation + 1f;
-            weights[i] = weight;
-            totalWeight += weight;
-        }
 
         var shares = new DamageSpecifier[parts.Count];
         for (var i = 0; i < shares.Length; i++)
             shares[i] = new DamageSpecifier();
 
-        foreach (var (type, amount) in localized.DamageDict)
+        if (isExplosion)
         {
-            var remaining = amount.Value;
+            var divisor = parts.Count;
+            foreach (var (type, amount) in localized.DamageDict)
+                for (var i = 0; i < parts.Count; i++)
+                    shares[i].DamageDict[type] = amount / divisor;
+        }
+        else
+        {
+            var weights = new float[parts.Count];
+            var totalWeight = 0f;
             for (var i = 0; i < parts.Count; i++)
             {
-                var value = i == parts.Count - 1
-                    ? remaining
-                    : (int) ((long) amount.Value * weights[i] / totalWeight);
-                shares[i].DamageDict[type] = FixedPoint2.FromHundredths(value);
-                remaining -= value;
+                var weight = 1f;
+                if (mode != DamageDistribution.SplitEvenly && TryComp(parts[i], out BodyPartComponent? part))
+                    weight = host.TargetWeights.GetValueOrDefault(part.PartType, 1f);
+                if (!float.IsFinite(weight) || weight <= 0f)
+                    weight = 1f;
+                if (mode == DamageDistribution.SplitWithVariation && variation > 0f)
+                    weight *= _random.NextFloat() * variation + 1f;
+                weights[i] = weight;
+                totalWeight += weight;
+            }
+
+            foreach (var (type, amount) in localized.DamageDict)
+            {
+                var remaining = amount.Value;
+                for (var i = 0; i < parts.Count; i++)
+                {
+                    var value = i == parts.Count - 1
+                        ? remaining
+                        : (int) ((long) amount.Value * weights[i] / totalWeight);
+                    shares[i].DamageDict[type] = FixedPoint2.FromHundredths(value);
+                    remaining -= value;
+                }
             }
         }
 
@@ -257,6 +400,8 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         }
         if (woundSeverityMultiplier != 1f)
             _woundSeverityMultipliers[body] = Math.Max(0f, woundSeverityMultiplier);
+        if (skipPartArmor)
+            _skipPartArmor.Add(body);
         try
         {
             for (var i = 0; i < parts.Count; i++)
@@ -279,6 +424,7 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
             _explosionDamage.Remove(body);
             _explosionAmputationCandidates.Remove(body);
             _woundSeverityMultipliers.Remove(body);
+            _skipPartArmor.Remove(body);
         }
     }
 
@@ -671,27 +817,32 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
                 return;
             }
 
-            var modify = new PartDamageModifyEvent(
-                body,
-                target,
-                partComponent.PartType,
-                partComponent.Symmetry,
-                localized);
-            if (TryComp(body, out InventoryComponent? inventory))
-                _inventory.RelayEvent((body, inventory), modify);
-
-            localized = modify.Damage;
-            if (localized.Empty)
+            if (!_skipPartArmor.Contains(body))
             {
-                _projection.RefreshBodyDamage(body);
-                return;
+                var modify = new PartDamageModifyEvent(
+                    body,
+                    target,
+                    partComponent.PartType,
+                    partComponent.Symmetry,
+                    localized);
+                if (TryComp(body, out InventoryComponent? inventory))
+                    _inventory.RelayEvent((body, inventory), modify);
+
+                localized = modify.Damage;
+                if (localized.Empty)
+                {
+                    _projection.RefreshBodyDamage(body);
+                    return;
+                }
             }
 
             var overflow = AccumulateAmputationOverflow(target, ref localized);
             if (!overflow.Empty)
             {
                 var overflowed = new PartDamageOverflowedEvent(body, target, overflow,
-                    _explosionDamage.Contains(body), _explosionAmputationCandidates.GetValueOrDefault(body) == target);
+                    _explosionDamage.Contains(body),
+                    _explosionAmputationCandidates.GetValueOrDefault(body) == target,
+                    _woundSeverityMultipliers.GetValueOrDefault(body, 1f));
                 RaiseLocalEvent(target, ref overflowed);
             }
 
@@ -701,13 +852,16 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
                 return;
             }
 
-            if (_damage.TryChangeDamage(target,
-                    localized,
-                    out var appliedDamage,
-                    ignoreResistances: true,
-                    interruptsDoAfters: interruptsDoAfters,
-                    origin: origin,
-                    ignoreGlobalModifiers: true))
+            var before = _damage.GetAllDamage(target).Clone();
+            _damage.TryChangeDamage(target,
+                localized,
+                ignoreResistances: true,
+                interruptsDoAfters: interruptsDoAfters,
+                origin: origin,
+                ignoreGlobalModifiers: true);
+            var appliedDamage = _damage.GetAllDamage(target) - before;
+            appliedDamage.TrimZeros();
+            if (!appliedDamage.Empty)
             {
                 _applied.Add(body);
                 var applied = new PartDamageAppliedEvent(body, target, appliedDamage,
@@ -848,7 +1002,7 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
             mode is not DamageDistribution.SplitEvenly and not DamageDistribution.SplitByPartWeight and not DamageDistribution.SplitWithVariation)
             return false;
 
-        TryApplyDistributedDamage(body,
+        return TryApplyDistributedDamage(body,
             damage,
             mask,
             mode,
@@ -858,7 +1012,6 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
             variation,
             isExplosion,
             woundSeverityMultiplier);
-        return true;
     }
 
     private bool CanTreatPart(EntityUid body, EntityUid part)
@@ -978,7 +1131,6 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
     private bool ApplySystemicDamage(EntityUid body, DamageSpecifier change)
     {
         var systemic = EnsureComp<SystemicDamageComponent>(body);
-        var applied = new DamageSpecifier();
         var changed = false;
         foreach (var (type, amount) in change.DamageDict)
         {
@@ -991,7 +1143,6 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
                 continue;
 
             changed = true;
-            applied.DamageDict[type] = value - oldValue;
             if (value == FixedPoint2.Zero)
                 systemic.Damage.DamageDict.Remove(type);
             else
@@ -1002,9 +1153,6 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
             return false;
 
         Dirty(body, systemic);
-        if (TryComp(body, out WoundHostComponent? host) &&
-            _targetResolver.TryResolveExact(body, host.SystemicPainTarget, out var painTarget))
-            _pain.ApplyDamage(painTarget, applied);
         return true;
     }
 

@@ -60,7 +60,7 @@ public abstract partial class SharedSurgerySystem
         if (HasComp<SleepingComponent>(args.Body))
             amount *= ent.Comp.SleepModifier;
 
-        _pain.ChangePain((args.Part, null), amount);
+        _pain.InflictSurgeryPain(args.Body, args.Part, amount, ent.Comp.PainDuration);
     }
 
     protected virtual void OnToolStepCompleted(Entity<SurgeryStepComponent> ent, ref SurgeryStepEvent args)

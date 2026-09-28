@@ -66,6 +66,14 @@
   categories: [ HideSpawnMenu ]
   name: SlimePerson appearance
   components:
+  # <Onyx-SlimeMarkingTail>
+  - type: ConditionalMarkingOrgans
+    organs:
+      Tail:
+        prototype: OrganSlimePersonTail
+        parent: Groin
+        layers: [ Tail, TailOverlay ]
+  # </Onyx-SlimeMarkingTail>
   - type: Inventory
     femaleDisplacements:
       jumpsuit:

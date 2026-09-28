@@ -54,10 +54,21 @@
     dirtCoverageLayers: [OUTERCLOTHING, INNERCLOTHING, NECK] # <Onyx-ClothingDirt>
     vital: true
     category: Torso
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
   # </Onyx-Surgery>
   # <Onyx-SurgeryToolExamine>
   - type: SurgeryTool
   # </Onyx-SurgeryToolExamine>
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     state: torso
   - type: VisualOrgan
@@ -93,16 +104,34 @@
     vital: true
     category: Head
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.5
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 200
       Piercing: 200
       Blunt: 350
+    # <Onyx-AmputationDamage>
+    damageOnAmputate:
+      types:
+        Bloodloss: 45
+        Asphyxiation: 45
+        Slash: 45
+    # </Onyx-AmputationDamage>
   # </Onyx-Surgery>
   # <Onyx-SurgeryToolExamine>
   - type: SurgeryTool
     customUses:
     - surgery-tool-use-attach-head
   # </Onyx-SurgeryToolExamine>
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     state: head
   - type: VisualOrgan
@@ -143,6 +172,10 @@
     symmetry: Left
     category: ArmLeft
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 130
       Piercing: 250
@@ -155,6 +188,13 @@
     customUses:
     - surgery-tool-use-attach-left-arm
   # </Onyx-SurgeryToolExamine>
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     noRot: true # <Onyx-BodyPartNoRot>
     enableOverrideDir: true # <Onyx-BodyPartNoRot>
@@ -186,6 +226,10 @@
     symmetry: Right
     category: ArmRight
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 130
       Piercing: 250
@@ -198,6 +242,13 @@
     customUses:
     - surgery-tool-use-attach-right-arm
   # </Onyx-SurgeryToolExamine>
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     noRot: true # <Onyx-BodyPartNoRot>
     enableOverrideDir: true # <Onyx-BodyPartNoRot>
@@ -228,6 +279,10 @@
     symmetry: Left
     category: HandLeft
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 70
       Piercing: 200
@@ -242,6 +297,13 @@
     handID: left
     data:
       location: Left
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     noRot: true # <Onyx-BodyPartNoRot>
     enableOverrideDir: true # <Onyx-BodyPartNoRot>
@@ -272,6 +334,10 @@
     symmetry: Right
     category: HandRight
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 70
       Piercing: 200
@@ -286,6 +352,13 @@
     handID: right
     data:
       location: Right
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     noRot: true # <Onyx-BodyPartNoRot>
     enableOverrideDir: true # <Onyx-BodyPartNoRot>
@@ -317,6 +390,10 @@
     symmetry: Left
     category: LegLeft
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 150
       Piercing: 250
@@ -329,6 +406,13 @@
     customUses:
     - surgery-tool-use-attach-left-leg
   # </Onyx-SurgeryToolExamine>
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     noRot: true # <Onyx-BodyPartNoRot>
     enableOverrideDir: true # <Onyx-BodyPartNoRot>
@@ -360,6 +444,10 @@
     symmetry: Right
     category: LegRight
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 150
       Piercing: 250
@@ -372,6 +460,13 @@
     customUses:
     - surgery-tool-use-attach-right-leg
   # </Onyx-SurgeryToolExamine>
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     noRot: true # <Onyx-BodyPartNoRot>
     enableOverrideDir: true # <Onyx-BodyPartNoRot>
@@ -402,6 +497,10 @@
     symmetry: Left
     category: FootLeft
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 80
       Piercing: 220
@@ -412,6 +511,13 @@
     customUses:
     - surgery-tool-use-attach-left-foot
   # </Onyx-SurgeryToolExamine>
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     noRot: true # <Onyx-BodyPartNoRot>
     enableOverrideDir: true # <Onyx-BodyPartNoRot>
@@ -442,6 +548,10 @@
     symmetry: Right
     category: FootRight
     fractureProfile: OrganicFractureProfile
+    # <Onyx-GoobTraumaProtection>
+    traumaProtection:
+      Dismemberment: 0.3
+    # </Onyx-GoobTraumaProtection>
     amputationThresholds:
       Slash: 80
       Piercing: 220
@@ -452,6 +562,13 @@
     customUses:
     - surgery-tool-use-attach-right-foot
   # </Onyx-SurgeryToolExamine>
+  - type: Nerve # <Onyx-Nerves>
+  # <Onyx-WoundSystem>
+  - type: Woundable
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  # </Onyx-WoundSystem>
   - type: Sprite
     noRot: true # <Onyx-BodyPartNoRot>
     enableOverrideDir: true # <Onyx-BodyPartNoRot>
@@ -477,6 +594,11 @@
   - type: GibbableOrgan
   - type: Organ
     category: Brain
+  # <Onyx-Consciousness>
+  - type: ConsciousnessRequired
+    identifier: nerveSystem
+  # </Onyx-Consciousness>
+  - type: NervousSystem # <Onyx-Nerves>
   # <Onyx-OrganDamage>
   - type: OrganDamage
     hitChance: 0.8
@@ -914,6 +1036,7 @@
   - type: ChildOrgan
   - type: DetachableOrgan
     detachedBody: DetachedBody
+  - type: NonEdible # <Onyx-NonEdibleParts>
 
 - type: entity
   abstract: true

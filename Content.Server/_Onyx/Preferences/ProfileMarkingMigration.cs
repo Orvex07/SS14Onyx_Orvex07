@@ -52,6 +52,23 @@ public static class ProfileMarkingMigration
             if (!markingData.ContainsKey(source) && markingData.ContainsKey(target))
                 MoveOrgan(markings, source, target);
         }
+
+        if (!markingManager.TryGetConditionalMarkingOrgans(species, out var conditionalOrgans))
+            return;
+
+        foreach (var (targetOrgan, conditional) in conditionalOrgans)
+        {
+            foreach (var layer in conditional.Layers)
+            {
+                foreach (var sourceOrgan in markings.Keys.ToArray())
+                {
+                    if (sourceOrgan == targetOrgan || !markings[sourceOrgan].Remove(layer, out var sourceMarkings))
+                        continue;
+
+                    Merge(markings.GetOrNew(targetOrgan).GetOrNew(layer), sourceMarkings);
+                }
+            }
+        }
     }
 
     private static void MoveOrgan(

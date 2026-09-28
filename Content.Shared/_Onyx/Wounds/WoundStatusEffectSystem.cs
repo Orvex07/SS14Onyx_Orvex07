@@ -36,7 +36,7 @@ public sealed partial class WoundStatusEffectSystem : EntitySystem
 
     private void OnWoundStateChanged(Entity<WoundableComponent> part, ref WoundStateChangedEvent args)
     {
-        _pain.RefreshWoundPain((part.Owner, (WoundableComponent?) part.Comp));
+        _pain.RecomputeWoundPain(part.Owner);
         RefreshFunctionality(part.Owner);
         if (!_net.IsServer || !TryComp(args.Wound, out WoundComponent? wound) ||
             !TryGetActiveBehavior(wound.Prototype, wound.Severity, out var behavior))
@@ -50,8 +50,9 @@ public sealed partial class WoundStatusEffectSystem : EntitySystem
 
     private void OnWoundCreated(Entity<WoundableComponent> part, ref WoundCreatedEvent args)
     {
-        _pain.RefreshWoundPain((part.Owner, (WoundableComponent?) part.Comp));
-        _pain.ApplyOneTimePain(part.Owner, args.Wound);
+        var createdSeverity = CompOrNull<WoundComponent>(args.Wound)?.Severity ?? FixedPoint2.Zero;
+        _pain.ApplyOneTimeSpike(part.Owner, args.Wound, createdSeverity);
+        _pain.RecomputeWoundPain(part.Owner);
         RefreshFunctionality(part.Owner);
         if (!_net.IsServer)
             return;
@@ -65,9 +66,9 @@ public sealed partial class WoundStatusEffectSystem : EntitySystem
 
     private void OnWoundChanged(Entity<WoundableComponent> part, ref WoundChangedEvent args)
     {
-        _pain.RefreshWoundPain((part.Owner, (WoundableComponent?) part.Comp));
         if (args.Severity > args.OldSeverity)
-            _pain.ApplyOneTimePain(part.Owner, args.Wound, args.Severity - args.OldSeverity);
+            _pain.ApplyOneTimeSpike(part.Owner, args.Wound, args.Severity - args.OldSeverity);
+        _pain.RecomputeWoundPain(part.Owner);
         RefreshFunctionality(part.Owner);
         if (!_net.IsServer || !TryComp(args.Wound, out WoundComponent? wound) ||
             !_prototypes.TryIndex(wound.Prototype, out var prototype))
@@ -94,7 +95,7 @@ public sealed partial class WoundStatusEffectSystem : EntitySystem
 
     private void OnWoundRemoved(Entity<WoundableComponent> part, ref WoundRemovedEvent args)
     {
-        _pain.RefreshWoundPain((part.Owner, (WoundableComponent?) part.Comp));
+        _pain.RecomputeWoundPain(part.Owner);
         RefreshFunctionality(part.Owner);
         if (!_net.IsServer)
             return;
@@ -128,7 +129,7 @@ public sealed partial class WoundStatusEffectSystem : EntitySystem
 
     public void RefreshPartWounds(EntityUid part)
     {
-        _pain.RefreshWoundPain(part);
+        _pain.RecomputeWoundPain(part);
         RefreshFunctionality(part);
         HandlePartInserted(part);
     }

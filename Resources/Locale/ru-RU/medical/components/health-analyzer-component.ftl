@@ -19,6 +19,10 @@ health-analyzer-window-body-tab = Тело
 health-analyzer-window-organs-tab = Органы
 health-analyzer-window-organs-unavailable = Данные об органах недоступны.
 health-analyzer-window-organ-health = { $percent } %
+health-analyzer-window-organ-healthy = [color=#69C779]В норме[/color] · { $percent }%
+health-analyzer-window-organ-damaged = [color=#E6A566]Повреждён[/color] · { $percent }%
+health-analyzer-window-organ-critical = [color=#E85D5D]Критическое повреждение[/color] · { $percent }%
+health-analyzer-window-organ-destroyed = [color=#A0A0A0]Разрушен[/color] · { $percent }%
 # </Onyx-HealthAnalyzerOrgans-edited>
 # <Onyx-HealthAnalyzerChemicals>
 health-analyzer-window-chemicals-tab = Химикаты

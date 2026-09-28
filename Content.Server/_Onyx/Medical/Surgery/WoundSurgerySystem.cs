@@ -20,6 +20,7 @@ public sealed partial class WoundSurgerySystem : EntitySystem
     [Dependency] private WoundFractureSystem _fractures = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private WoundSystem _wounds = default!;
+    [Dependency] private NerveSystem _nerves = default!;
 
     public override void Initialize()
     {
@@ -30,6 +31,9 @@ public sealed partial class WoundSurgerySystem : EntitySystem
         SubscribeLocalEvent<SurgeryFractureGradeConditionComponent, SurgeryValidEvent>(OnFractureGradeValid);
         SubscribeLocalEvent<SurgeryMendFractureEffectComponent, SurgeryStepEvent>(OnMendFracture);
         SubscribeLocalEvent<SurgeryMendFractureEffectComponent, SurgeryStepCompleteCheckEvent>(OnMendFractureCheck);
+        SubscribeLocalEvent<SurgeryNerveDamageConditionComponent, SurgeryValidEvent>(OnNerveDamageValid);
+        SubscribeLocalEvent<SurgeryRepairNerveEffectComponent, SurgeryStepEvent>(OnRepairNerve);
+        SubscribeLocalEvent<SurgeryRepairNerveEffectComponent, SurgeryStepCompleteCheckEvent>(OnRepairNerveCheck);
         SubscribeLocalEvent<SurgeryWoundedConditionComponent, SurgeryValidEvent>(OnWoundedValid);
         SubscribeLocalEvent<SurgeryTendWoundsEffectComponent, SurgeryStepEvent>(OnTendWounds);
         SubscribeLocalEvent<SurgeryTendWoundsEffectComponent, SurgeryStepCompleteCheckEvent>(OnTendWoundsCheck);
@@ -80,6 +84,24 @@ public sealed partial class WoundSurgerySystem : EntitySystem
     {
         var severity = GetGroupSeverity(args.Part, ent.Comp.DamageGroup);
         if (severity <= FixedPoint2.Zero || severity < ent.Comp.MinSeverity || severity > ent.Comp.MaxSeverity)
+            args.Cancelled = true;
+    }
+
+    private void OnNerveDamageValid(Entity<SurgeryNerveDamageConditionComponent> ent, ref SurgeryValidEvent args)
+    {
+        if (!TryComp(args.Part, out NerveComponent? nerve) || nerve.Damage < ent.Comp.MinimumDamage)
+            args.Cancelled = true;
+    }
+
+    private void OnRepairNerve(Entity<SurgeryRepairNerveEffectComponent> ent, ref SurgeryStepEvent args)
+    {
+        _nerves.Repair(args.Part, ent.Comp.Amount);
+    }
+
+    private void OnRepairNerveCheck(Entity<SurgeryRepairNerveEffectComponent> ent,
+        ref SurgeryStepCompleteCheckEvent args)
+    {
+        if (TryComp(args.Part, out NerveComponent? nerve) && nerve.Damage > FixedPoint2.Zero)
             args.Cancelled = true;
     }
 

@@ -19,11 +19,9 @@
   femaleFirstNames: AbductorNames
   naming: First
   # CorvaxGoob-Species-End
-  # <Onyx>
   defaultHeightCm: 175
   defaultWidthCm: 42
   minHeightCm: 140
   maxHeightCm: 200
   minWidthCm: 32
   maxWidthCm: 49
-  # </Onyx>

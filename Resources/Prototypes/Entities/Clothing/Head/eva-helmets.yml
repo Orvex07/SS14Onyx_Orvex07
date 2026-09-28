@@ -99,6 +99,13 @@
       head:
       - state: equipped-head
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.14
+      Dismemberment: 0
+      OrganDamage: 0.14
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Heat: 0.90

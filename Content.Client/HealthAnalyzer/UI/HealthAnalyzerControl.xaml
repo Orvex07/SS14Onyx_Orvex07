@@ -7,14 +7,6 @@
     VerticalExpand="True"
     HorizontalExpand="True"
     Orientation="Vertical">
-    <PanelContainer Name="NoPatientDataPanel" StyleClasses="PanelDeep" HorizontalExpand="True" VerticalExpand="True">
-        <Label Name="NoPatientDataText"
-               Text="{Loc health-analyzer-window-no-patient-data-text}"
-               StyleClasses="LabelHeading"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center" />
-    </PanelContainer>
-
     <BoxContainer Name="DiagnosticColumns" Orientation="Vertical" SeparationOverride="6" HorizontalExpand="True" VerticalExpand="True">
         <PanelContainer Name="PatientDataContainer" StyleClasses="PanelDark" MinHeight="112" HorizontalExpand="True">
             <BoxContainer Orientation="Horizontal" MinHeight="100" Margin="8 6" SeparationOverride="8">
@@ -41,17 +33,17 @@
             </BoxContainer>
         </PanelContainer>
 
-        <BoxContainer Orientation="Horizontal" SeparationOverride="6" HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="DiagnosticRow" Orientation="Horizontal" SeparationOverride="6" HorizontalExpand="True" VerticalExpand="True">
             <PanelContainer StyleClasses="PanelDeep" MinWidth="330" HorizontalExpand="True" VerticalExpand="True" SizeFlagsStretchRatio="4">
                 <BoxContainer Name="DiagnosticTabs" Orientation="Vertical" Margin="8 6" HorizontalExpand="True" VerticalExpand="True">
                     <ScrollContainer Name="BodyTab" HorizontalExpand="True" VerticalExpand="True" HScrollEnabled="False">
                         <BoxContainer Orientation="Vertical" HorizontalExpand="True">
-                            <GridContainer Columns="2" HSeparationOverride="12" VSeparationOverride="4" HorizontalExpand="True">
-                                <Label Name="DamageScopeLabel" Text="{Loc 'health-analyzer-window-entity-damage-total-text'}" StyleClasses="LabelHeading" />
-                                <Label Name="DamageLabel" HorizontalAlignment="Right" StyleClasses="LabelHeading" />
-                                <Label Name="VitalDamageLabel" Text="{Loc 'health-analyzer-window-entity-vital-damage-text'}" StyleClasses="LabelWeak" />
-                                <Label Name="VitalDamageValueLabel" HorizontalAlignment="Right" />
-                            </GridContainer>
+                            <BoxContainer Orientation="Vertical" SeparationOverride="2" HorizontalExpand="True">
+                                <Label Name="VitalDamageLabel" Text="{Loc 'health-analyzer-window-entity-vital-damage-text'}" StyleClasses="LabelHeading" ClipText="True" />
+                                <Label Name="VitalDamageValueLabel" StyleClasses="LabelHeading" ClipText="True" />
+                                <Label Name="DamageScopeLabel" Text="{Loc 'health-analyzer-window-entity-damage-total-text'}" StyleClasses="LabelWeak" ClipText="True" />
+                                <Label Name="DamageLabel" ClipText="True" />
+                            </BoxContainer>
                             <controls:Separator Margin="0 8" StyleClasses="LowDivider" />
                             <controls:Separator Name="AlertsDivider" Visible="False" StyleClasses="LowDivider" />
                             <BoxContainer Name="AlertsContainer" Visible="False" Margin="0 6" Orientation="Vertical" HorizontalAlignment="Center" />

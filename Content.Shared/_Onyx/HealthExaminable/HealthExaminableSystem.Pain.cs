@@ -10,10 +10,10 @@ public sealed partial class HealthExaminableSystem
 
     private string? GetPainLevel(EntityUid part)
     {
-        if (!TryComp(part, out PainComponent? pain))
+        if (!HasComp<NerveComponent>(part))
             return null;
 
-        var value = _pain.GetPain((part, pain));
+        var value = _pain.GetPartPain(part);
         return value >= 50 ? "agony"
             : value >= 30 ? "terrible"
             : value >= 15 ? "strong"

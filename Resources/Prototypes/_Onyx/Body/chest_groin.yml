@@ -12,12 +12,16 @@
   components:
   - type: BodyPart
     partType: Chest
+    vital: true
     dirtExposures: [Splash, Crawl, FullBody]
     dirtCoverageLayers: [OUTERCLOTHING, INNERCLOTHING, UNDERWEART, NECK]
     category: Chest
     fractureProfile: OrganicFractureProfile
     maxDamage: 250
+    traumaProtection:
+      Dismemberment: 0.3
   - type: SurgeryTool
+  - type: Nerve
   - type: Sprite
     state: chest_m
   - type: VisualOrgan
@@ -43,13 +47,21 @@
     dirtCoverageLayers: [OUTERCLOTHING, INNERCLOTHING, UNDERWEARB]
     category: Groin
     fractureProfile: OrganicFractureProfile
+    traumaProtection:
+      Dismemberment: 0.5
     amputationThresholds:
       Slash: 220
       Piercing: 250
       Blunt: 400
+    damageOnAmputate:
+      types:
+        Bloodloss: 35
+        Asphyxiation: 20
+        Slash: 25
   - type: SurgeryTool
     customUses:
     - surgery-tool-use-attach-groin
+  - type: Nerve
   - type: Sprite
     state: groin_m
   - type: VisualOrgan
@@ -261,7 +273,6 @@
   parent: [ OrganBaseChestSexed, OrganBaseChest, OrganVulpkaninExternal ]
   id: OrganVulpkaninChest
   components:
-  # <Onyx-CorvaxVulpkaninChest-edited>
   - type: Sprite
     sprite: Corvax/Mobs/Species/Vulpkanin/parts.rsi
     state: torso_m
@@ -273,13 +284,11 @@
     sexStateOverrides:
       Male: torso_m
       Female: torso_f
-  # </Onyx-CorvaxVulpkaninChest-edited>
 
 - type: entity
   parent: [ OrganBaseGroinSexed, OrganBaseGroin, OrganVulpkaninExternal ]
   id: OrganVulpkaninGroin
   components:
-  # <Onyx-CorvaxVulpkaninGroin-edited>
   - type: Sprite
     sprite: Corvax/Mobs/Species/Vulpkanin/parts.rsi
     state: groin_m
@@ -291,7 +300,6 @@
     sexStateOverrides:
       Male: groin_m
       Female: groin_f
-  # </Onyx-CorvaxVulpkaninGroin-edited>
   - type: VisualOrganMarkings
     markingData:
       layers: [ Tail, TailOverlay ]

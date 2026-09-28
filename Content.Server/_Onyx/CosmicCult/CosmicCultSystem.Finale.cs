@@ -97,7 +97,7 @@ public sealed partial class CosmicCultSystem : SharedCosmicCultSystem
         var stationUid = _station.GetStationInMap(Transform(uid).MapID);
 
         if (stationUid is { } station && TryComp<AlertLevelComponent>(station, out var alertLevel))
-            _alert.SetLevel((station, alertLevel), new ProtoId<AlertLevelPrototype>("octarine"), true, true, true, true); // <Onyx-AlertLevelNative>
+            _alert.SetLevel((station, alertLevel), new ProtoId<AlertLevelPrototype>("octarine"), true, true, true, true);
 
         EnsureComp<ActivatableUIComponent>(uid).Key = MonumentKey.Key;
 
@@ -120,7 +120,7 @@ public sealed partial class CosmicCultSystem : SharedCosmicCultSystem
         var stationUid = _station.GetOwningStation(uid);
 
         if (stationUid is { } station && TryComp<AlertLevelComponent>(station, out var alertLevel))
-            _alert.SetLevel((station, alertLevel), new ProtoId<AlertLevelPrototype>("green"), true, true, true); // <Onyx-AlertLevelNative>
+            _alert.SetLevel((station, alertLevel), new ProtoId<AlertLevelPrototype>("green"), true, true, true);
 
         _sound.PlayGlobalOnStation(uid, _audio.ResolveSound(comp.CancelEventSound));
         _sound.StopStationEventMusic(uid, StationEventMusicType.CosmicCult);

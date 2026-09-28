@@ -44,14 +44,12 @@ public sealed partial class DnaModifierSystem
         if (TryComp<DetailExaminableComponent>(entity, out var detail) &&
             TryComp<DetailExaminableComponent>(target, out var targetDetail))
         {
-            // <Onyx-CharacterDescriptions-edited>
             detail.Content = targetDetail.Content;
             detail.CharacterContent = targetDetail.CharacterContent;
             detail.OOCContent = targetDetail.OOCContent;
             detail.TagsContent = targetDetail.TagsContent;
             detail.LinksContent = targetDetail.LinksContent;
             Dirty(entity, detail);
-            // </Onyx-CharacterDescriptions-edited>
         }
 
         _metaData.SetEntityName(entity, Name(target));

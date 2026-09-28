@@ -183,13 +183,30 @@ public abstract partial class SharedVisualBodySystem : EntitySystem
             organMarkings[layer] = okSet;
         }
 
-        var profile = Comp<VisualOrganComponent>(ent).Profile;
+        // <Onyx-ExternalMarkingOrgans-edited>
+        var profile = TryComp(ent, out VisualOrganComponent? visual)
+            ? visual.Profile
+            : GetBodyOrganProfile(args.Body);
+        // </Onyx-ExternalMarkingOrgans-edited>
         var resolved = organMarkings.ToDictionary(
             kvp => kvp.Key,
             kvp => ResolveMarkings(kvp.Value, profile.SkinColor, profile.EyeColor, groupProto.Appearances));
 
         SetOrganMarkings(ent, resolved, ent.Comp.MarkingsDisplacement);
     }
+
+    // <Onyx-ExternalMarkingOrgans>
+    private OrganProfileData GetBodyOrganProfile(EntityUid body)
+    {
+        foreach (var (part, _) in _bodySystem.GetBodyChildren(body))
+        {
+            if (TryComp(part, out VisualOrganComponent? visual))
+                return visual.Profile;
+        }
+
+        return new();
+    }
+    // </Onyx-ExternalMarkingOrgans>
 
     private bool TryGetVisualCategory(EntityUid entity, out ProtoId<OrganCategoryPrototype> category)
     {

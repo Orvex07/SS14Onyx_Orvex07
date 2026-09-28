@@ -57,7 +57,7 @@ public sealed partial class ModernPdaMenu : PdaWindow
     public event Action<EntityUid>? OnProgramItemPressed;
     public event Action<EntityUid>? OnUninstallButtonPressed;
     public event Action<EntityUid>? OnInstallButtonPressed;
-    public event Action<Color?>? OnThemeChanged; // <Onyx-PdaTheme>
+    public event Action<Color?>? OnThemeChanged;
 
     public ModernPdaMenu()
     {
@@ -114,7 +114,7 @@ public sealed partial class ModernPdaMenu : PdaWindow
 
     public void UpdateState(PdaUpdateState state)
     {
-        SetTheme(state.ThemeAccent, false); // <Onyx-PdaTheme>
+        SetTheme(state.ThemeAccent, false);
         UpdateBattery(state.BatteryCharge, state.BatteryMax, state.BatteryLowThreshold);
         _diskUsed = state.DiskUsed;
         _diskMax = state.DiskMax;

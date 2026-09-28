@@ -88,6 +88,14 @@
   - type: VisualBody
   - type: MarkingActivity # <Onyx-MarkingActivity>
     action: ActionToggleWagging # <Onyx-MarkingActivity>
+  # <Onyx-ExternalMarkingOrgans>
+  - type: ConditionalMarkingOrgans
+    organs:
+      Tail:
+        prototype: OrganMarkingTail
+        parent: Groin
+        layers: [ Tail, TailOverlay ]
+  # </Onyx-ExternalMarkingOrgans>
   - type: Hands
   - type: ComplexInteraction
   - type: ContainerContainer

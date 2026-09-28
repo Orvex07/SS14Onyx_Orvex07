@@ -47,6 +47,14 @@
   parent: [ClothingShoesBase, ClothingSlotBase]
   id: ClothingShoesMilitaryBase
   components:
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Foot ]
+    traumaProtection:
+      Fracture: 0.1
+      Dismemberment: 0.1
+      OrganDamage: 0.1
+  # </Onyx-GoobTraumaProtection>
   - type: Matchbox
   - type: ItemSlots
     slots:

@@ -17,6 +17,14 @@
       Cloth: 50
   - type: StaticPrice
     price: 20
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Groin ]
+    traumaProtection:
+      Fracture: 0.05
+      Dismemberment: 0
+      OrganDamage: 0.05
+  # </Onyx-GoobTraumaProtection>
 
 - type: entity
   abstract: true

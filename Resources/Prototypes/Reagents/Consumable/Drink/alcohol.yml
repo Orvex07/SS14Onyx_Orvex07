@@ -112,14 +112,14 @@
     Digestion:
       metabolites:
         Ethanol: 0.4
-      # <Onyx-PartPain>
+      # <Onyx-PartPain-edited>
       effects:
       - !type:SuppressPain
-        amount: 0.25
-        decayDuration: 9
+        amount: 0.5
+        decayDuration: 10
         identifier: Painkiller
-        recoveryMultiplier: 1.1
-      # </Onyx-PartPain>
+        recoveryMultiplier: 1.25
+      # </Onyx-PartPain-edited>
 
 - type: reagent
   id: DeadRum

@@ -15,6 +15,14 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/security.rsi
   - type: Armor #Based on /tg/ but slightly compensated to fit the fact that armor stacks in SS14.
+    # <Onyx-TraumaProtection>
+    coverage: [ Chest, Groin ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+      NerveDamage: 0
+    # </Onyx-TraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.70
@@ -67,6 +75,14 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/bulletproof.rsi
   - type: Armor
+    # <Onyx-TraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 0.4
+      Dismemberment: 0.4
+      OrganDamage: 0.4
+      NerveDamage: 0
+    # </Onyx-TraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.9
@@ -87,6 +103,14 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/armor_reflec.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest ]
+    traumaProtection:
+      Fracture: 0
+      Dismemberment: 0
+      OrganDamage: 0
+      NerveDamage: 0
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.9
@@ -146,6 +170,21 @@
     sprite: Clothing/OuterClothing/Armor/captain_carapace.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/captain_carapace.rsi
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Chest, Groin ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    modifiers:
+      coefficients:
+        Blunt: 0.3
+        Slash: 0.3
+        Piercing: 0.4
+        Heat: 0.3
+        Caustic: 0.75
+  # </Onyx-GoobTraumaProtection>
   - type: Tag
     tags:
     - WhitelistChameleon
@@ -173,6 +212,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Vests/webvest.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin ]
+    traumaProtection:
+      Fracture: 0.3
+      Dismemberment: 0.3
+      OrganDamage: 0.3
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.6 #ballistic plates = better protection
@@ -198,6 +244,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Vests/elitevest.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin ]
+    traumaProtection:
+      Fracture: 0.25
+      Dismemberment: 0.25
+      OrganDamage: 0.25
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.5
@@ -227,6 +280,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Vests/mercwebvest.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.7 #slightly better overall protection but slightly worse than bulletproof armor against bullets seems sensible
@@ -252,6 +312,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/syndie-raid.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail ]
+    traumaProtection:
+      Fracture: 0.5
+      Dismemberment: 0.5
+      OrganDamage: 0.5
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.35
@@ -321,6 +388,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/riot.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 0.4
+      Dismemberment: 0.4
+      OrganDamage: 0.4
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.4
@@ -347,6 +421,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/cult_armour.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 0.33
+      Dismemberment: 0.33
+      OrganDamage: 0.33
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.5
@@ -370,6 +451,14 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/heavy.rsi
   - type: Armor
+    # <Onyx-TraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail ]
+    traumaProtection:
+      Fracture: 1
+      Dismemberment: 1
+      OrganDamage: 1
+      NerveDamage: 1
+    # </Onyx-TraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.2
@@ -418,6 +507,14 @@
     sprite: Clothing/OuterClothing/Armor/magusblue.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/magusblue.rsi
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail ]
+    traumaProtection:
+      Fracture: 0.5
+      Dismemberment: 0.5
+      OrganDamage: 0.5
+  # </Onyx-GoobTraumaProtection>
 
 - type: entity
   parent: ClothingOuterArmorHeavy
@@ -441,6 +538,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/lingarmor.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail, Other ]
+    traumaProtection:
+      Fracture: 0.4
+      Dismemberment: 0.4
+      OrganDamage: 0.4
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.5
@@ -473,6 +577,14 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/bone_armor.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 1
+      Dismemberment: -1
+      OrganDamage: -1
+      NerveDamage: -1
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.6
@@ -506,6 +618,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/podwars_armor.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 0.27
+      Dismemberment: 0.27
+      OrganDamage: 0.27
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.5

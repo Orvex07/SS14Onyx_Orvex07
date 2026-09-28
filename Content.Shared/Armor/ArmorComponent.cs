@@ -8,14 +8,16 @@ namespace Content.Shared.Armor;
 /// <summary>
 /// Used for clothing that reduces damage when worn.
 /// </summary>
-[RegisterComponent, NetworkedComponent, Access(typeof(SharedArmorSystem))]
+[RegisterComponent, NetworkedComponent, Access(typeof(SharedArmorSystem), typeof(Content.Shared._Onyx.Wounds.TraumaProtectionSystem))] // <Onyx-TraumaProtection-edited>
 public sealed partial class ArmorComponent : Component
 {
     /// <summary>
     /// The damage reduction
     /// </summary>
-    [DataField(required: true)]
-    public DamageModifierSet Modifiers = default!;
+    // <Onyx-OptionalArmorModifiers-edited>
+    [DataField]
+    public DamageModifierSet Modifiers = new();
+    // </Onyx-OptionalArmorModifiers-edited>
 
     /// <summary>
     /// A multiplier applied to the calculated point value

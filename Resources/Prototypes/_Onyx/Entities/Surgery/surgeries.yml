@@ -645,6 +645,39 @@
 
 - type: entity
   parent: BaseSurgeryRemoveOrgan
+  id: SurgeryRemoveTail
+  name: Remove tail
+  components:
+  - type: Surgery
+    icon: { sprite: _Onyx/Species/Felinid/felinid_tails_static.rsi, state: basic_tail_tip }
+    steps:
+      default:
+        steps:
+        - SurgeryOpenIncision
+        - SurgeryStepRemoveTail
+  - type: SurgeryOrganCondition
+    slot: Tail
+    part: Groin
+
+- type: entity
+  parent: BaseSurgeryInsertOrgan
+  id: SurgeryInsertTail
+  name: Implant tail
+  components:
+  - type: Surgery
+    icon: { sprite: _Onyx/Species/Felinid/felinid_tails_static.rsi, state: basic_tail_tip }
+    steps:
+      default:
+        steps:
+        - SurgeryOpenIncision
+        - SurgeryStepInsertTail
+  - type: SurgeryOrganCondition
+    slot: Tail
+    inverse: true
+    part: Groin
+
+- type: entity
+  parent: BaseSurgeryRemoveOrgan
   id: SurgeryRemoveHeart
   name: Remove heart
   components:
@@ -933,6 +966,23 @@
 
 - type: entity
   parent: BaseSurgeryHealOrgan
+  id: SurgeryHealTail
+  name: Heal tail
+  components:
+  - type: Surgery
+    icon: { sprite: _Onyx/Species/Felinid/felinid_tails_static.rsi, state: basic_tail_tip }
+    steps:
+      default:
+        steps:
+        - SurgeryOpenIncision
+        - SurgeryStepHealTail
+  - type: SurgeryOrganCondition
+    slot: Tail
+    damaged: true
+    part: Groin
+
+- type: entity
+  parent: BaseSurgeryHealOrgan
   id: SurgeryHealLungs
   name: Heal lungs
   components:
@@ -1140,6 +1190,20 @@
         - SurgeryOpenIncision
         - SurgeryStepMendFrameFracture
   - type: SurgeryFractureGradeCondition
+
+- type: entity
+  parent: SurgeryBase
+  id: SurgeryRepairNerves
+  name: Repair nerves
+  components:
+  - type: Surgery
+    useTargetPartIcon: true
+    steps:
+      default:
+        steps:
+        - SurgeryOpenIncision
+        - SurgeryStepRepairNerves
+  - type: SurgeryNerveDamageCondition
 
 - type: entity
   parent: SurgeryBase

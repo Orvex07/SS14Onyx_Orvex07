@@ -9,6 +9,7 @@ using Content.Shared.FixedPoint;
 using Content.Shared.Humanoid;
 using Content.Shared.Rejuvenate;
 using Content.Shared._Onyx.Chemistry.Circulation;
+using Content.Shared._Onyx.Consciousness;
 using Robust.Shared.Network;
 
 namespace Content.Shared._Onyx.Wounds;
@@ -22,6 +23,7 @@ public sealed partial class WoundDamageProjectionSystem : EntitySystem
     [Dependency] private CirculatoryStreamSystem _circulation = default!;
 
     private readonly HashSet<EntityUid> _projecting = new();
+    private readonly HashSet<EntityUid> _deferred = new();
 
     public override void Initialize()
     {
@@ -54,11 +56,6 @@ public sealed partial class WoundDamageProjectionSystem : EntitySystem
                 if (TryComp(part, out DamageableComponent? damageable))
                 {
                     _damage.ClearAllDamage((part, damageable));
-                    if (TryComp(part, out PainComponent? pain))
-                    {
-                        _pain.SetPain((part, pain), FixedPoint2.Zero);
-                        _pain.ClearPainSuppression((part, pain));
-                    }
 
                     if (TryComp(part, out WoundableComponent? woundable) &&
                         woundable.AmputationOverflow != FixedPoint2.Zero)
@@ -68,8 +65,7 @@ public sealed partial class WoundDamageProjectionSystem : EntitySystem
                     }
                 }
 
-            if (TryComp(body, out PainComponent? bodyPain))
-                _pain.ClearPainSuppression((body, bodyPain));
+            _pain.RemoveAllPainEffects(body);
         }
         finally
         {
@@ -84,8 +80,6 @@ public sealed partial class WoundDamageProjectionSystem : EntitySystem
         if (!_net.IsServer || !TryComp(part, out BodyPartComponent? component))
             return;
 
-        _pain.ApplyDamage(part, args.Damage, component);
-
         if (component.Body is { } body)
             RefreshBodyDamage(body);
         else
@@ -98,15 +92,24 @@ public sealed partial class WoundDamageProjectionSystem : EntitySystem
             return;
 
         SetupPart(part);
-        RefreshBodyPain(body);
         RefreshBodyDamage(body);
     }
 
     public void OnPartRemoved(EntityUid part, EntityUid body)
     {
         RefreshDetachedDamage(part);
-        RefreshBodyPain(body);
         RefreshBodyDamage(body);
+    }
+
+    public void BeginDeferredProjection(EntityUid body)
+    {
+        _deferred.Add(body);
+    }
+
+    public void EndDeferredProjection(EntityUid body)
+    {
+        if (_deferred.Remove(body))
+            RefreshBodyDamage(body);
     }
 
     private EntityUid GetDetachedRoot(EntityUid part)
@@ -142,7 +145,7 @@ public sealed partial class WoundDamageProjectionSystem : EntitySystem
 
     public void RefreshBodyDamage(EntityUid body)
     {
-        if (!_net.IsServer || !HasComp<WoundHostComponent>(body) || !_projecting.Add(body))
+        if (!_net.IsServer || _deferred.Contains(body) || !HasComp<WoundHostComponent>(body) || !_projecting.Add(body))
             return;
 
         try
@@ -180,7 +183,8 @@ public sealed partial class WoundDamageProjectionSystem : EntitySystem
                 }
             }
 
-            _damage.SetDamage(body, total);
+            if (!_damage.GetAllDamage(body).Equals(total))
+                _damage.SetDamage(body, total);
             Dirty(body, visual);
         }
         finally
@@ -196,21 +200,18 @@ public sealed partial class WoundDamageProjectionSystem : EntitySystem
 
         EnsureComp<SystemicDamageComponent>(body);
         EnsureComp<PartDamageVisualsComponent>(body);
-        EnsureComp<PainComponent>(body);
         foreach (var (part, _) in _body.GetBodyChildren(body))
             SetupPart(part);
-        RefreshBodyPain(body);
+        EnsureComp<ConsciousnessComponent>(body);
         RefreshBodyDamage(body);
     }
 
-private void SetupPart(EntityUid part)
+    private void SetupPart(EntityUid part)
     {
         EnsureComp<WoundableComponent>(part);
         EnsureComp<DamageableComponent>(part);
-        if (_pain.CanFeelPain(part))
-            EnsureComp<PainComponent>(part);
-        else
-            RemComp<PainComponent>(part);
+        EnsureComp<NerveComponent>(part);
+        _pain.RecomputeWoundPain(part);
         EnsureComp<BodyPartFunctionalityComponent>(part);
         var injurable = EnsureComp<InjurableComponent>(part);
         if (injurable.DamageContainer != null)
@@ -218,14 +219,6 @@ private void SetupPart(EntityUid part)
 
         injurable.DamageContainer = "Biological";
         Dirty(part, injurable);
-    }
-
-    private void RefreshBodyPain(EntityUid body)
-    {
-        var value = FixedPoint2.Zero;
-        foreach (var (part, _) in _body.GetBodyChildren(body))
-            value += _pain.GetRawPain(part);
-        _pain.SetPain((body, EnsureComp<PainComponent>(body)), value);
     }
 
     private bool TryGetVisualLayer(EntityUid part, out HumanoidVisualLayers layer)
@@ -250,4 +243,5 @@ private void SetupPart(EntityUid part)
             default: return false;
         }
     }
+
 }

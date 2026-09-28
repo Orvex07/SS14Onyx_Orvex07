@@ -8,4 +8,5 @@ public readonly record struct HealthAnalyzerOrganInfo(
     NetEntity Entity,
     FixedPoint2 Health,
     FixedPoint2 MaxHealth,
+    float MinimumFunctionalHealth,
     int Order);

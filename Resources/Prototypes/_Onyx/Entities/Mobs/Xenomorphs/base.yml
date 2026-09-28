@@ -139,10 +139,10 @@
   - type: LanguageKnowledge
     speaks:
     - Xeno
-    - XenoHivemind # <Onyx-XenoLanguages>
+    - XenoHivemind
     understands:
     - Xeno
-    - XenoHivemind # <Onyx-XenoLanguages>
+    - XenoHivemind
     - Hissing
     - Draconic
   - type: CollectiveMind # Goobstation

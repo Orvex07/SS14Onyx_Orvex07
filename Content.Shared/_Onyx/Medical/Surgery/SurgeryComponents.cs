@@ -53,6 +53,8 @@ public enum SurgeryEntityTarget : byte
 {
     Body,
     Part,
+    User,
+    Tool,
 }
 
 [RegisterComponent] public sealed partial class MechanicalOrganComponent : Component;

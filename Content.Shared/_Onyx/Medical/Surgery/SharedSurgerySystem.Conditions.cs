@@ -99,9 +99,35 @@ public abstract partial class SharedSurgerySystem
         if (_net.IsClient)
             return;
 
+        if (ent.Comp.Target is SurgeryEntityTarget.User or SurgeryEntityTarget.Tool)
+        {
+            if (args.User is not { } user || args.Tools == null)
+                return;
+
+            var transientMatches = ent.Comp.Target == SurgeryEntityTarget.User
+                ? ComponentsMatch(user, ent.Comp.All, ent.Comp.None)
+                : args.Tools.Any(tool => ComponentsMatch(tool, ent.Comp.All, ent.Comp.None));
+            if (!transientMatches)
+                args.Cancelled = true;
+            return;
+        }
+
         var target = ent.Comp.Target == SurgeryEntityTarget.Body ? args.Body : args.Part;
         if (!ComponentsMatch(target, ent.Comp.All, ent.Comp.None))
             args.Cancelled = true;
+    }
+
+    private void OnComponentConditionCanPerform(Entity<SurgeryComponentConditionComponent> ent,
+        ref SurgeryCanPerformStepEvent args)
+    {
+        if (ent.Comp.Target is SurgeryEntityTarget.Body or SurgeryEntityTarget.Part)
+            return;
+
+        var matches = ent.Comp.Target == SurgeryEntityTarget.User
+            ? ComponentsMatch(args.User, ent.Comp.All, ent.Comp.None)
+            : args.Tools.Any(tool => ComponentsMatch(tool, ent.Comp.All, ent.Comp.None));
+        if (!matches)
+            SetMissingTool(ref args, "surgery-ui-reason-tool");
     }
 
     private void OnOrganConditionValid(Entity<SurgeryOrganConditionComponent> ent, ref SurgeryValidEvent args)

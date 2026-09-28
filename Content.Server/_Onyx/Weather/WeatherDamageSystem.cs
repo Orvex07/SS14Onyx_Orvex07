@@ -64,7 +64,7 @@ public sealed partial class WeatherDamageSystem : EntitySystem
             }
 
             if (!_woundDamageRouting.TryRouteDistributedDamage(uid, damage, TargetBodyPart.All,
-                    DamageDistribution.SplitByPartWeight, interruptsDoAfters: false)) // <Onyx-WeatherWounds>
+                    DamageDistribution.SplitByPartWeight, interruptsDoAfters: false))
             {
                 _damageable.TryChangeDamage(uid, damage, interruptsDoAfters: false);
             }

@@ -69,6 +69,13 @@
     equipDelay: 5
     unequipDelay: 5 #Its insane more armor/hardsuits don't have equip times tbh?
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail ]
+    traumaProtection:
+      Fracture: 0.3
+      Dismemberment: 0.3
+      OrganDamage: 0.3
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.5

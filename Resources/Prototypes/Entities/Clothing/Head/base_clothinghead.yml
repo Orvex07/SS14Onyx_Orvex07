@@ -176,6 +176,14 @@
     highPressureMultiplier: 0.3
     lowPressureMultiplier: 1000
   - type: Armor
+    # <Onyx-TraumaProtection>
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+      NerveDamage: 0
+    # </Onyx-TraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.90
@@ -299,9 +307,7 @@
     slots: [ HEAD ]
   - type: ZombificationResistance
     zombificationResistanceCoefficient: 0.90
-  - type: Armor # so zombification resistance shows up
-    modifiers:
-      coefficients: { }
+  - type: Armor # so zombification resistance shows up; <Onyx-OptionalArmorModifiers-edited>
   - type: GroupExamine
   - type: HideLayerClothing
     slots:

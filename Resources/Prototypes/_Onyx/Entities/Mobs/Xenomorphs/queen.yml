@@ -96,11 +96,11 @@
   - type: LanguageKnowledge
     speaks:
     - Xeno
-    - XenoHivemind # <Onyx-XenoLanguages>
+    - XenoHivemind 
     - TauCetiBasic
     understands:
     - Xeno
-    - XenoHivemind # <Onyx-XenoLanguages>
+    - XenoHivemind
     - Hissing
     - Draconic
     - TauCetiBasic

@@ -2,6 +2,7 @@ using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Shared.Body;
+using Content.Shared._Onyx.Body; // <Onyx-ExternalMarkingOrgans>
 using Content.Shared.Humanoid.Prototypes;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
@@ -277,6 +278,13 @@ public sealed partial class MarkingManager
         var organs = appearancePrototype.TryComp<InitialBodyComponent>(out var initialBody, _component)
             ? new Dictionary<ProtoId<OrganCategoryPrototype>, EntProtoId>(initialBody.Organs)
             : new();
+        // <Onyx-ExternalMarkingOrgans>
+        if (TryGetConditionalMarkingOrgans(species, out var conditional))
+        {
+            foreach (var (category, data) in conditional)
+                organs[category] = data.Prototype;
+        }
+        // </Onyx-ExternalMarkingOrgans>
         return organs;
     }
 
@@ -294,11 +302,51 @@ public sealed partial class MarkingManager
             if (!TryGetMarkingData(proto, out var organData))
                 continue;
 
-            ret[organ] = organData.Value;
+            ret[organ] = organData.Value with { Layers = [..organData.Value.Layers] }; // <Onyx-ExternalMarkingOrgans-edited>
         }
+
+        // <Onyx-ExternalMarkingOrgans>
+        if (!TryGetConditionalMarkingOrgans(species, out var conditional))
+            return ret;
+
+        foreach (var (category, data) in conditional)
+        {
+            ProtoId<MarkingsGroupPrototype>? group = null;
+            foreach (var (organ, organData) in ret)
+            {
+                if (organ == category)
+                    continue;
+
+                if (organData.Layers.Overlaps(data.Layers))
+                    group ??= organData.Group;
+                organData.Layers.ExceptWith(data.Layers);
+            }
+
+            if (group is { } resolvedGroup)
+                ret[category] = new OrganMarkingData { Group = resolvedGroup, Layers = [..data.Layers] };
+        }
+        // </Onyx-ExternalMarkingOrgans>
 
         return ret;
     }
+
+    // <Onyx-ExternalMarkingOrgans>
+    public bool TryGetConditionalMarkingOrgans(
+        ProtoId<SpeciesPrototype> species,
+        [NotNullWhen(true)] out Dictionary<ProtoId<OrganCategoryPrototype>, ConditionalMarkingOrganData>? organs)
+    {
+        var speciesPrototype = _prototype.Index(species);
+        var appearancePrototype = _prototype.Index(speciesPrototype.DollPrototype);
+        if (appearancePrototype.TryComp<ConditionalMarkingOrgansComponent>(out var conditional, _component))
+        {
+            organs = conditional.Organs;
+            return true;
+        }
+
+        organs = null;
+        return false;
+    }
+    // </Onyx-ExternalMarkingOrgans>
 
     /// <summary>
     /// Expands the provided profile data into all the categories for a species.

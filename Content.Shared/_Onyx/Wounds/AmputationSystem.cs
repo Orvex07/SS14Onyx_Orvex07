@@ -1,4 +1,5 @@
 using System.Numerics;
+using Content.Shared.Armor;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared.Damage;
@@ -20,7 +21,14 @@ public sealed partial class AmputationSystem : EntitySystem
     [Dependency] private INetManager _net = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private WoundSystem _wounds = default!;
+    [Dependency] private WoundDamageRoutingSystem _routing = default!;
     [Dependency] private ThrowingSystem _throwing = default!;
+    [Dependency] private TraumaProtectionSystem _traumaProtection = default!;
+    [Dependency] private WoundFractureSystem _fractures = default!;
+
+    private const float ExplosionIntegrityExponent = 1.3f;
+    private const float ExplosionDismembermentSeverityGate = 10f;
+    private const float PiercingDismembermentMultiplier = 0.05f;
 
     public override void Initialize()
     {
@@ -36,14 +44,18 @@ public sealed partial class AmputationSystem : EntitySystem
             bodyPart.MaxDamage <= FixedPoint2.Zero)
             return;
 
-        if (args.ExplosionAmputationCandidate && TryExplosionAmputate(args.Body, part, bodyPart, args.Damage))
+        var protection = _traumaProtection.GetProtection(args.Body, bodyPart, TraumaType.Dismemberment);
+        if (args.IsExplosion && args.ExplosionAmputationCandidate &&
+            TryExplosionAmputate(args.Body, part, bodyPart, args.Damage,
+                args.WoundSeverityMultiplier, protection: protection))
             return;
 
         if (!part.Comp.Severable)
         {
             if (part.Comp.AmputationOverflow >= bodyPart.MaxDamage)
             {
-                SetSeverable(part, true);
+                if (_random.Prob(Math.Clamp(1f - protection, 0f, 1f)))
+                    SetSeverable(part, true);
             }
             return;
         }
@@ -75,15 +87,19 @@ public sealed partial class AmputationSystem : EntitySystem
             !TryComp(part, out DamageableComponent? damageable))
             return;
 
+        var protection = _traumaProtection.GetProtection(args.Body, bodyPart, TraumaType.Dismemberment);
         var damage = _damageable.GetAllDamage((part.Owner, damageable));
-        if (args.ExplosionAmputationCandidate && TryExplosionAmputate(args.Body, part, bodyPart, args.Damage, damage))
+        if (args.IsExplosion && args.ExplosionAmputationCandidate &&
+            TryExplosionAmputate(args.Body, part, bodyPart, args.Damage,
+                args.WoundSeverityMultiplier, protection))
             return;
 
         if (!part.Comp.Severable)
         {
             if (ReachedThreshold(damage, bodyPart.AmputationThresholds))
             {
-                SetSeverable(part, true);
+                if (_random.Prob(Math.Clamp(1f - protection, 0f, 1f)))
+                    SetSeverable(part, true);
             }
             return;
         }
@@ -117,6 +133,11 @@ public sealed partial class AmputationSystem : EntitySystem
         var parent = bodyPart.Parent ?? part;
         if (!_body.TryDetachPart(part))
             return false;
+
+        var beforeDamage = new BeforeAmputationDamageEvent();
+        RaiseLocalEvent(body, ref beforeDamage);
+        if (!beforeDamage.Cancelled && bodyPart.DamageOnAmputate is { } damage)
+            _routing.TryApplyAmputationDamage(body, parent, damage);
 
         if (TryComp(body, out WoundHostComponent? host))
             _wounds.CreateOrMergeWound(parent, host.DismembermentWound,
@@ -172,21 +193,61 @@ public sealed partial class AmputationSystem : EntitySystem
         Entity<WoundableComponent> part,
         BodyPartComponent bodyPart,
         DamageSpecifier hit,
-        DamageSpecifier? totalDamage = null)
+        float woundSeverityMultiplier,
+        float protection = 0f)
     {
-        if (!IsFinishingHit(body, bodyPart, hit))
+        if (!TryComp(part, out DamageableComponent? damageable))
             return false;
 
-        if (totalDamage == null)
+        var integrityCap = GetIntegrityCap(bodyPart);
+        if (integrityCap <= 0f)
+            return false;
+
+        var currentDamage = _damageable.GetPositiveDamage((part.Owner, damageable)).GetTotal().Float();
+        var integrity = Math.Max(0f, integrityCap - currentDamage);
+        var fractureMultiplier = GetFractureMultiplier(part);
+        foreach (var (type, amount) in hit.DamageDict)
         {
-            totalDamage = _damageable.GetAllDamage(part.Owner).Clone();
-            foreach (var (type, amount) in hit.DamageDict)
-                if (amount > FixedPoint2.Zero)
-                    totalDamage.DamageDict[type] = totalDamage.DamageDict.GetValueOrDefault(type) + amount;
+            if (type != "Blunt" && type != "Piercing" && type != "Slash" ||
+                amount.Float() * woundSeverityMultiplier < ExplosionDismembermentSeverityGate)
+                continue;
+
+            var damageTypeMultiplier = type == "Piercing" ? PiercingDismembermentMultiplier : 1f;
+            var chance = Math.Clamp(
+                (1f - (MathF.Pow(integrity, ExplosionIntegrityExponent) / integrityCap - 1f) * fractureMultiplier)
+                * damageTypeMultiplier - protection,
+                0f,
+                1f);
+            if (chance > 0f && _random.Prob(chance) && TryAmputate(body, part.Owner))
+                return true;
         }
 
-        var chance = Math.Clamp(GetThresholdProgress(totalDamage, bodyPart.AmputationThresholds) * 0.5f, 0f, 1f);
-        return chance > 0f && _random.Prob(chance) && TryAmputate(body, part.Owner);
+        return false;
+    }
+
+    private static float GetIntegrityCap(BodyPartComponent part)
+    {
+        if (part.MaxDamage > FixedPoint2.Zero)
+            return part.MaxDamage.Float();
+
+        var cap = float.MaxValue;
+        foreach (var threshold in part.AmputationThresholds.Values)
+            if (threshold > FixedPoint2.Zero)
+                cap = Math.Min(cap, threshold.Float());
+
+        return cap == float.MaxValue ? 0f : cap;
+    }
+
+    private float GetFractureMultiplier(EntityUid part)
+    {
+        return _fractures.GetFracture(part)?.Comp2.Grade switch
+        {
+            FractureGrade.Hairline => 0.6f,
+            FractureGrade.Simple => 1f,
+            FractureGrade.Displaced => 1.2f,
+            FractureGrade.Comminuted => 1.2f,
+            _ => 0.3f,
+        };
     }
 
     private float GetResetRatio(EntityUid body)
@@ -209,4 +270,5 @@ public sealed partial class AmputationSystem : EntitySystem
     {
         return host.DismembermentSeverities.GetValueOrDefault(type, host.DefaultDismembermentSeverity);
     }
+
 }

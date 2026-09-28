@@ -153,6 +153,7 @@ public abstract partial class SharedVisualBodySystem
 
     private void OnSetModifiers(Entity<VisualBodyComponent> ent, ref HumanoidMarkingModifierMarkingSetMessage args)
     {
+        SyncConditionalMarkingOrgans(ent, args.Markings); // <Onyx-ExternalMarkingOrgans>
         var markingsEvt = new ApplyOrganMarkingsEvent(args.Markings);
         RaiseLocalEvent(ent, ref markingsEvt);
         // <Onyx-MarkingActivity>
@@ -168,6 +169,7 @@ public abstract partial class SharedVisualBodySystem
     [PublicAPI]
     public void ApplyMarkings(EntityUid ent, Dictionary<ProtoId<OrganCategoryPrototype>, Dictionary<HumanoidVisualLayers, List<Marking>>> markings)
     {
+        SyncConditionalMarkingOrgans(ent, markings); // <Onyx-ExternalMarkingOrgans>
         var markingsEvt = new ApplyOrganMarkingsEvent(markings);
         RaiseLocalEvent(ent, ref markingsEvt);
         // <Onyx-MarkingActivity>
@@ -180,6 +182,7 @@ public abstract partial class SharedVisualBodySystem
         if (!Resolve(ent, ref ent.Comp))
             return;
 
+        SyncConditionalMarkingOrgans(ent, appearance.Markings); // <Onyx-ExternalMarkingOrgans>
         ApplyProfile(ent,
             new()
         {

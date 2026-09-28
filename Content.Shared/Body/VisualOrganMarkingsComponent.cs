@@ -11,13 +11,13 @@ namespace Content.Shared.Body;
 /// Defines an organ that applies markings on top of the layer specified in <see cref="VisualOrganComponent" />
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true, fieldDeltas: true)]
-[Access(typeof(SharedVisualBodySystem), typeof(_Onyx.Body.MarkingActivitySystem), typeof(_Onyx.Body.OrganActionSystem))] // <Onyx-MarkingActivity-edited>
+[Access(typeof(SharedVisualBodySystem), typeof(_Onyx.Body.MarkingActivitySystem), typeof(_Onyx.Body.OrganActionSystem), typeof(_Onyx.Body.DetachedMarkingFallbackSystem))] // <Onyx-MarkingActivity-edited>
 public sealed partial class VisualOrganMarkingsComponent : Component
 {
     /// <summary>
     /// Defines the type of markings this organ can take
     /// </summary>
-    [DataField(required: true), AlwaysPushInheritance]
+    [DataField(required: true), AutoNetworkedField, AlwaysPushInheritance] // <Onyx-ExternalMarkingOrgans-edited>
     public OrganMarkingData MarkingData = default!;
 
     /// <summary>

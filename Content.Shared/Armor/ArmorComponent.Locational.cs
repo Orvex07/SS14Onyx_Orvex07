@@ -41,6 +41,8 @@ public sealed partial class ArmorPartModifier
     [DataField]
     public HashSet<BodyPartSymmetry> Symmetry = [];
 
-    [DataField(required: true)]
-    public DamageModifierSet Modifiers = default!;
+    // <Onyx-OptionalArmorModifiers-edited>
+    [DataField]
+    public DamageModifierSet Modifiers = new();
+    // </Onyx-OptionalArmorModifiers-edited>
 }

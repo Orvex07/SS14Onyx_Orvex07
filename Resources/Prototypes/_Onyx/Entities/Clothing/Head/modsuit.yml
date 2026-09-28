@@ -22,10 +22,8 @@
   name: base modsuit helmet
   categories: [ HideSpawnMenu ]
   components:
-  # <Onyx>
   - type: SlotBlock
     slots: [ears, eyes, mask]
-  # </Onyx>
   - type: Sprite
     state: icon
   - type: Clickable

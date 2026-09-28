@@ -52,6 +52,20 @@ public sealed partial class SurgeryFractureGradeConditionComponent : Component
 public sealed partial class SurgeryMendFractureEffectComponent : Component;
 
 [RegisterComponent]
+public sealed partial class SurgeryNerveDamageConditionComponent : Component
+{
+    [DataField]
+    public FixedPoint2 MinimumDamage = FixedPoint2.New(0.01f);
+}
+
+[RegisterComponent]
+public sealed partial class SurgeryRepairNerveEffectComponent : Component
+{
+    [DataField]
+    public FixedPoint2 Amount = FixedPoint2.MaxValue;
+}
+
+[RegisterComponent]
 public sealed partial class SurgeryTreatWoundEffectComponent : Component
 {
     [DataField]

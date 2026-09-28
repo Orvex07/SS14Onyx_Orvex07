@@ -1,5 +1,6 @@
 using Content.Shared.Body;
 using Content.Shared.Body.Part;
+using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
@@ -11,6 +12,11 @@ public sealed partial class SurgeryStepPainInflicterComponent : Component
 {
     [DataField] public FixedPoint2 Amount = 5;
     [DataField] public FixedPoint2 SleepModifier = 1;
+
+    /// <summary>
+    /// How long the inflicted surgery pain lasts on the nervous hub.
+    /// </summary>
+    [DataField] public TimeSpan PainDuration = TimeSpan.FromSeconds(30);
 }
 
 [RegisterComponent, NetworkedComponent] public sealed partial class BodyPartReattachedComponent : Component;
@@ -101,4 +107,27 @@ public sealed partial class SurgeryMutingEffectComponent : Component
 public sealed partial class SurgeryStepEmoteEffectComponent : Component
 {
     [DataField] public string Emote = "Scream";
+}
+
+[RegisterComponent]
+public sealed partial class SurgeryDamageEffectComponent : Component
+{
+    [DataField(required: true)]
+    public DamageSpecifier Damage = new();
+
+    [DataField]
+    public SurgeryEntityTarget Target = SurgeryEntityTarget.Part;
+
+    [DataField]
+    public bool HealWounds;
+}
+
+[RegisterComponent]
+public sealed partial class SurgeryFailureDamageComponent : Component
+{
+    [DataField(required: true)]
+    public DamageSpecifier Damage = new();
+
+    [DataField]
+    public SurgeryEntityTarget Target = SurgeryEntityTarget.Part;
 }

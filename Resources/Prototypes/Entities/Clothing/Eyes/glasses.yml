@@ -192,6 +192,14 @@
     - Antagonists
   - type: IdentityBlocker
     coverage: EYES
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.13
+      Dismemberment: 0
+      OrganDamage: 0.13
+  # </Onyx-GoobTraumaProtection>
 
 - type: entity
   parent: [BaseCorvaxContraband433DepartmentsCommandSecurity, ClothingEyesBase, BaseCommandContraband] # Corvax-Contraband
@@ -230,6 +238,14 @@
     protectionTime: 5
   - type: IdentityBlocker
     coverage: EYES
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.13
+      Dismemberment: 0
+      OrganDamage: 0.13
+  # </Onyx-GoobTraumaProtection>
 
 #Make a scanner category when these actually function and we get the trayson
 - type: entity
@@ -243,6 +259,13 @@
   - type: Clothing
     sprite: Clothing/Eyes/Glasses/thermal.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.13
+      Dismemberment: 0
+      OrganDamage: 0.13
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Heat: 0.95
@@ -281,6 +304,14 @@
   - type: Clothing
     sprite: Clothing/Eyes/Glasses/ninjavisor.rsi
   - type: FlashImmunity
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.07
+      Dismemberment: 0
+      OrganDamage: 0.07
+  # </Onyx-GoobTraumaProtection>
 
 - type: entity
   parent: [ClothingEyesBase, ShowSecurityIcons, BaseSecurityContraband]

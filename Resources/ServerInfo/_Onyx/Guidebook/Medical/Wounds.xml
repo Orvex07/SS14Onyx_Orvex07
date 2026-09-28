@@ -13,6 +13,7 @@
   </Box>
   <FTLTextpart Key="guidebook-onyx-wounds-special-heading"/>
   <FTLTextpart Key="guidebook-onyx-wounds-fracture"/>
+  <FTLTextpart Key="guidebook-onyx-wounds-organs-nerves"/>
   <FTLTextpart Key="guidebook-onyx-wounds-incision"/>
   <FTLTextpart Key="guidebook-onyx-wounds-dismemberment-wound"/>
   <FTLTextpart Key="guidebook-onyx-wounds-amputation-consequence"/>

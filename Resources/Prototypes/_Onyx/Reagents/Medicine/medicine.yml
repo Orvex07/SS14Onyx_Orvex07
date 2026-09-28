@@ -127,22 +127,6 @@
         amount: 0.125
 
 - type: reagent
-  id: Osteogen
-  name: reagent-name-osteogen
-  group: Medicine
-  desc: reagent-desc-osteogen
-  physicalDesc: reagent-physical-desc-opaque
-  flavor: medicine
-  color: "#d9e6c3"
-  metabolisms:
-    Bloodstream:
-      effects:
-      - !type:MendFractures
-        amount: 1
-        wounds: [BoneFractureWound]
-        maximumGrade: Simple
-
-- type: reagent
   id: Mitogen
   name: reagent-name-mitogen
   group: Medicine
@@ -205,8 +189,8 @@
       metabolismRate: 0.15
       effects:
       - !type:SuppressPain
-        amount: 0.5
-        decayDuration: 27
+        amount: 10
+        decayDuration: 30
         identifier: Ibuprofen
         recoveryMultiplier: 2.5
       - !type:HealthChange
@@ -252,8 +236,8 @@
       metabolismRate: 0.12
       effects:
       - !type:SuppressPain
-        amount: 0.9
-        decayDuration: 50
+        amount: 15
+        decayDuration: 30
         identifier: Ketorolac
         recoveryMultiplier: 3
       - !type:HealthChange
@@ -422,8 +406,8 @@
       metabolismRate: 0.1
       effects:
       - !type:SuppressPain
-        amount: 1.25
-        decayDuration: 45
+        amount: 25
+        decayDuration: 30
         identifier: Tramadol
         recoveryMultiplier: 3.5
       - !type:GenericStatusEffect
@@ -452,8 +436,8 @@
       metabolismRate: 0.1
       effects:
       - !type:SuppressPain
-        amount: 2
-        decayDuration: 60
+        amount: 400
+        decayDuration: 30
         identifier: Oxycodone
         recoveryMultiplier: 4.5
       - !type:GenericStatusEffect

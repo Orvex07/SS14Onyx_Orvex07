@@ -11,7 +11,7 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
-    protected bool IsSurgeryValid(EntityUid body, EntityUid targetPart, EntProtoId surgery, EntProtoId stepId, List<EntityUid> tools, out Entity<SurgeryComponent> surgeryEnt, out Entity<BodyPartComponent> part, out EntityUid step)
+    protected bool IsSurgeryValid(EntityUid user, EntityUid body, EntityUid targetPart, EntProtoId surgery, EntProtoId stepId, List<EntityUid> tools, out Entity<SurgeryComponent> surgeryEnt, out Entity<BodyPartComponent> part, out EntityUid step)
     {
         surgeryEnt = default;
         part = default;
@@ -25,7 +25,7 @@ public abstract partial class SharedSurgerySystem
             GetSurgeryStepEntity(stepId) is not { } stepEnt)
             return false;
 
-        var ev = new SurgeryValidEvent(body, targetPart);
+        var ev = new SurgeryValidEvent(body, targetPart, user, tools);
         RaiseLocalEvent(stepEnt, ref ev);
         RaiseLocalEvent(surgeryEntId, ref ev);
         if (ev.Cancelled)
@@ -44,7 +44,7 @@ public abstract partial class SharedSurgerySystem
         part = default;
         step = default;
         validTools = null;
-        return IsSurgeryValid(target, targetPart, surgeryId, stepId, tools, out var surgery, out part, out step) &&
+        return IsSurgeryValid(user, target, targetPart, surgeryId, stepId, tools, out var surgery, out part, out step) &&
                PreviousStepsComplete(target, part, surgery, stepId, tools) &&
                !IsStepComplete(target, part, stepId) &&
                CanPerformStep(user, target, part, part.Comp.PartType, step, doPopup,

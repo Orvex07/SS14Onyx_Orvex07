@@ -49,7 +49,7 @@ public sealed partial class MechGrabberSystem
     {
         if (Deleted(target) || target == mechUid ||
             !TryComp<MechComponent>(mechUid, out var mech) ||
-            _vehicle.GetOperatorOrNull(mechUid) == target || // <Onyx-MechVehicleNative>
+            _vehicle.GetOperatorOrNull(mechUid) == target ||
             _container.IsEntityInContainer(target) ||
             component.ItemContainer.ContainedEntities.Count >= component.MaxContents ||
             Transform(target).Anchored ||

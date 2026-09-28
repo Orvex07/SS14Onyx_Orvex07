@@ -66,3 +66,4 @@ ent-OrganGingerbreadGroin = gingerbread pelvis
 
 markings-organ-Chest = Chest
 markings-organ-Groin = Groin
+markings-organ-Tail = Tail

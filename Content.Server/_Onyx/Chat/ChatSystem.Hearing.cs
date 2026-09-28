@@ -9,7 +9,6 @@ public sealed partial class ChatSystem
         return !HasComp<MissingEarsComponent>(entity);
     }
 
-    // <Onyx-HearingVisibility>
     /// <summary>
     ///     Returns true if <paramref name="listener"/> can both hear <paramref name="source"/> and see it.
     ///     Chat from creatures on visibility layers the listener's eye cannot see is filtered out.
@@ -36,5 +35,4 @@ public sealed partial class ChatSystem
             eyeMask |= eye.VisibilityMask;
         return (eyeMask & sourceMask) == sourceMask;
     }
-    // </Onyx-HearingVisibility>
 }

@@ -140,10 +140,13 @@ public abstract partial class SharedArmorSystem : EntitySystem
 
     private void OnArmorVerbExamine(EntityUid uid, ArmorComponent component, GetVerbsEvent<ExamineVerb> args)
     {
-        if (!args.CanInteract || !args.CanAccess || !component.ShowArmorOnExamine)
+        // <Onyx-ArmorExamine-edited>
+        if (!args.CanInteract || !args.CanAccess || !component.ShowArmorOnExamine ||
+            !HasVisibleArmorInformation(component))
             return;
 
-        var examineMarkup = GetArmorExamine(component.Modifiers);
+        var examineMarkup = GetArmorExamine(component);
+        // </Onyx-ArmorExamine-edited>
 
         var ev = new ArmorExamineEvent(examineMarkup);
         RaiseLocalEvent(uid, ref ev);

@@ -11,6 +11,14 @@
     slots: [mask]
   - type: StaticPrice
     price: 25
+  # <Onyx-GoobTraumaProtection>
+  - type: Armor
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.05
+      Dismemberment: 0
+      OrganDamage: 0.05
+  # </Onyx-GoobTraumaProtection>
   # <Onyx-DiseaseProtection>
   - type: DiseaseProtection
     incoming:

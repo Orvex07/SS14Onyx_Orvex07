@@ -2,6 +2,7 @@
   <FTLTextpart Key="guidebook-onyx-surgery-content"/>
   <FTLTextpart Key="guidebook-onyx-surgery-procedure"/>
   <FTLTextpart Key="guidebook-onyx-surgery-tools"/>
+  <FTLTextpart Key="guidebook-onyx-surgery-diagnostics"/>
   <Box>
     <GuideEntityEmbed Entity="Scalpel"/>
     <GuideEntityEmbed Entity="Hemostat"/>

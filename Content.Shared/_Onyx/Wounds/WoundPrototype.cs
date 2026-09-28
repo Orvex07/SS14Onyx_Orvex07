@@ -190,6 +190,9 @@ public sealed partial class BodyPartProfilePrototype : IPrototype
 [DataDefinition]
 public sealed partial class OrganDamageRouting
 {
+    [DataField]
+    public FixedPoint2 MinimumHitDamage = 15;
+
     /// <summary>Chance an organ is damaged when a part of a given type takes damage.</summary>
     [DataField]
     public Dictionary<BodyPartType, float> Chances = new();

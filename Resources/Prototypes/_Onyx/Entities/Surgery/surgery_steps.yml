@@ -23,6 +23,10 @@
   - type: SurgeryStepPainInflicter
     amount: 34
     sleepModifier: 0.12
+  - type: SurgeryFailureDamage
+    damage:
+      types:
+        Slash: 8
   - type: SurgeryTargetPartContext
 
 - type: entity
@@ -113,6 +117,10 @@
   - type: SurgeryStepPainInflicter
     amount: 34
     sleepModifier: 0
+  - type: SurgeryFailureDamage
+    damage:
+      types:
+        Blunt: 12
 
 - type: entity
   parent: SurgeryStepBase
@@ -227,6 +235,10 @@
     state: cautery
   - type: SurgeryStepEmoteEffect
   - type: SurgeryCloseIncisionEffect
+  - type: SurgeryDamageEffect
+    damage:
+      types:
+        Heat: -5
   - type: SurgeryStepPainInflicter
     amount: 9
     sleepModifier: 0.34
@@ -310,6 +322,10 @@
   - type: SurgeryStepPainInflicter
     amount: 50
     sleepModifier: 0.14
+  - type: SurgeryFailureDamage
+    damage:
+      types:
+        Slash: 15
 
 - type: entity
   parent: SurgeryStepBase
@@ -764,6 +780,16 @@
 
 - type: entity
   parent: SurgeryStepRemoveOrgan
+  id: SurgeryStepRemoveTail
+  components: [ { type: SurgeryRemoveOrganEffect, slot: Tail } ]
+
+- type: entity
+  parent: SurgeryStepInsertOrgan
+  id: SurgeryStepInsertTail
+  components: [ { type: SurgeryInsertOrganEffect, slot: Tail } ]
+
+- type: entity
+  parent: SurgeryStepRemoveOrgan
   id: SurgeryStepRemoveHeart
   components: [ { type: SurgeryRemoveOrganEffect, slot: Heart } ]
 
@@ -876,6 +902,14 @@
   components:
   - type: SurgeryOrganHealEffect
     slot: Heart
+    amount: 1
+
+- type: entity
+  parent: SurgeryStepHealOrganBase
+  id: SurgeryStepHealTail
+  components:
+  - type: SurgeryOrganHealEffect
+    slot: Tail
     amount: 1
 
 - type: entity
@@ -1028,6 +1062,22 @@
   - type: Sprite
     sprite: Objects/Tools/welder.rsi
     state: icon
+
+- type: entity
+  parent: SurgeryStepBase
+  id: SurgeryStepRepairNerves
+  name: Repair damaged nerves
+  components:
+  - type: SurgeryStep
+    tool: [ { type: Stitches } ]
+    duration: 4
+  - type: SurgeryRepairNerveEffect
+  - type: Sprite
+    sprite: _Onyx/Objects/Specific/Medical/Surgery/stitches.rsi
+    state: stitches
+  - type: SurgeryStepPainInflicter
+    amount: 20
+    sleepModifier: 0
 
 - type: entity
   parent: SurgeryStepBase

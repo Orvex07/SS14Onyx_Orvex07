@@ -34,6 +34,8 @@ public sealed class AmputationConsequenceTest : GameTest
   components:
   - type: Body
   - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
   - type: WoundHost
   - type: InitialBody
     organs:
@@ -57,6 +59,11 @@ public sealed class AmputationConsequenceTest : GameTest
     partType: Head
     amputationThresholds:
       Slash: 70
+    damageOnAmputate:
+      types:
+        Bloodloss: 45
+        Asphyxiation: 45
+        Slash: 45
   - type: Woundable
     profile: AmputationConsequenceTestWoundableProfile
   - type: TransplantCompatibility
@@ -104,7 +111,11 @@ public sealed class AmputationConsequenceTest : GameTest
             Assert.That(graph.HasAmputationConsequence(torso), Is.True);
             var damage = entities.System<DamageableSystem>()
                 .GetAllDamage((torso, entities.GetComponent<DamageableComponent>(torso)));
-            Assert.That(damage.GetTotal(), Is.EqualTo(FixedPoint2.Zero));
+            Assert.That(damage.DamageDict["Slash"], Is.EqualTo(FixedPoint2.New(45)));
+            var bodyDamage = entities.System<DamageableSystem>().GetAllDamage(body);
+            Assert.That(bodyDamage.DamageDict["Bloodloss"], Is.EqualTo(FixedPoint2.New(45)));
+            Assert.That(bodyDamage.DamageDict["Asphyxiation"], Is.EqualTo(FixedPoint2.New(45)));
+            Assert.That(bodyDamage.DamageDict["Slash"], Is.EqualTo(FixedPoint2.New(45)));
 
             var spare = entities.SpawnEntity("AmputationConsequenceTestHead", map.GridCoords);
             Assert.That(graph.TryAttachPart(torso, spare), Is.False);
@@ -138,7 +149,7 @@ public sealed class AmputationConsequenceTest : GameTest
             Assert.That(graph.HasAmputationConsequence(torso), Is.False);
             var damage = entities.System<DamageableSystem>()
                 .GetAllDamage((torso, entities.GetComponent<DamageableComponent>(torso)));
-            Assert.That(damage.GetTotal(), Is.EqualTo(FixedPoint2.Zero));
+            Assert.That(damage.DamageDict["Slash"], Is.EqualTo(FixedPoint2.New(45)));
 
             var spare = entities.SpawnEntity("AmputationConsequenceTestHead", map.GridCoords);
             Assert.That(graph.TryAttachPart(torso, spare), Is.True);

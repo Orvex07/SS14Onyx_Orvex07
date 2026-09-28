@@ -9,6 +9,7 @@
     category: Chest
     fractureProfile: OrganicFractureProfile
     maxDamage: 250
+  - type: Nerve
 
 - type: entity
   parent: OrganAnimal
@@ -24,6 +25,7 @@
       Slash: 220
       Piercing: 250
       Blunt: 400
+  - type: Nerve
 
 - type: entity
   parent: OrganAnimal
@@ -38,6 +40,7 @@
       Slash: 150
       Piercing: 250
       Blunt: 300
+  - type: Nerve
 
 - type: entity
   parent: OrganAnimal
@@ -52,6 +55,7 @@
       Slash: 80
       Piercing: 220
       Blunt: 170
+  - type: Nerve
 
 - type: entity
   parent: ChestAnimal
@@ -90,6 +94,7 @@
     category: Chest
     fractureProfile: OrganicFractureProfile
     maxDamage: 250
+  - type: Nerve
 
 - type: entity
   parent: OrganAnimal
@@ -105,6 +110,7 @@
       Slash: 130
       Piercing: 250
       Blunt: 250
+  - type: Nerve
 
 - type: entity
   parent: OrganAnimal
@@ -120,6 +126,7 @@
       Slash: 130
       Piercing: 250
       Blunt: 250
+  - type: Nerve
 
 - type: entity
   parent: OrganAnimal
@@ -139,6 +146,7 @@
     handID: hand_left
     data:
       location: Left
+  - type: Nerve
 
 - type: entity
   parent: OrganAnimal
@@ -158,3 +166,4 @@
     handID: hand_right
     data:
       location: Right
+  - type: Nerve

@@ -46,6 +46,8 @@ public abstract partial class SharedSurgerySystem
         if (!_random.Prob(Math.Clamp(args.SuccessRate, 0f, 1f)))
         {
             var tool = tools.Count > 0 ? tools[0] : args.User;
+            var failed = new SurgeryStepFailedEvent(args.User, ent, part);
+            RaiseLocalEvent(step, ref failed);
             _popup.PopupEntity(Loc.GetString("surgery-popup-tool-failure", ("tool", tool)),
                 args.User, args.User, Content.Shared.Popups.PopupType.SmallCaution);
             RefreshUI(ent);

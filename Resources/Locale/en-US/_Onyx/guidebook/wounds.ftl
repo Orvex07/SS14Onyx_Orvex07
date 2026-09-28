@@ -16,6 +16,11 @@ guidebook-onyx-body-part-damage-difference =
     Body-part damage counts toward overall health. A wound is a separate result of a strong hit: a cut, burn, electrical injury, fracture, or structural defect. Damage can be removed while a wound and its effects remain.
     Material is checked per selected part. A cybernetic limb on an organic patient is repaired as a machine, while the adjacent living limb is treated as tissue.
 
+guidebook-onyx-body-part-damage-protection =
+    ## Trauma protection
+    Ordinary armor modifiers reduce direct damage. [bold]Trauma protection[/bold] separately reduces the chance of fractures, organ damage, nerve damage, and dismemberment on covered parts.
+    Coverage still comes from the armor's listed body parts and side. The head and pelvis also have intrinsic resistance to dismemberment. Multiple worn sources add together; specialized equipment may fully prevent a particular trauma without making the wearer immune to direct damage.
+
 guidebook-onyx-wounds-content =
     # Wounds
     A sufficiently strong individual hit creates a wound. Weak hits usually deal damage only. Later hits worsen an existing wound.
@@ -55,6 +60,11 @@ guidebook-onyx-wounds-special-heading =
 guidebook-onyx-wounds-fracture =
     ### Fracture
     Separate bone damage ranging from a hairline crack to a comminuted fracture. It causes pain and functional penalties. Reduction temporarily weakens its effects; mending removes it.
+
+guidebook-onyx-wounds-organs-nerves =
+    ### Organs and nerves
+    Hits of at least 15 localized damage may injure an organ inside the struck part. The affected organ and received damage depend on organ exposure and damage type. Below one quarter health an organ stops providing its function, but remains surgically repairable; at zero it is destroyed and may cause internal bleeding.
+    Hits of at least 5 damage may cause nerve trauma. Damaged nerves amplify real pain while making the patient feel less of it, so apparent pain can hide worsening trauma. Nerve damage persists until surgically repaired.
 
 guidebook-onyx-wounds-incision =
     ### Surgical incision
@@ -99,6 +109,7 @@ guidebook-onyx-wounds-dismemberment =
     ## Dismemberment
     Dismemberment has two phases. Accumulated structural damage first leaves a limb ready to sever. Another strong blunt, slash, or piercing hit completes the amputation. Repairing below the dangerous level removes this state.
     A missing part loses all of its functions. Its stump needs separate treatment; reducing overall damage does not replace that procedure.
+    Explosions distribute damage unevenly and choose one eligible limb as an amputation candidate. Dismemberment chance rises with structural damage and fracture severity, while intrinsic and worn trauma protection reduce it. The torso cannot be severed this way.
 
 guidebook-onyx-wound-treatment-content =
     # Wound treatment
@@ -123,6 +134,7 @@ guidebook-onyx-wound-treatment-chemistry =
 guidebook-onyx-wound-treatment-fractures =
     ## Fractures
     Fractures are mended with bone gel through an open incision.
+    Nerve trauma is repaired with surgical stitches through an open incision. Medicine cannot mend fractures or nerves.
 
 guidebook-onyx-wound-treatment-mechanical =
     ## IPCs and cybernetics
@@ -143,6 +155,12 @@ guidebook-onyx-surgery-procedure =
 
 guidebook-onyx-surgery-tools =
     A scalpel makes an incision. A hemostat clamps vessels. A retractor opens access. A cautery seals tissue. Bones require bone gel. A wrong tool can harm the patient.
+    Improvised tools can satisfy the same task but work slower and have a lower success rate. A failed invasive step causes additional localized trauma instead of silently doing nothing.
+
+guidebook-onyx-surgery-diagnostics =
+    ## Reading the analyzer
+    Each affected part is shown as a separate block. Wounds, fracture grade, external and internal bleeding rate, pain, nerve condition, and lost function appear on separate lines.
+    Organ rows show both a percentage and a state: healthy, damaged, critical, or destroyed. Critical organs no longer provide their normal function but can still be repaired surgically.
 
 guidebook-onyx-surgery-access =
     ## Access depth

@@ -13,8 +13,6 @@ public sealed partial class ExplosionSystem
     public bool IncrementalTileBreaking { get; private set; }
     public int SingleTickAreaLimit { get; private set; }
     public bool CanCreateVacuum { get; private set; }
-    public float LimbDamageVariation { get; private set; } // <Onyx-Wounds>
-    public float WoundMultiplier { get; private set; } // <Onyx-Wounds>
 
     private void SubscribeCvars()
     {
@@ -27,7 +25,5 @@ public sealed partial class ExplosionSystem
         Subs.CVar(_cfg, CCVars.ExplosionIncrementalTileBreaking, value => IncrementalTileBreaking = value, true);
         Subs.CVar(_cfg, CCVars.ExplosionSingleTickAreaLimit, value => SingleTickAreaLimit = value, true);
         Subs.CVar(_cfg, CCVars.ExplosionCanCreateVacuum, value => CanCreateVacuum = value, true);
-        Subs.CVar(_cfg, CCVars.ExplosionLimbDamageVariation, value => LimbDamageVariation = value, true); // <Onyx-Wounds>
-        Subs.CVar(_cfg, CCVars.ExplosionWoundMultiplier, value => WoundMultiplier = value, true); // <Onyx-Wounds>
     }
 }

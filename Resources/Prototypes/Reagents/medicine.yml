@@ -152,13 +152,13 @@
       - !type:EvenHealthChange
         damage:
           Brute: -1.5
-      # <Onyx-PartPain>
+      # <Onyx-PartPain-edited>
       - !type:SuppressPain
-        amount: 0.75
-        decayDuration: 18
+        amount: 1.2
+        decayDuration: 30
         identifier: Bicaridine
         recoveryMultiplier: 1.75
-      # </Onyx-PartPain>
+      # </Onyx-PartPain-edited>
       - !type:HealthChange
         conditions:
         - !type:ReagentCondition

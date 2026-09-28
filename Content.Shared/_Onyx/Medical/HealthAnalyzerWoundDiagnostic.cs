@@ -16,11 +16,14 @@ public readonly record struct HealthAnalyzerWoundDiagnostic(
     List<HealthAnalyzerVisibleWound> VisibleWounds,
     BodyPartFunctionalityState Functionality,
     float InternalBleedingRate,
-    HealthAnalyzerClottingPhase ClottingPhase)
+    HealthAnalyzerClottingPhase ClottingPhase,
+    FixedPoint2 NerveDamage,
+    FixedPoint2 NerveMaxDamage)
 {
     public bool HasFindings =>
         Fracture != FractureGrade.None || BleedingRate > 0f || ScarCount > 0 || Pain > FixedPoint2.Zero ||
-        VisibleWounds.Count > 0 || Functionality != BodyPartFunctionalityState.Functional || InternalBleedingRate > 0f;
+        VisibleWounds.Count > 0 || Functionality != BodyPartFunctionalityState.Functional || InternalBleedingRate > 0f ||
+        NerveDamage > FixedPoint2.Zero;
 }
 
 [Serializable, NetSerializable]

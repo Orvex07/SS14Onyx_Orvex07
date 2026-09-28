@@ -3,7 +3,6 @@ using Content.Shared.Damage.Prototypes;
 using Content.Shared.Body.Part;
 using Content.Shared.FixedPoint;
 using Content.Shared.Humanoid;
-using Content.Shared._Onyx.Targeting;
 using Robust.Shared.Containers;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
@@ -42,9 +41,6 @@ public sealed partial class WoundHostComponent : Component
         "Shock",
         "Caustic",
     ];
-
-    [DataField]
-    public TargetBodyPart SystemicPainTarget = TargetBodyPart.Chest;
 
     [DataField]
     public Dictionary<BodyPartType, FixedPoint2> DismembermentSeverities = new()
@@ -97,59 +93,6 @@ public sealed partial class PartDamageVisualsComponent : Component
 {
     [AutoNetworkedField]
     public Dictionary<HumanoidVisualLayers, DamageSpecifier> Damage = new();
-}
-
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
-public sealed partial class PainComponent : Component
-{
-    [AutoNetworkedField]
-    public FixedPoint2 Value;
-
-    [AutoNetworkedField]
-    public FixedPoint2 Suppression;
-
-    /// <summary>
-    /// Pain floor produced by the part's wounds themselves (independent of damage).
-    /// Healing a wound removes ~half immediately, the rest decays via normal recovery.
-    /// </summary>
-    [AutoNetworkedField]
-    public FixedPoint2 WoundPain;
-
-    [DataField]
-    public Dictionary<ProtoId<DamageTypePrototype>, float> DamageMultipliers = new()
-    {
-        ["Blunt"] = 0.87f,
-        ["Slash"] = 0.67f,
-        ["Piercing"] = 0.67f,
-        ["Heat"] = 0.8f,
-        ["Cold"] = 0.75f,
-        ["Shock"] = 0.7f,
-        ["Cellular"] = 0.32f,
-        ["Caustic"] = 0.12f,
-        ["Radiation"] = 0.12f,
-        ["Poison"] = 0.7f,
-    };
-
-    [DataField]
-    public FixedPoint2 RecoveryPerSecond = FixedPoint2.New(1f / 9f);
-
-    [DataField]
-    public FixedPoint2 SoftPainCap = 135;
-
-    [ViewVariables]
-    public Dictionary<string, PainSuppressionModifier> SuppressionModifiers = new();
-}
-
-public sealed record PainSuppressionModifier(FixedPoint2 Amount, FixedPoint2 DecayPerSecond, float RecoveryMultiplier);
-
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
-public sealed partial class PainShockTargetComponent : Component
-{
-    [DataField, AutoNetworkedField]
-    public bool Armed = true;
-
-    [AutoNetworkedField]
-    public TimeSpan? AdrenalineEnds;
 }
 
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]

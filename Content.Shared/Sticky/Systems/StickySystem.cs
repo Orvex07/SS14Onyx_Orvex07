@@ -190,6 +190,7 @@ public sealed partial class StickySystem : EntitySystem
         if (attemptEv.Cancelled)
             return;
 
+        RemComp<Content.Shared.Interaction.Components.UnremoveableComponent>(uid); // <Onyx-MedicalPatches-edited>
         // try to remove sticky item from target container
         if (!_container.TryGetContainer(stuckTo, StickerSlotId, out var container) || !_container.Remove(uid, container))
             return;

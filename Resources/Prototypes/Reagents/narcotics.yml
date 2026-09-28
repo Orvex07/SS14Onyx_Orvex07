@@ -47,13 +47,13 @@
       - !type:ModifyStatusEffect
         effectProto: StatusEffectPainNumbness
         time: 2
-      # <Onyx-PartPain>
+      # <Onyx-PartPain-edited>
       - !type:SuppressPain
-        amount: 0.75
-        decayDuration: 9
+        amount: 1.2
+        decayDuration: 10
         identifier: Desoxyephedrine
-        recoveryMultiplier: 1.75 # <Onyx-PartPain-edited>
-      # </Onyx-PartPain>
+        recoveryMultiplier: 1.75
+      # </Onyx-PartPain-edited>
       # Interactions
       - !type:ModifyStatusEffect
         conditions:
@@ -646,13 +646,13 @@
   metabolisms:
     Bloodstream:
       effects:
-      # <Onyx-PartPain>
+      # <Onyx-PartPain-edited>
       - !type:SuppressPain
-        amount: 0.4
-        decayDuration: 9
+        amount: 2
+        decayDuration: 14
         identifier: Happiness
-        recoveryMultiplier: 1.5
-      # </Onyx-PartPain>
+        recoveryMultiplier: 2
+      # </Onyx-PartPain-edited>
       - !type:Emote
         emote: Laugh
         showInChat: false

@@ -1,3 +1,32 @@
+- type: organCategory
+  id: Tail
+
+- type: entity
+  parent: OrganBaseOrganic
+  id: OrganMarkingTail
+  name: tail
+  components:
+  - type: Organ
+    category: Tail
+  - type: Sprite
+    noRot: true
+    rotation: 180
+  - type: VisualOrganMarkings
+    showOnDetached: true
+    markingData:
+      group: None
+      layers: [ Tail, TailOverlay ]
+  - type: SurgeryTool
+    customUses:
+    - surgery-tool-use-implant-tail
+
+- type: entity
+  parent: OrganMarkingTail
+  id: OrganSlimePersonTail
+  components:
+  - type: TransplantCompatibility
+    profile: Slime
+
 - type: entity
   parent: OrganHumanEars
   id: OrganFelinidEars

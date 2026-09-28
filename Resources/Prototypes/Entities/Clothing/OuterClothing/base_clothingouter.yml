@@ -193,6 +193,14 @@
     shape:
     - 0,0,4,5
   - type: Armor
+    # <Onyx-TraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail, Other ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+      NerveDamage: 0
+    # </Onyx-TraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.90

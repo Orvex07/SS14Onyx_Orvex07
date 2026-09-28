@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Space Onyx Contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 using System.Diagnostics;
 using Content.Server.Administration;
+using Content.Shared._Onyx.Body;
+using Content.Shared._Onyx.Consciousness;
 using Content.Shared._Onyx.Targeting;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared.Administration;
@@ -16,13 +21,19 @@ namespace Content.Server._Onyx.Wounds.Commands;
 public sealed class PainCommand : ToolshedCommand
 {
     private PainSystem? _pain;
+    private ConsciousnessSystem? _consciousness;
     private TargetResolverSystem? _targetResolver;
 
     [CommandImplementation("add")]
     public EntityUid Add(IInvocationContext ctx, [PipedArgument] EntityUid body, TargetBodyPart target, float amount)
     {
-        if (TryGetPart(ctx, body, target, amount, out var part))
-            Pain.ChangePain(part, FixedPoint2.New(amount));
+        if (TryGetNerve(ctx, body, target, amount, out var hub, out var part))
+        {
+            if (Pain.TryGetPainModifier(hub.Owner, part, PainSystem.AdminPainIdentifier, out var existing, hub.Comp))
+                Pain.TryChangePainModifier(hub.Owner, part, PainSystem.AdminPainIdentifier, existing.Value.Change + FixedPoint2.New(amount), PainDamageTypes.WoundPain, hub.Comp);
+            else
+                Pain.TryAddPainModifier(hub.Owner, part, PainSystem.AdminPainIdentifier, FixedPoint2.New(amount), PainDamageTypes.WoundPain, hub.Comp);
+        }
 
         return body;
     }
@@ -30,8 +41,13 @@ public sealed class PainCommand : ToolshedCommand
     [CommandImplementation("rem")]
     public EntityUid Remove(IInvocationContext ctx, [PipedArgument] EntityUid body, TargetBodyPart target, float amount)
     {
-        if (TryGetPart(ctx, body, target, amount, out var part))
-            Pain.ChangePain(part, -FixedPoint2.New(amount));
+        if (TryGetNerve(ctx, body, target, amount, out var hub, out var part))
+        {
+            if (Pain.TryGetPainModifier(hub.Owner, part, PainSystem.AdminPainIdentifier, out var existing, hub.Comp))
+                Pain.TryChangePainModifier(hub.Owner, part, PainSystem.AdminPainIdentifier, existing.Value.Change - FixedPoint2.New(amount), PainDamageTypes.WoundPain, hub.Comp);
+            else
+                Pain.TryAddPainModifier(hub.Owner, part, PainSystem.AdminPainIdentifier, -FixedPoint2.New(amount), PainDamageTypes.WoundPain, hub.Comp);
+        }
 
         return body;
     }
@@ -39,22 +55,28 @@ public sealed class PainCommand : ToolshedCommand
     [CommandImplementation("set")]
     public EntityUid Set(IInvocationContext ctx, [PipedArgument] EntityUid body, TargetBodyPart target, float amount)
     {
-        if (TryGetPart(ctx, body, target, amount, out var part))
-            Pain.SetPain(part, FixedPoint2.New(amount));
+        if (TryGetNerve(ctx, body, target, amount, out var hub, out var part))
+        {
+            if (!Pain.TryChangePainModifier(hub.Owner, part, PainSystem.AdminPainIdentifier, FixedPoint2.New(amount), PainDamageTypes.WoundPain, hub.Comp))
+                Pain.TryAddPainModifier(hub.Owner, part, PainSystem.AdminPainIdentifier, FixedPoint2.New(amount), PainDamageTypes.WoundPain, hub.Comp);
+        }
 
         return body;
     }
 
     private PainSystem Pain => _pain ??= GetSys<PainSystem>();
+    private ConsciousnessSystem Consciousness => _consciousness ??= GetSys<ConsciousnessSystem>();
     private TargetResolverSystem TargetResolver => _targetResolver ??= GetSys<TargetResolverSystem>();
 
-    private bool TryGetPart(
+    private bool TryGetNerve(
         IInvocationContext ctx,
         EntityUid body,
         TargetBodyPart target,
         float amount,
+        out Entity<NervousSystemComponent> hub,
         out EntityUid part)
     {
+        hub = default;
         part = default;
         if (!HasComp<BodyComponent>(body))
             return ReportError(ctx, Loc.GetString("cmd-pain-no-body", ("entity", body)));
@@ -65,8 +87,8 @@ public sealed class PainCommand : ToolshedCommand
         if (!TargetResolver.TryResolveExact(body, target, out part))
             return ReportError(ctx, Loc.GetString("cmd-pain-missing-part", ("entity", body), ("part", target)));
 
-        if (!HasComp<PainComponent>(part))
-            return ReportError(ctx, Loc.GetString("cmd-pain-no-component", ("entity", body), ("part", target)));
+        if (!Consciousness.TryGetNervousSystem(body, out hub))
+            return ReportError(ctx, Loc.GetString("cmd-pain-no-nervous-system", ("entity", body)));
 
         if (!float.IsFinite(amount) || amount < 0f)
             return ReportError(ctx, Loc.GetString("cmd-pain-invalid-amount"));

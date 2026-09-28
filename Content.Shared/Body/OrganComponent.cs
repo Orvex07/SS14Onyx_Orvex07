@@ -21,6 +21,9 @@ public sealed partial class OrganComponent : Component
 
     [DataField, AutoNetworkedField]
     public FixedPoint2 MaxHealth = FixedPoint2.New(15);
+
+    [DataField, AutoNetworkedField]
+    public float MinimumFunctionalHealth = 0.25f;
     // </Onyx-OrganHealth>
 
     // <Onyx-OrganDamage>

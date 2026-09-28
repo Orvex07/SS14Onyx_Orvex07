@@ -12,6 +12,13 @@
     walkModifier: 0.8
     sprintModifier: 0.8
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail, Other ]
+    traumaProtection:
+      Fracture: 1
+      Dismemberment: 1
+      OrganDamage: 1
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.9
@@ -56,6 +63,13 @@
   - type: PressureProtection
     highPressureMultiplier: 0.04
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail, Other ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Slash: 0.9
@@ -85,6 +99,13 @@
   - type: FireProtection
     reduction: 0.8 # atmos firesuit offers best protection, hardsuits are a little vulnerable
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail, Other ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Slash: 0.9
@@ -140,6 +161,13 @@
     highPressureMultiplier: 0.6
     lowPressureMultiplier: 1000
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail, Other ]
+    traumaProtection:
+      Fracture: 0.4
+      Dismemberment: 0.4
+      OrganDamage: 0.4
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.8

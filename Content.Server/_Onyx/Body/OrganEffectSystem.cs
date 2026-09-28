@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Shared._Onyx.Body;
+using Content.Shared._Onyx.Body.Systems;
 using Content.Shared._Onyx.Cybernetics;
 using Content.Shared.Body;
 using Content.Shared.Body.Part;
@@ -162,7 +163,7 @@ public sealed partial class OrganEffectSystem : EntitySystem
         var merged = new HashSet<string>();
         foreach (var (organId, organ) in organs)
         {
-            if (organ.Health <= FixedPoint2.Zero)
+            if (!OrganHealthSystem.IsFunctional(organ))
                 continue;
             if (organ.Category is { } category)
                 organCounts[category] = organCounts.GetValueOrDefault(category) + 1;
@@ -187,7 +188,7 @@ public sealed partial class OrganEffectSystem : EntitySystem
         SetMissing<MissingEyesComponent>(body, MissingOrgan(anatomy, organCounts, "Eyes"));
         SetMissing<MissingEarsComponent>(body, MissingOrgan(anatomy, organCounts, "Ears"));
         SetMissing<TonguelessAccentComponent>(body, MissingOrgan(anatomy, organCounts, "Tongue"));
-        var cutVocalCords = organs.Any(organ => organ.Component.Health > FixedPoint2.Zero &&
+        var cutVocalCords = organs.Any(organ => OrganHealthSystem.IsFunctional(organ.Component) &&
             TryComp(organ.Id, out TongueComponent? tongue) && tongue is { VocalCordsCut: true });
         if (cutVocalCords)
             _statusEffects.TrySetStatusEffectDuration(body, SurgicallyMutedEffect);

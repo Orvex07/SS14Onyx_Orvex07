@@ -25,13 +25,13 @@
     - SystemicBleedingWound
   organDamage:
     chances:
-      Head: 0.05
-      Chest: 0.04
-      Groin: 0.04
-      Arm: 0.02
-      Hand: 0.01
-      Leg: 0.02
-      Foot: 0.01
+      Head: 0.3
+      Chest: 0.3
+      Groin: 0.3
+      Arm: 0.3
+      Hand: 0.3
+      Leg: 0.3
+      Foot: 0.3
     maxAffected: 2
 
 - type: bodyPartProfile
@@ -58,13 +58,13 @@
     - SystemicBleedingWound
   organDamage:
     chances:
-      Head: 0.05
-      Chest: 0.04
-      Groin: 0.04
-      Arm: 0.02
-      Hand: 0.01
-      Leg: 0.02
-      Foot: 0.01
+      Head: 0.3
+      Chest: 0.3
+      Groin: 0.3
+      Arm: 0.3
+      Hand: 0.3
+      Leg: 0.3
+      Foot: 0.3
 
 - type: bodyPartProfile
   id: SlimeBodyPartProfile
@@ -92,9 +92,9 @@
     - SystemicBleedingWound
   organDamage:
     chances:
-      Head: 0.05
-      Chest: 0.04
-      Groin: 0.04
+      Head: 0.3
+      Chest: 0.3
+      Groin: 0.3
 
 - type: bodyPartProfile
   id: CyberneticBodyPartProfile
@@ -121,13 +121,13 @@
     - AmputationConsequenceWound
   organDamage:
     chances:
-      Head: 0.05
-      Chest: 0.04
-      Groin: 0.04
-      Arm: 0.02
-      Hand: 0.01
-      Leg: 0.02
-      Foot: 0.01
+      Head: 0.3
+      Chest: 0.3
+      Groin: 0.3
+      Arm: 0.3
+      Hand: 0.3
+      Leg: 0.3
+      Foot: 0.3
     maxAffected: 2
 
 - type: bodyPartProfile
@@ -156,9 +156,9 @@
     - SystemicBleedingWound
   organDamage:
     chances:
-      Head: 0.05
-      Chest: 0.04
-      Groin: 0.04
+      Head: 0.3
+      Chest: 0.3
+      Groin: 0.3
 
 - type: fractureProfile
   id: OrganicFractureProfile

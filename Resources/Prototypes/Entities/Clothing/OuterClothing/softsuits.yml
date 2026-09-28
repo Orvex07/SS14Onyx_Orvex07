@@ -112,6 +112,13 @@
     sprintModifier: 0.9
     requireActivated: false
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Hand, Leg, Foot, Tail, Other ]
+    traumaProtection:
+      Fracture: 0.1
+      Dismemberment: 0.1
+      OrganDamage: 0.1
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Heat: 0.90

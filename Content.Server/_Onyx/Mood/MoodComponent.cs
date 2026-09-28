@@ -195,7 +195,7 @@ public sealed partial class MoodComponent : Component
     };
 
     /// <summary>
-    ///     Health moodlets keyed by fraction of the critical threshold.
+    ///     Health moodlets keyed by fraction of felt body pain over the pain cap.
     /// </summary>
     [DataField(customTypeSerializer: typeof(DictionarySerializer<ProtoId<MoodEffectPrototype>, float>))]
     public Dictionary<ProtoId<MoodEffectPrototype>, float> HealthMoodEffectsThresholds = new()

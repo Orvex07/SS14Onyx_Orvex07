@@ -55,8 +55,11 @@ public sealed class DamageSpecifierDictionarySerializer :
         var prototypes = dependencies.Resolve<IPrototypeManager>();
         if (node.TryGet<MappingDataNode>("types", out var types))
         {
-            serializationManager.Read<Dictionary<ProtoId<DamageTypePrototype>, FixedPoint2>>(
-                types, hookCtx, context, instanceProvider: () => damage, notNullableOverride: true);
+            foreach (var (key, value) in types.Children)
+            {
+                ProtoId<DamageTypePrototype> damageType = key;
+                damage[damageType] = serializationManager.Read<FixedPoint2>(value, hookCtx, context);
+            }
         }
 
         foreach (var (key, value) in node.Children)

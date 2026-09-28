@@ -1,17 +1,26 @@
+using Content.Shared._Onyx.Consciousness;
+using Content.Shared.Body;
 using Content.Shared.EntityEffects;
 using Content.Shared.FixedPoint;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._Onyx.Wounds;
 
-public sealed partial class SuppressPainEntityEffectSystem : EntityEffectSystem<PainComponent, SuppressPain>
+public sealed partial class SuppressPainEntityEffectSystem : EntityEffectSystem<BodyComponent, SuppressPain>
 {
+    [Dependency] private ConsciousnessSystem _consciousness = default!;
     [Dependency] private PainSystem _pain = default!;
 
-    protected override void Effect(Entity<PainComponent> entity, ref EntityEffectEvent<SuppressPain> args)
+    protected override void Effect(Entity<BodyComponent> entity, ref EntityEffectEvent<SuppressPain> args)
     {
-        _pain.SuppressPain((entity.Owner, entity.Comp), args.Effect.Identifier,
-            args.Effect.Amount * args.Scale, args.Effect.DecayDuration, args.Effect.RecoveryMultiplier);
+        if (!_consciousness.TryGetNervousSystem(entity.Owner, out var hub))
+            return;
+
+        var identifier = args.Effect.Identifier;
+        var amount = args.Effect.Amount * args.Scale;
+
+        _pain.SuppressPain(hub.Owner, identifier, amount, args.Effect.DecayDuration,
+            args.Effect.RecoveryMultiplier, hub.Comp);
     }
 }
 

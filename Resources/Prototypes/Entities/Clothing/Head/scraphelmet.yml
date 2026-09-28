@@ -68,6 +68,13 @@
     unequipDelay: 3 #shorter on the helmet.
   - type: IngestionBlocker
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Head ]
+    traumaProtection:
+      Fracture: 0.3
+      Dismemberment: 0.3
+      OrganDamage: 0.3
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.9

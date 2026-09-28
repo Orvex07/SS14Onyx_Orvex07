@@ -182,6 +182,7 @@ public sealed partial class HumanoidCharacterAppearance : IEquatable<HumanoidCha
         {
             var coloration = proto.Index(speciesProto.SkinColoration);
             var organs = markingManager.GetOrgans(species);
+            var organMarkingData = markingManager.GetMarkingData(species); // <Onyx-ExternalMarkingOrgans>
             skinColor = coloration.Strategy.EnsureVerified(skinColor); // <Onyx-EyeMarkingColor-edited>
 
             // Corvax-Sponsors-Start
@@ -208,9 +209,9 @@ public sealed partial class HumanoidCharacterAppearance : IEquatable<HumanoidCha
                     validatedMarkings.Remove(organ);
             }
 
-            foreach (var (organ, organProtoID) in organs)
+            foreach (var (organ, _) in organs) // <Onyx-ExternalMarkingOrgans-edited>
             {
-                if (!markingManager.TryGetMarkingData(organProtoID, out var organData))
+                if (!organMarkingData.TryGetValue(organ, out var organData)) // <Onyx-ExternalMarkingOrgans-edited>
                 {
                     validatedMarkings.Remove(organ);
                     continue;
@@ -219,9 +220,9 @@ public sealed partial class HumanoidCharacterAppearance : IEquatable<HumanoidCha
                 var actualMarkings = appearance.Markings.GetValueOrDefault(organ)?.ShallowClone() ?? new();
 
                 markingManager.EnsureValidColors(actualMarkings);
-                markingManager.EnsureValidGroupAndSex(actualMarkings, organData.Value.Group, sex);
-                markingManager.EnsureValidLayers(actualMarkings, organData.Value.Layers);
-                markingManager.EnsureValidLimits(actualMarkings, organData.Value.Group, organData.Value.Layers, skinColor, eyeColor);
+                markingManager.EnsureValidGroupAndSex(actualMarkings, organData.Group, sex); // <Onyx-ExternalMarkingOrgans-edited>
+                markingManager.EnsureValidLayers(actualMarkings, organData.Layers); // <Onyx-ExternalMarkingOrgans-edited>
+                markingManager.EnsureValidLimits(actualMarkings, organData.Group, organData.Layers, skinColor, eyeColor); // <Onyx-ExternalMarkingOrgans-edited>
 
                 validatedMarkings[organ] = actualMarkings;
             }

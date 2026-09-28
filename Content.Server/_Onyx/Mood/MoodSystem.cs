@@ -12,6 +12,7 @@ using Content.Server.Chat.Managers;
 using Content.Server.Popups;
 using Content.Server.Roles;
 using Content.Shared._Onyx.Mood;
+using Content.Shared._Onyx.Wounds;
 using Content.Shared._Onyx.Overlays;
 using Content.Shared._Onyx.Roles;
 using Content.Shared.Alert;
@@ -61,6 +62,7 @@ public sealed partial class MoodSystem : EntitySystem
     [Dependency] private AtmosphereSystem _atmo = default!;
     [Dependency] private BarotraumaSystem _barotrauma = default!;
     [Dependency] private SatiationSystem _satiation = default!;
+    [Dependency] private PainSystem _pain = default!;
 
     private const float SanityTick = 1f;
     private float _sanityAccumulator;
@@ -93,7 +95,7 @@ public sealed partial class MoodSystem : EntitySystem
         SubscribeLocalEvent<MoodComponent, MoodPurgeEffectsEvent>(OnMoodEffectsPurged);
         SubscribeLocalEvent<MoodComponent, ShowMoodAlertEvent>(OnMoodAlertShown);
         SubscribeLocalEvent<MoodComponent, RefreshMovementSpeedModifiersEvent>(OnSpeedRefresh);
-        SubscribeLocalEvent<MoodComponent, DamageChangedEvent>(OnDamageChanged);
+        SubscribeLocalEvent<MoodComponent, PainChangedEvent>(OnPainChanged);
         SubscribeLocalEvent<MoodComponent, CuffedStateChangeEvent>(OnCuffedChanged);
         SubscribeLocalEvent<MoodComponent, SuffocationEvent>(OnSuffocationStarted);
         SubscribeLocalEvent<MoodComponent, StopSuffocatingEvent>(OnSuffocationStopped);
@@ -575,7 +577,7 @@ public sealed partial class MoodSystem : EntitySystem
         Recalculate(uid, component);
     }
 
-    private void OnDamageChanged(EntityUid uid, MoodComponent component, DamageChangedEvent args)
+    private void OnPainChanged(EntityUid uid, MoodComponent component, ref PainChangedEvent args)
     {
         if (HasComp<IgnoreSlowOnDamageComponent>(uid))
         {
@@ -583,16 +585,17 @@ public sealed partial class MoodSystem : EntitySystem
             return;
         }
 
-        var vital = _thresholds.CheckVitalDamage(uid, args.Damageable);
-        if (!_thresholds.TryGetPercentageForState(uid, MobState.Critical, vital, out var damage))
-            return;
+        var cap = _pain.GetPainCap(uid);
+        var pain = _pain.GetPain(uid);
+
+        var fraction = pain.Float() / cap.Float();
 
         ProtoId<MoodEffectPrototype> pick = "HealthNoDamage";
         var pickValue = component.HealthMoodEffectsThresholds["HealthNoDamage"];
 
         foreach (var (id, value) in component.HealthMoodEffectsThresholds)
         {
-            if (value > damage || value < pickValue)
+            if (value > fraction || value < pickValue)
                 continue;
 
             pick = id;

@@ -68,7 +68,7 @@ public sealed class ModernPdaBoundUserInterface : CartridgeLoaderBoundUserInterf
             if (_attachedProgram is { } program)
                 SendMessage(new CartridgeLoaderUiMessage(EntMan.GetNetEntity(program), CartridgeUiMessageAction.Deactivate));
         };
-        _menu.OnThemeChanged += accent => SendMessage(new PdaSetThemeMessage(accent)); // <Onyx-PdaTheme>
+        _menu.OnThemeChanged += accent => SendMessage(new PdaSetThemeMessage(accent));
 
         var borderColor = EntMan.GetComponentOrNull<PdaBorderColorComponent>(Owner);
         if (borderColor == null)

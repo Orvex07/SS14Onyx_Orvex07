@@ -75,8 +75,8 @@
         emote: Scream
         probability: 0.05
       - !type:SuppressPain
-        amount: 2
-        decayDuration: 60
+        amount: 400
+        decayDuration: 30
         identifier: Fentanyl
         recoveryMultiplier: 4.5
 
@@ -93,7 +93,7 @@
       metabolismRate: 0.5
       effects:
       - !type:SuppressPain
-        amount: 0.75
+        amount: 15
         decayDuration: 30
         identifier: Heroin
         recoveryMultiplier: 3
@@ -139,8 +139,8 @@
       metabolismRate: 0.5
       effects:
       - !type:SuppressPain
-        amount: 1.75
-        decayDuration: 25
+        amount: 200
+        decayDuration: 20
         identifier: Remifentanil
         recoveryMultiplier: 4
       - !type:HealthChange
@@ -174,8 +174,8 @@
       metabolismRate: 0.25
       effects:
       - !type:SuppressPain
-        amount: 0.6
-        decayDuration: 24
+        amount: 8
+        decayDuration: 30
         identifier: Opium
         recoveryMultiplier: 2
       - !type:ModifyStatusEffect

@@ -5,4 +5,5 @@
     <GuideEntityEmbed Entity="HandheldHealthAnalyzer"/>
   </Box>
   <FTLTextpart Key="guidebook-onyx-body-part-damage-difference"/>
+  <FTLTextpart Key="guidebook-onyx-body-part-damage-protection"/>
 </Document>

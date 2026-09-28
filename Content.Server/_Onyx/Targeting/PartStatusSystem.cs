@@ -20,7 +20,7 @@ public sealed partial class PartStatusSystem : EntitySystem
         SubscribeLocalEvent<WoundableComponent, PartBleedingChangedEvent>(OnWoundChanged);
         SubscribeLocalEvent<WoundableComponent, FractureGradeChangedEvent>(OnWoundChanged);
         SubscribeLocalEvent<WoundableComponent, ScarCreatedEvent>(OnWoundChanged);
-        SubscribeLocalEvent<PainComponent, PainChangedEvent>(OnPainChanged);
+        SubscribeLocalEvent<PartStatusComponent, PainChangedEvent>(OnPainChanged);
     }
 
     public override void Update(float frameTime)
@@ -41,10 +41,9 @@ public sealed partial class PartStatusSystem : EntitySystem
             Refresh((body, status));
     }
 
-    private void OnPainChanged(Entity<PainComponent> part, ref PainChangedEvent args)
+    private void OnPainChanged(Entity<PartStatusComponent> ent, ref PainChangedEvent args)
     {
-        if (TryComp(part, out BodyPartComponent? bodyPart) && bodyPart.Body is { } body && TryComp(body, out PartStatusComponent? status))
-            Refresh((body, status));
+        Refresh(ent);
     }
 
     public void Refresh(Entity<PartStatusComponent> ent)
@@ -84,9 +83,9 @@ public sealed partial class PartStatusSystem : EntitySystem
             scar |= HasComp<WoundScarComponent>(wound);
         }
         var severity = Content.Shared._Onyx.Targeting.PartStatusSystem.GetSeverity(damage);
-        if (TryComp(part, out PainComponent? pain))
+        if (HasComp<NerveComponent>(part))
             severity = (PartDamageSeverity) Math.Max((int) severity,
-                (int) Content.Shared._Onyx.Targeting.PartStatusSystem.GetSeverity(_pain.GetPain((part, pain)).Float()));
+                (int) Content.Shared._Onyx.Targeting.PartStatusSystem.GetSeverity(_pain.GetPartPain(part).Float()));
         return new(true, severity, bleeding, fracture, scar);
     }
 }

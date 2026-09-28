@@ -1,0 +1,83 @@
+# Content below taken from Goob-Station (https://github.com/Goob-Station/Goob-Station), licensed under AGPL-3.0-or-later.
+
+- type: soundCollection
+  id: PainRattles
+  files:
+  - /Audio/_Onyx/Pain/PainRattles1.ogg
+  - /Audio/_Onyx/Pain/PainRattles2.ogg
+  - /Audio/_Onyx/Pain/PainRattles3.ogg
+
+- type: soundCollection
+  id: PainScreamsShortMale
+  files:
+  - /Audio/_Onyx/Pain/MalePainShort1.ogg
+  - /Audio/_Onyx/Pain/MalePainShort2.ogg
+  - /Audio/_Onyx/Pain/MalePainShort3.ogg
+  - /Audio/_Onyx/Pain/MalePainShort4.ogg
+  - /Audio/_Onyx/Pain/MalePainShort5.ogg
+  - /Audio/_Onyx/Pain/MalePainShort6.ogg
+  - /Audio/_Onyx/Pain/MalePainShort7.ogg
+
+- type: soundCollection
+  id: AgonyScreamsMale
+  files:
+  - /Audio/_Onyx/Pain/MaleAgony1.ogg
+  - /Audio/_Onyx/Pain/MaleAgony2.ogg
+  - /Audio/_Onyx/Pain/MaleAgony3.ogg
+
+- type: soundCollection
+  id: PainShockScreamsMale
+  files:
+  - /Audio/_Onyx/Pain/PainShockMale1.ogg
+  - /Audio/_Onyx/Pain/PainShockMale2.ogg
+  - /Audio/_Onyx/Pain/PainShockMale3.ogg
+  - /Audio/_Onyx/Pain/PainShockMale4.ogg
+
+- type: soundCollection
+  id: CritWhimpersMale
+  files:
+  - /Audio/_Onyx/Pain/StillAliveMale1.ogg
+  - /Audio/_Onyx/Pain/StillAliveMale2.ogg
+  - /Audio/_Onyx/Pain/StillAliveMale3.ogg
+  - /Audio/_Onyx/Pain/StillAliveMale4.ogg
+
+- type: soundCollection
+  id: PainShockWhimpersMale
+  files:
+  - /Audio/_Onyx/Pain/StillAlivePainedMale1.ogg
+  - /Audio/_Onyx/Pain/StillAlivePainedMale2.ogg
+
+- type: soundCollection
+  id: PainScreamsShortFemale
+  files:
+  - /Audio/_Onyx/Pain/FemalePainShort1.ogg
+  - /Audio/_Onyx/Pain/FemalePainShort2.ogg
+  - /Audio/_Onyx/Pain/FemalePainShort3.ogg
+  - /Audio/_Onyx/Pain/FemalePainShort4.ogg
+  - /Audio/_Onyx/Pain/FemalePainShort5.ogg
+
+- type: soundCollection
+  id: AgonyScreamsFemale
+  files:
+  - /Audio/_Onyx/Pain/FemaleAgony1.ogg
+  - /Audio/_Onyx/Pain/FemaleAgony2.ogg
+  - /Audio/_Onyx/Pain/FemaleAgony3.ogg
+
+- type: soundCollection
+  id: PainShockScreamsFemale
+  files:
+  - /Audio/_Onyx/Pain/PainShockFemale1.ogg
+  - /Audio/_Onyx/Pain/PainShockFemale2.ogg
+  - /Audio/_Onyx/Pain/PainShockFemale3.ogg
+
+- type: soundCollection
+  id: CritWhimpersFemale
+  files:
+  - /Audio/_Onyx/Pain/StillAliveFemale1.ogg
+  - /Audio/_Onyx/Pain/StillAliveFemale2.ogg
+  - /Audio/_Onyx/Pain/StillAliveFemale3.ogg
+
+- type: soundCollection
+  id: PainShockWhimpersFemale
+  files:
+  - /Audio/_Onyx/Pain/StillAlivePainedFemale1.ogg

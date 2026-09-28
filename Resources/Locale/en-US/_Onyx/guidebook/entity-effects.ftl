@@ -8,7 +8,7 @@ entity-effect-guidebook-mend-fractures =
     { $chance ->
         [1] Reduces
         *[other] reduce
-    } matching fracture severity by { NATURALFIXED($amount, 2) } per metabolism tick. Types: { $wounds }. Grades: “{ $minimumGrade }” through “{ $maximumGrade }”, inclusive.
+    } matching fracture severity by { $amount } per metabolism tick. Types: { $wounds }. Grades: “{ $minimumGrade }” through “{ $maximumGrade }”, inclusive.
 
 entity-effect-guidebook-all-fractures = all fractures
 

@@ -367,10 +367,13 @@ if (TryComp<UnrevivableComponent>(entity, out var unrevivableComp) && unrevivabl
             var visibleWounds = new Dictionary<(LocId Name, LocId? StageName), int>();
             var clottingPhases = new HashSet<HealthAnalyzerClottingPhase>();
             var internalBleedingRate = 0f;
+            // <Onyx-HealthAnalyzerNerves>
+            var nerve = CompOrNull<NerveComponent>(part);
+            var nerveDamage = nerve?.Damage ?? FixedPoint2.Zero;
+            var nerveMaxDamage = nerve?.MaxDamage ?? FixedPoint2.Zero;
+            // </Onyx-HealthAnalyzerNerves>
             // <Onyx-HealthAnalyzerPain>
-            var pain = TryComp(part, out PainComponent? painComponent)
-                ? _pain.GetPain((part, painComponent))
-                : FixedPoint2.Zero;
+            var pain = _pain.GetPartPain(part);
             // </Onyx-HealthAnalyzerPain>
 
             foreach (var wound in _wounds.GetWounds((part, woundable)))
@@ -431,7 +434,7 @@ if (TryComp<UnrevivableComponent>(entity, out var unrevivableComp) && unrevivabl
                 _ => HealthAnalyzerClottingPhase.Mixed,
             };
 
-            // <Onyx-HealthAnalyzerPain-edited>
+            // <Onyx-HealthAnalyzerWoundDiagnostics-edited>
             var diagnostic = new HealthAnalyzerWoundDiagnostic(
                 fracture,
                 fractureTreatment,
@@ -442,8 +445,10 @@ if (TryComp<UnrevivableComponent>(entity, out var unrevivableComp) && unrevivabl
                 wounds,
                 _functionality.GetState((part, woundable)),
                 internalBleedingRate,
-                clottingPhase);
-            // </Onyx-HealthAnalyzerPain-edited>
+                clottingPhase,
+                nerveDamage,
+                nerveMaxDamage);
+            // </Onyx-HealthAnalyzerWoundDiagnostics-edited>
             if (diagnostic.HasFindings)
                 result[target] = diagnostic;
         }
@@ -464,6 +469,7 @@ if (TryComp<UnrevivableComponent>(entity, out var unrevivableComp) && unrevivabl
                 GetNetEntity(organ),
                 component.Health,
                 component.MaxHealth,
+                component.MinimumFunctionalHealth,
                 OrganOrder(component.Category?.Id)));
         }
 

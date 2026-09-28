@@ -4,3 +4,5 @@ ent-OrganArcanEars = { ent-OrganBaseEars }
     .desc = { ent-OrganBaseEars.desc }
 ent-OrganSlimePersonEars = { ent-OrganBaseEars }
     .desc = { ent-OrganBaseEars.desc }
+ent-OrganMarkingTail = хвост
+    .desc = Отделённый хвост.

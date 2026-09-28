@@ -1,4 +1,5 @@
 using Content.Shared.Body.Part;
+using Content.Shared.Armor;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
@@ -14,6 +15,7 @@ public sealed partial class WoundFractureSystem : EntitySystem
     [Dependency] private DamageableSystem _damage = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private TraumaProtectionSystem _traumaProtection = default!;
     [Dependency] private WoundSystem _wounds = default!;
 
     public override void Initialize() =>
@@ -42,11 +44,12 @@ public sealed partial class WoundFractureSystem : EntitySystem
         if (damage < FixedPoint2.Max(FixedPoint2.Zero, profile.MinimumHitDamage))
             return;
 
+        var protection = _traumaProtection.GetProtection(args.Body, Comp<BodyPartComponent>(part), TraumaType.Fracture);
         var effectiveTrauma = GetEffectiveTrauma(part.Owner, profile, damage);
         var hitGrade = GetGrade(profile, effectiveTrauma);
         if (hitGrade == FractureGrade.None ||
             !profile.Grades.TryGetValue(hitGrade, out var gradeSettings) ||
-            !_random.Prob(Math.Clamp(gradeSettings.CreationChance, 0f, 1f)))
+            !_random.Prob(Math.Clamp(gradeSettings.CreationChance - protection, 0f, 1f)))
             return;
 
         if (_wounds.CreateOrMergeWound(part.Owner, profile.Wound, damage * profile.SeverityMultiplier) is not { } wound ||

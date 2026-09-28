@@ -8,6 +8,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.GameStates;
 using Robust.Shared.Serialization;
 using Content.Shared.Inventory;
+using Content.Shared.Armor;
 
 namespace Content.Shared.Body.Part;
 
@@ -70,6 +71,10 @@ public sealed partial class BodyPartComponent : Component
     [DataField]
     public ProtoId<FractureProfilePrototype>? FractureProfile;
 
+    /// <summary>Intrinsic resistance of this specific body part to secondary trauma.</summary>
+    [DataField]
+    public Dictionary<TraumaType, float> TraumaProtection = new();
+
     /// <summary>
     /// Maximum structural damage the part can take before further damage becomes overflow.
     /// Damage beyond the cap is not applied to the part (wounds, bleeding and pain stop
@@ -92,6 +97,10 @@ public sealed partial class BodyPartComponent : Component
 
     [DataField]
     public FixedPoint2 AmputationConsequenceSeverity = 35;
+
+    /// <summary>Damage applied to the body when this part is amputated.</summary>
+    [DataField]
+    public DamageSpecifier? DamageOnAmputate;
 
     [DataField]
     public FixedPoint2? DismembermentSeverity;

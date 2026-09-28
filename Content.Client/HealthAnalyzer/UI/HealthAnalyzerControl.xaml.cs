@@ -49,7 +49,7 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
     private TargetBodyPart? _selectedPart;
     private EntityUid? _target;
     // <Onyx-HealthAnalyzerOrgans>
-    private readonly Dictionary<NetEntity, (BoxContainer Row, EllipsisLabel Name, Label Health)> _organRows = new();
+    private readonly Dictionary<NetEntity, (BoxContainer Row, EllipsisLabel Name, RichTextLabel Health)> _organRows = new();
     private bool _organsUnavailable;
     // </Onyx-HealthAnalyzerOrgans>
     // </Onyx-HealthAnalyzer-StatusDoll>
@@ -77,13 +77,32 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
         if (target == null
             || !_entityManager.HasComponent<DamageableComponent>(target))
         {
-            NoPatientDataPanel.Visible = true; // <Onyx-HealthAnalyzer-Interface-edited>
             // <Onyx-HealthAnalyzer-StatusDoll-edited>
-            PatientDataContainer.Visible = false;
-            DiagnosticColumns.Visible = false;
+            PatientDataContainer.Visible = true;
+            DiagnosticColumns.Visible = true;
+            DiagnosticRow.Visible = false;
+            var noData = new FormattedMessage();
+            noData.PushColor(Color.White);
+            noData.AddText(Loc.GetString("health-analyzer-window-no-patient-data-text"));
+            NameLabel.SetMessage(noData);
+            SpeciesLabel.Visible = false;
+            SpriteView.Visible = false;
+            StatusDoll.Visible = false;
+            WholeBodyButton.Visible = false;
+            NoDataTex.Visible = true;
+            ScanModeLabel.Text = Loc.GetString("health-analyzer-window-entity-unknown-text");
+            ScanModeLabel.FontColorOverride = Color.Red;
+            StatusLabel.Text = Loc.GetString("health-analyzer-window-entity-unknown-text");
+            TemperatureLabel.Text = Loc.GetString("health-analyzer-window-entity-unknown-value-text");
+            BloodLabel.Text = Loc.GetString("health-analyzer-window-entity-unknown-value-text");
             AlertsDivider.Visible = false;
             AlertsContainer.Visible = false;
             GroupsContainer.RemoveAllChildren();
+            WoundFindingsContainer.RemoveAllChildren();
+            WoundDiagnosticStateLabel.Visible = false;
+            DiseasesDivider.Visible = false;
+            DiseasesContainer.Visible = false;
+            DiseasesContainer.RemoveAllChildren();
             ClearOrganRows(); // <Onyx-HealthAnalyzerOrgans-edited>
             ChemicalsContainer.RemoveAllChildren(); // <Onyx-HealthAnalyzerChemicals>
             _target = null;
@@ -94,10 +113,10 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
             return;
         }
 
-        NoPatientDataPanel.Visible = false; // <Onyx-HealthAnalyzer-Interface-edited>
         // <Onyx-HealthAnalyzer-StatusDoll-edited>
         PatientDataContainer.Visible = true;
         DiagnosticColumns.Visible = true;
+        DiagnosticRow.Visible = true;
         // </Onyx-HealthAnalyzer-StatusDoll-edited>
 
         // <Onyx-HealthAnalyzer-StatusDoll>
@@ -223,6 +242,7 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
         WholeBodyButton.Disabled = part == null;
         StatusDoll.Refresh(_state.PartDamage, _spriteSystem);
         DrawDamage(target);
+        DrawWoundDiagnostics(_state);
     }
 
     private void DrawDamage(EntityUid target)
@@ -277,7 +297,11 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
         }
 
         WoundDiagnosticStateLabel.Visible = false;
-        foreach (var part in SharedTargetingSystem.SelectableParts)
+        var parts = _selectedPart is { } selectedPart
+            ? [selectedPart]
+            : SharedTargetingSystem.SelectableParts;
+        var hasPartFindings = false;
+        foreach (var part in parts)
         {
             if (!state.WoundDiagnostics.Parts.TryGetValue(part, out var diagnostic))
                 continue;
@@ -295,14 +319,22 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
                         : string.Empty;
                     return $"{type}{stage}{(wound.Count > 1 ? $" ×{wound.Count}" : string.Empty)}";
                 });
-                details.Add(string.Join(", ", wounds));
+                details.Add(Loc.GetString("health-analyzer-wound-wounds", ("wounds", string.Join(", ", wounds))));
+            }
+
+            if (diagnostic.Fracture != FractureGrade.None)
+            {
+                var fracture = Loc.GetString($"health-analyzer-diagnostic-fracture-{diagnostic.Fracture.ToString().ToLowerInvariant()}");
+                if (diagnostic.FractureTreatment == FractureTreatment.Reduced)
+                    fracture = Loc.GetString("health-analyzer-diagnostic-fracture-reduced", ("fracture", fracture));
+                details.Add(fracture);
             }
 
             if (diagnostic.BleedingRate > 0f)
-                details.Add(Loc.GetString("health-analyzer-wound-bleeding-short"));
+                details.Add(Loc.GetString("health-analyzer-wound-bleeding", ("rate", diagnostic.BleedingRate)));
 
             if (diagnostic.InternalBleedingRate > 0f)
-                details.Add(Loc.GetString("health-analyzer-wound-internal-bleeding-short"));
+                details.Add(Loc.GetString("health-analyzer-wound-internal-bleeding", ("rate", diagnostic.InternalBleedingRate)));
 
             if (diagnostic.ClottingPhase is HealthAnalyzerClottingPhase.InProgress or HealthAnalyzerClottingPhase.Complete or HealthAnalyzerClottingPhase.Mixed)
                 details.Add(Loc.GetString($"health-analyzer-wound-clotting-{diagnostic.ClottingPhase.ToString().ToLowerInvariant()}"));
@@ -311,14 +343,38 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
                 details.Add(Loc.GetString("health-analyzer-wound-scars-short", ("count", diagnostic.ScarCount)));
 
             if (diagnostic.Pain > FixedPoint2.Zero)
-                details.Add(Loc.GetString("health-analyzer-wound-pain-short", ("pain", diagnostic.Pain)));
+                details.Add(Loc.GetString("health-analyzer-wound-pain-diagnostic", ("pain", diagnostic.Pain)));
+
+            if (diagnostic.NerveDamage > FixedPoint2.Zero)
+            {
+                var ratio = diagnostic.NerveMaxDamage > FixedPoint2.Zero
+                    ? diagnostic.NerveDamage.Float() / diagnostic.NerveMaxDamage.Float()
+                    : 1f;
+                var severity = ratio switch
+                {
+                    < 0.25f => "minor",
+                    < 0.6f => "moderate",
+                    _ => "severe",
+                };
+                details.Add(Loc.GetString($"health-analyzer-diagnostic-nerve-{severity}"));
+            }
 
             if (diagnostic.Functionality != BodyPartFunctionalityState.Functional)
                 details.Add(Loc.GetString($"health-analyzer-wound-functionality-{diagnostic.Functionality.ToString().ToLowerInvariant()}"));
 
             if (details.Count > 0)
+            {
                 AddWoundFinding(Loc.GetString("health-analyzer-wound-part-summary",
-                    ("part", partName), ("details", string.Join(" · ", details))));
+                    ("part", partName), ("details", string.Join("\n    ", details))));
+                hasPartFindings = true;
+            }
+        }
+
+        if (_selectedPart is { } filtered && !hasPartFindings)
+        {
+            WoundDiagnosticStateLabel.Visible = true;
+            WoundDiagnosticStateLabel.SetMessage(Loc.GetString("health-analyzer-wound-no-findings-part",
+                ("part", Loc.GetString($"targeting-part-{PartKey(filtered)}"))));
         }
     }
 
@@ -450,9 +506,20 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
             var name = _entityManager.HasComponent<MetaDataComponent>(organEntity.Value)
                 ? Capitalize(Identity.Name(organEntity.Value, _entityManager))
                 : Loc.GetString("health-analyzer-window-entity-unknown-value-text");
-            var percent = float.IsFinite((float) organ.Health / (float) organ.MaxHealth)
-                ? (int) MathF.Round(Math.Clamp((float) organ.Health / (float) organ.MaxHealth * 100f, 0f, 100f))
+            var ratio = float.IsFinite((float) organ.Health / (float) organ.MaxHealth)
+                ? Math.Clamp((float) organ.Health / (float) organ.MaxHealth, 0f, 1f)
+                : 0f;
+            var percent = float.IsFinite(ratio)
+                ? (int) MathF.Round(ratio * 100f)
                 : 0;
+            var functionalThreshold = Math.Clamp(organ.MinimumFunctionalHealth, 0f, 1f);
+            var condition = ratio <= 0f
+                ? "destroyed"
+                : ratio <= functionalThreshold
+                    ? "critical"
+                    : ratio < 0.75f
+                        ? "damaged"
+                        : "healthy";
 
             if (_organRows.TryGetValue(organ.Entity, out var existing))
             {
@@ -462,9 +529,8 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
                     existing.Name.ToolTip = name;
                 }
 
-                var health = Loc.GetString("health-analyzer-window-organ-health", ("percent", percent));
-                if (existing.Health.Text != health)
-                    existing.Health.Text = health;
+                var health = Loc.GetString($"health-analyzer-window-organ-{condition}", ("percent", percent));
+                existing.Health.SetMessage(FormattedMessage.FromMarkupPermissive(health));
 
                 if (existing.Row.GetPositionInParent() != position)
                     existing.Row.SetPositionInParent(position);
@@ -492,11 +558,12 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
                 ToolTip = name,
             };
             row.AddChild(nameLabel);
-            var healthLabel = new Label
+            var healthLabel = new RichTextLabel
             {
-                Text = Loc.GetString("health-analyzer-window-organ-health",
-                    ("percent", percent)),
+                HorizontalExpand = false,
             };
+            healthLabel.SetMessage(FormattedMessage.FromMarkupPermissive(
+                Loc.GetString($"health-analyzer-window-organ-{condition}", ("percent", percent))));
             row.AddChild(healthLabel);
             OrgansContainer.AddChild(row);
             row.SetPositionInParent(position++);

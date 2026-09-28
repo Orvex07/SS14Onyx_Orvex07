@@ -88,7 +88,7 @@ public sealed partial class MechPolicySystem : EntitySystem
     private void OnToggleAction(Entity<MechComponent> mech, ref ToggleActionEvent args)
     {
         if (args.Handled ||
-            _vehicle.GetOperatorOrNull(mech.Owner) != args.Performer || // <Onyx-MechVehicleNative>
+            _vehicle.GetOperatorOrNull(mech.Owner) != args.Performer ||
             mech.Comp.Energy <= 0 ||
             HasComp<EmpDisabledComponent>(mech))
             args.Handled = true;

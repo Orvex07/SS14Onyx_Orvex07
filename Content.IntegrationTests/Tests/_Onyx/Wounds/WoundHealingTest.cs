@@ -40,6 +40,16 @@ public sealed class WoundHealingTest : GameTest
     organs:
       Chest: WoundHealingTorso
       Head: WoundHealingHead
+      Brain: WoundHealingBrain
+
+- type: entity
+  id: WoundHealingBrain
+  components:
+  - type: Organ
+    category: Brain
+  - type: ConsciousnessRequired
+    identifier: nerveSystem
+  - type: NervousSystem
 
 - type: entity
   id: WoundHealingTorso
@@ -91,6 +101,8 @@ public sealed class WoundHealingTest : GameTest
         await server.WaitIdleAsync();
         var entityManager = server.ResolveDependency<IEntityManager>();
         var map = await Pair.CreateTestMap();
+        var healedBody = EntityUid.Invalid;
+        var healedHead = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
         {
@@ -103,9 +115,11 @@ public sealed class WoundHealingTest : GameTest
             var damage = entityManager.System<DamageableSystem>();
             var pain = entityManager.System<PainSystem>();
             var head = graph.GetBodyChildren(body).Single(part => part.Component.PartType == BodyPartType.Head).Id;
+            healedBody = body;
+            healedHead = head;
 
             Assert.That(routing.TryApplyPartDamage(body, head, Spec("Blunt", 15)));
-            Assert.That(pain.GetRawPain(body), Is.EqualTo(FixedPoint2.New(13.05)));
+            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(13.05)));
             var wound = wounds.GetWounds((head, entityManager.GetComponent<WoundableComponent>(head)))
                 .Single(candidate => candidate.Comp.Prototype == new ProtoId<WoundPrototype>("BluntWound"));
             Assert.That(healing.TryApplyHealing(body, head, (item, entityManager.GetComponent<HealingComponent>(item)),
@@ -113,8 +127,20 @@ public sealed class WoundHealingTest : GameTest
             Assert.That(damage.GetAllDamage(head).GetTotal(), Is.EqualTo(FixedPoint2.New(5)));
             Assert.That(wound.Comp.Severity, Is.EqualTo(FixedPoint2.New(13.5)));
             Assert.That(damage.GetAllDamage(body).GetTotal(), Is.EqualTo(FixedPoint2.New(5)));
-            Assert.That(pain.GetRawPain(head), Is.EqualTo(FixedPoint2.New(13.05)));
-            Assert.That(pain.GetRawPain(body), Is.EqualTo(FixedPoint2.New(13.05)));
+            Assert.That(pain.GetPartPain(head), Is.EqualTo(FixedPoint2.New(13.05)));
+            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(13.05)));
+        });
+
+        await Task.Delay(1500);
+        await server.WaitIdleAsync();
+
+        await server.WaitAssertion(() =>
+        {
+            var pain = entityManager.System<PainSystem>();
+            Assert.That(pain.GetPartPain(healedHead), Is.GreaterThan(FixedPoint2.Zero));
+            Assert.That(pain.GetPartPain(healedHead), Is.LessThan(FixedPoint2.New(13.05)));
+            Assert.That(pain.GetPain(healedBody), Is.GreaterThan(FixedPoint2.Zero));
+            Assert.That(pain.GetPain(healedBody), Is.LessThan(FixedPoint2.New(13.05)));
         });
     }
 

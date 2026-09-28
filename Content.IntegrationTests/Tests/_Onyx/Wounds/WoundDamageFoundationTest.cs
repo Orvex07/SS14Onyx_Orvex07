@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Content.IntegrationTests.Fixtures;
+using Content.Shared._Onyx.Consciousness;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared._Onyx.Targeting;
 using Content.Shared.Armor;
@@ -15,6 +17,7 @@ using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Inventory;
 using Content.Shared.EntityEffects;
+using Content.Shared.Explosion;
 using Content.Shared.Rejuvenate;
 using Content.Shared.Stunnable;
 using Content.Shared.Throwing;
@@ -45,7 +48,6 @@ public sealed class WoundDamageFoundationTest : GameTest
   - type: Sprite
   - type: Damageable
   - type: MobState
-  - type: PainShockTarget
   - type: Injurable
     damageContainer: Biological
   - type: WoundHost
@@ -55,18 +57,30 @@ public sealed class WoundDamageFoundationTest : GameTest
       Head: WoundFoundationHead
       ArmLeft: WoundFoundationLeftArm
       ArmRight: WoundFoundationRightArm
+      Brain: WoundFoundationBrain
+
+- type: entity
+  id: WoundFoundationBrain
+  components:
+  - type: Organ
+    category: Brain
+  - type: ConsciousnessRequired
+    identifier: nerveSystem
+  - type: NervousSystem
 
 - type: entity
   id: WoundFoundationTorso
   components:
   - type: BodyPart
     partType: Chest
+    vital: true
 
 - type: entity
   id: WoundFoundationHead
   components:
   - type: BodyPart
     partType: Head
+    vital: true
 
 - type: entity
   id: WoundFoundationLeftArm
@@ -81,6 +95,14 @@ public sealed class WoundDamageFoundationTest : GameTest
   - type: BodyPart
     partType: Arm
     symmetry: Right
+
+- type: entity
+  id: WoundFoundationEmptyBody
+  components:
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  - type: WoundHost
 
 - type: entity
   id: WoundFoundationArmorHead
@@ -315,6 +337,25 @@ public sealed class WoundDamageFoundationTest : GameTest
             Assert.That(entityManager.GetComponent<SystemicDamageComponent>(body).Damage.GetTotal(), Is.EqualTo(FixedPoint2.New(4)));
             Assert.That(damage.GetAllDamage(body).GetTotal(), Is.EqualTo(FixedPoint2.New(19)));
 
+            var sharedDamage = Spec("Blunt", 10);
+            var firstBody = entityManager.SpawnEntity("WoundFoundationBody", map.GridCoords);
+            var secondBody = entityManager.SpawnEntity("WoundFoundationBody", map.GridCoords);
+            var firstExplosion = new BeforeExplodeEvent(sharedDamage, "Default", []);
+            entityManager.EventBus.RaiseLocalEvent(firstBody, ref firstExplosion);
+            damage.ChangeDamage(firstBody, sharedDamage);
+            var secondExplosion = new BeforeExplodeEvent(sharedDamage, "Default", []);
+            entityManager.EventBus.RaiseLocalEvent(secondBody, ref secondExplosion);
+            damage.ChangeDamage(secondBody, sharedDamage);
+            Assert.That(sharedDamage.GetTotal(), Is.EqualTo(FixedPoint2.New(10)));
+            Assert.That(damage.GetAllDamage(firstBody).GetTotal(), Is.EqualTo(FixedPoint2.New(10)));
+            Assert.That(damage.GetAllDamage(secondBody).GetTotal(), Is.EqualTo(FixedPoint2.New(10)));
+
+            var emptyBody = entityManager.SpawnEntity("WoundFoundationEmptyBody", map.GridCoords);
+            var emptyExplosion = new BeforeExplodeEvent(sharedDamage, "Default", []);
+            entityManager.EventBus.RaiseLocalEvent(emptyBody, ref emptyExplosion);
+            damage.ChangeDamage(emptyBody, sharedDamage);
+            Assert.That(damage.GetAllDamage(emptyBody).GetTotal(), Is.EqualTo(FixedPoint2.New(10)));
+
             Assert.That(graph.TryDetachPart(head));
             Assert.That(damage.GetAllDamage(body).GetTotal(), Is.EqualTo(FixedPoint2.New(6)));
             Assert.That(routing.TryApplyPartDamage(body, head, Spec("Blunt", 1)), Is.False);
@@ -400,6 +441,7 @@ public sealed class WoundDamageFoundationTest : GameTest
                 DamageDistribution.SplitEvenly));
             Assert.That(damage.GetAllDamage(torso).DamageDict.GetValueOrDefault(new ProtoId<DamageTypePrototype>("Slash")), Is.EqualTo(FixedPoint2.New(1)));
             Assert.That(damage.GetAllDamage(head).DamageDict.GetValueOrDefault(new ProtoId<DamageTypePrototype>("Slash")), Is.EqualTo(FixedPoint2.Zero));
+
         });
     }
 
@@ -607,6 +649,8 @@ public sealed class WoundDamageFoundationTest : GameTest
         await server.WaitIdleAsync();
         var entityManager = server.ResolveDependency<IEntityManager>();
         var map = await Pair.CreateTestMap();
+        var shockBody = EntityUid.Invalid;
+        var shockArm = EntityUid.Invalid;
 
         await server.WaitAssertion(() =>
         {
@@ -615,12 +659,15 @@ public sealed class WoundDamageFoundationTest : GameTest
             var routing = entityManager.System<WoundDamageRoutingSystem>();
             var damage = entityManager.System<DamageableSystem>();
             var pain = entityManager.System<PainSystem>();
+            var consciousness = entityManager.System<ConsciousnessSystem>();
             var effects = entityManager.System<SharedEntityEffectsSystem>();
             var parts = graph.GetBodyChildren(body).ToList();
             var head = parts.Single(part => part.Component.PartType == BodyPartType.Head).Id;
 
+            Assert.That(consciousness.TryGetNervousSystem(body, out var hub));
+
             Assert.That(routing.TryApplyPartDamage(body, head, Spec("Blunt", 10)));
-            Assert.That(pain.GetPain(head), Is.EqualTo(FixedPoint2.New(8.7)));
+            Assert.That(pain.GetPartPain(head), Is.EqualTo(FixedPoint2.New(8.7)));
             Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(8.7)));
 
             var systemicBody = entityManager.SpawnEntity("WoundFoundationBody", map.GridCoords);
@@ -632,9 +679,9 @@ public sealed class WoundDamageFoundationTest : GameTest
             Assert.That(damage.GetAllDamage(systemicArm).GetTotal(), Is.EqualTo(FixedPoint2.Zero));
             Assert.That(entityManager.GetComponent<SystemicDamageComponent>(systemicBody).Damage.GetTotal(),
                 Is.EqualTo(FixedPoint2.New(10)));
-            Assert.That(pain.GetPain(systemicArm), Is.EqualTo(FixedPoint2.Zero));
-            Assert.That(pain.GetPain(systemicTorso), Is.EqualTo(FixedPoint2.New(7)));
-            Assert.That(pain.GetPain(systemicBody), Is.EqualTo(FixedPoint2.New(7)));
+            Assert.That(pain.GetPartPain(systemicArm), Is.EqualTo(FixedPoint2.Zero));
+            Assert.That(pain.GetPartPain(systemicTorso), Is.EqualTo(FixedPoint2.Zero));
+            Assert.That(pain.GetPain(systemicBody), Is.EqualTo(FixedPoint2.Zero));
 
             var healingBody = entityManager.SpawnEntity("WoundFoundationBody", map.GridCoords);
             var healingHead = graph.GetBodyChildren(healingBody)
@@ -642,8 +689,12 @@ public sealed class WoundDamageFoundationTest : GameTest
             Assert.That(routing.TryApplyPartDamage(healingBody, healingHead, Spec("Blunt", 10)));
             Assert.That(routing.TryApplyPartDamage(healingBody, healingHead, Spec("Blunt", -10)));
             Assert.That(damage.GetAllDamage(healingHead).GetTotal(), Is.EqualTo(FixedPoint2.Zero));
-            Assert.That(pain.GetRawPain(healingHead), Is.EqualTo(FixedPoint2.New(8.7)));
-            Assert.That(pain.GetRawPain(healingBody), Is.EqualTo(FixedPoint2.New(8.7)));
+            Assert.That(pain.GetPartPain(healingHead), Is.EqualTo(FixedPoint2.New(8.7)));
+            Assert.That(pain.GetPain(healingBody), Is.EqualTo(FixedPoint2.New(8.7)));
+            Assert.That(consciousness.TryGetNervousSystem(healingBody, out var healingHub));
+            Assert.That(pain.TryGetPainModifier(healingHub.Owner, healingHead, "WoundPainRecovery",
+                out var recovery, healingHub.Comp));
+            Assert.That(recovery.Value.DecayPerSecond, Is.EqualTo(FixedPoint2.New(1f / 6f)));
 
             var suppressant = new SuppressPain
             {
@@ -652,10 +703,12 @@ public sealed class WoundDamageFoundationTest : GameTest
             };
             effects.ApplyEffect(body, suppressant);
             Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(6.7)));
-            Assert.That(pain.GetRawPain(body), Is.EqualTo(FixedPoint2.New(8.7)));
+            Assert.That(pain.GetPartPain(head), Is.EqualTo(FixedPoint2.New(8.7)));
             effects.ApplyEffect(body, suppressant);
             Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(4.7)));
-            Assert.That(entityManager.GetComponent<PainComponent>(body).Suppression, Is.EqualTo(FixedPoint2.New(4)));
+            Assert.That(pain.TryGetPainModifier(hub.Owner, hub.Owner, "PainSuppressant", out var suppression, hub.Comp));
+            Assert.That(suppression.Value.Change, Is.EqualTo(FixedPoint2.New(-4)));
+            Assert.That(suppression.Value.DecayPerSecond, Is.EqualTo(FixedPoint2.Zero));
 
             effects.ApplyEffect(body, new SuppressPain
             {
@@ -664,45 +717,69 @@ public sealed class WoundDamageFoundationTest : GameTest
                 Identifier = "SecondSuppressant",
             });
             Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(3.7)));
-            Assert.That(pain.DecayPainSuppression(body, 1f));
-            Assert.That(entityManager.GetComponent<PainComponent>(body).Suppression, Is.EqualTo(FixedPoint2.New(4.5)));
-            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(4.2)));
 
-            Assert.That(pain.RecoverPain(head, 1f), Is.False);
-            Assert.That(pain.GetRawPain(head), Is.EqualTo(FixedPoint2.New(8.7)));
-            Assert.That(pain.GetRawPain(body), Is.EqualTo(FixedPoint2.New(8.7)));
-            Assert.That(pain.RecoverPain(healingHead, 1f));
-            Assert.That(pain.GetRawPain(healingHead), Is.EqualTo(FixedPoint2.New(8.62)));
-            Assert.That(pain.GetRawPain(healingBody), Is.EqualTo(FixedPoint2.New(8.62)));
+            // Wound pain persists while the wound is active.
+            Assert.That(pain.GetPartPain(head), Is.EqualTo(FixedPoint2.New(8.7)));
+            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(3.7)));
 
             Assert.That(graph.TryDetachPart(head));
             Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.Zero));
             Assert.That(damage.TryChangeDamage(head, Spec("Blunt", 5)));
-            Assert.That(pain.GetPain(head), Is.EqualTo(FixedPoint2.New(13.05)));
+            Assert.That(pain.GetPartPain(head), Is.EqualTo(FixedPoint2.Zero));
 
-            Assert.That(pain.SetPain(head, FixedPoint2.New(-1)), Is.True);
-            Assert.That(pain.GetPain(head), Is.EqualTo(FixedPoint2.Zero));
-            Assert.That(pain.ChangePain(head, FixedPoint2.New(2)), Is.True);
-            Assert.That(pain.GetPain(head), Is.EqualTo(FixedPoint2.New(2)));
-            Assert.That(pain.ChangePain(head, FixedPoint2.New(-3)), Is.True);
-            Assert.That(pain.GetPain(head), Is.EqualTo(FixedPoint2.Zero));
-
-            Assert.That(pain.SetPain(body, FixedPoint2.New(200)), Is.True);
-            Assert.That(pain.GetRawPain(body), Is.EqualTo(FixedPoint2.New(135)));
-            Assert.That(entityManager.HasComponent<StunnedComponent>(body), Is.True);
-            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(94.5)));
-            Assert.That(entityManager.GetComponent<PainShockTargetComponent>(body).Armed, Is.False);
-
-            Assert.That(pain.SuppressPain(body, "PainShockTest", 30, TimeSpan.FromSeconds(10)));
-            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(73.5)));
-            Assert.That(entityManager.GetComponent<PainShockTargetComponent>(body).Armed, Is.True);
-            Assert.That(pain.ClearPainSuppression(body));
-            Assert.That(entityManager.HasComponent<StunnedComponent>(body), Is.True);
-            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(94.5)));
-            Assert.That(entityManager.GetComponent<PainShockTargetComponent>(body).Armed, Is.True);
+            // Admin modifiers.
+            Assert.That(pain.TryRemovePainModifier(healingHub.Owner, healingHead, "WoundPainRecovery", healingHub.Comp));
+            Assert.That(pain.GetPain(healingBody), Is.EqualTo(FixedPoint2.Zero));
+            Assert.That(pain.TryAddPainModifier(healingHub.Owner, healingHead, "AdminPain", FixedPoint2.New(2), PainDamageTypes.WoundPain, healingHub.Comp));
+            Assert.That(pain.TryAddPainModifier(healingHub.Owner, healingHead, "AdminPain", FixedPoint2.New(2), PainDamageTypes.WoundPain, healingHub.Comp), Is.False);
+            Assert.That(pain.GetPartPain(healingHead), Is.EqualTo(FixedPoint2.New(2)));
+            Assert.That(pain.GetPain(healingBody), Is.EqualTo(FixedPoint2.New(2)));
+            Assert.That(pain.TryChangePainModifier(healingHub.Owner, healingHead, "AdminPain", FixedPoint2.New(5), PainDamageTypes.WoundPain, healingHub.Comp));
+            Assert.That(pain.GetPain(healingBody), Is.EqualTo(FixedPoint2.New(5)));
+            Assert.That(pain.TryChangePainModifier(healingHub.Owner, healingHead, "MissingPain", FixedPoint2.New(5), PainDamageTypes.WoundPain, healingHub.Comp), Is.False);
+            Assert.That(pain.TryRemovePainModifier(healingHub.Owner, healingHead, "AdminPain", healingHub.Comp));
+            Assert.That(pain.TryRemovePainModifier(healingHub.Owner, healingHead, "AdminPain", healingHub.Comp), Is.False);
+            Assert.That(pain.GetPain(healingBody), Is.EqualTo(FixedPoint2.Zero));
 
             entityManager.EventBus.RaiseLocalEvent(body, new RejuvenateEvent());
             Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.Zero));
+        });
+
+        await server.WaitAssertion(() =>
+        {
+            var entityManager = server.ResolveDependency<IEntityManager>();
+            var graph = entityManager.System<SharedBodySystem>();
+            var routing = entityManager.System<WoundDamageRoutingSystem>();
+            var pain = entityManager.System<PainSystem>();
+            var consciousness = entityManager.System<ConsciousnessSystem>();
+
+            shockBody = entityManager.SpawnEntity("WoundFoundationBody", map.GridCoords);
+            shockArm = graph.GetBodyChildren(shockBody)
+                .Single(part => part.Component.PartType == BodyPartType.Arm &&
+                                 part.Component.Symmetry == BodyPartSymmetry.Left).Id;
+            Assert.That(routing.TryApplyPartDamage(shockBody, shockArm, Spec("Blunt", 75)));
+            Assert.That(consciousness.TryGetNervousSystem(shockBody, out _));
+            var shockPain = pain.GetPain(shockBody);
+            Assert.That(shockPain, Is.EqualTo(FixedPoint2.New(65.25)));
+        });
+
+        await Task.Delay(1500);
+        await server.WaitIdleAsync();
+
+        await server.WaitAssertion(() =>
+        {
+            var entityManager = server.ResolveDependency<IEntityManager>();
+            var pain = entityManager.System<PainSystem>();
+            var consciousness = entityManager.System<ConsciousnessSystem>();
+
+            Assert.That(shockBody, Is.Not.EqualTo(EntityUid.Invalid));
+            Assert.That(entityManager.HasComponent<StunnedComponent>(shockBody), Is.True);
+            Assert.That(consciousness.TryGetNervousSystem(shockBody, out var shockHub));
+            Assert.That(pain.TryGetPainModifier(shockHub.Owner, shockArm, PainSystem.WoundPainIdentifier,
+                out _, shockHub.Comp), Is.True);
+            Assert.That(shockHub.Comp.Multipliers.ContainsKey(PainSystem.PainAdrenalineIdentifier), Is.True);
+            Assert.That(pain.GetPain(shockBody), Is.GreaterThan(FixedPoint2.Zero));
+            Assert.That(pain.GetPain(shockBody), Is.LessThan(FixedPoint2.New(65.25)));
         });
     }
 

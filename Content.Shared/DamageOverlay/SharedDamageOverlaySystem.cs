@@ -1,4 +1,4 @@
-using Content.Shared._Onyx.Wounds;
+using Content.Shared._Onyx.Wounds; // <Onyx-PainDamageOverlay>
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
@@ -90,8 +90,9 @@ public abstract partial class SharedDamageOverlaySystem : EntitySystem
         var damagePerGroup = _damageable.GetDamagePerGroup((entity, damageable));
         var critThreshold = foundThreshold.Value;
         entity.Comp.CurrentState = mobState.CurrentState;
-        entity.Comp.PainLevel = TryComp(entity, out PainComponent? pain) && pain.SoftPainCap > FixedPoint2.Zero
-            ? FixedPoint2.Min(1f, _pain.GetPain((entity.Owner, pain)) / pain.SoftPainCap).Float()
+        var painCap = _pain.GetPainCap(entity.Owner);
+        entity.Comp.PainLevel = painCap > FixedPoint2.Zero
+            ? FixedPoint2.Min(1f, _pain.GetPain(entity.Owner) / painCap).Float()
             : 0f;
         if (entity.Comp.PainLevel < 0.05f)
             entity.Comp.PainLevel = 0f;

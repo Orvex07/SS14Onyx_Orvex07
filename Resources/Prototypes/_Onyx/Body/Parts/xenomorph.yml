@@ -18,6 +18,7 @@
         Quantity: 10
   - type: Woundable
     profile: OrganicBodyPartProfile
+  - type: Nerve
 
 - type: entity
   id: ChestXenomorph

@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Shared.Body;
+using Content.Shared.Armor;
 using Content.Shared.Body.Part;
 using Content.Shared.Body.Systems;
 using Content.Shared._Onyx.Body.Systems;
@@ -23,6 +24,7 @@ public sealed partial class OrganDamageSystem : EntitySystem
     [Dependency] private WoundBleedingSystem _bleeding = default!;
     [Dependency] private AmputationSystem _amputation = default!;
     [Dependency] private OrganHealthSystem _organHealth = default!;
+    [Dependency] private TraumaProtectionSystem _traumaProtection = default!;
 
     public override void Initialize()
     {
@@ -41,7 +43,11 @@ public sealed partial class OrganDamageSystem : EntitySystem
             return;
 
         var settings = profile.OrganDamage;
-        var chance = settings.Chances.GetValueOrDefault(bodyPart.PartType);
+        if (args.Damage.GetTotal() < settings.MinimumHitDamage)
+            return;
+
+        var protection = _traumaProtection.GetProtection(args.Body, bodyPart, TraumaType.OrganDamage);
+        var chance = settings.Chances.GetValueOrDefault(bodyPart.PartType) - protection;
         if (chance <= 0f || !_random.Prob(Math.Clamp(chance, 0f, 1f)))
             return;
 

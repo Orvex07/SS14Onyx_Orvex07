@@ -47,11 +47,11 @@ public sealed partial class OrganHealthSystem : EntitySystem
 
     public void SetHealth(Entity<OrganComponent> organ, FixedPoint2 health)
     {
-        var wasFunctional = organ.Comp.Health > FixedPoint2.Zero;
+        var wasFunctional = IsFunctional(organ.Comp);
         organ.Comp.Health = FixedPoint2.Clamp(health, FixedPoint2.Zero, organ.Comp.MaxHealth);
         Dirty(organ);
 
-        var functional = organ.Comp.Health > FixedPoint2.Zero;
+        var functional = IsFunctional(organ.Comp);
         if (wasFunctional == functional || organ.Comp.Body is not { } body)
             return;
 
@@ -61,6 +61,12 @@ public sealed partial class OrganHealthSystem : EntitySystem
 
     public void ChangeHealth(Entity<OrganComponent> organ, FixedPoint2 amount) =>
         SetHealth(organ, organ.Comp.Health + amount);
+
+    public static bool IsFunctional(OrganComponent organ)
+    {
+        var threshold = organ.MaxHealth * Math.Clamp(organ.MinimumFunctionalHealth, 0f, 1f);
+        return organ.Health > threshold;
+    }
 
     private void DestroyOrgan(Entity<OrganComponent> organ)
     {

@@ -66,6 +66,13 @@
   id: ClothingOuterArmorHoS
   components:
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.65
@@ -87,6 +94,13 @@
   id: ClothingOuterArmorWarden
   components:
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.65
@@ -235,6 +249,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Coats/labcoat_cmo.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 0.1
+      Dismemberment: 0.1
+      OrganDamage: 0.1
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Slash: 0.95
@@ -362,6 +383,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Coats/dogi.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Arm, Leg, Tail ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.8
@@ -412,6 +440,13 @@
   - type: Clothing
     sprite: Clothing/OuterClothing/Coats/brigmedic.rsi
   - type: Armor
+    # <Onyx-GoobTraumaProtection>
+    coverage: [ Chest, Groin, Tail ]
+    traumaProtection:
+      Fracture: 0.2
+      Dismemberment: 0.2
+      OrganDamage: 0.2
+    # </Onyx-GoobTraumaProtection>
     modifiers:
       coefficients:
         Blunt: 0.8

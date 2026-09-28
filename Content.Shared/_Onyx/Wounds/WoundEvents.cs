@@ -1,10 +1,12 @@
 using Content.Shared.FixedPoint;
+using Content.Shared._Onyx.Body;
 using Content.Shared.Body.Part;
 using Content.Shared.Damage;
 using Content.Shared.Inventory;
 using Content.Shared.Damage.Prototypes;
 using Robust.Shared.Serialization;
 using Robust.Shared.Prototypes;
+using Robust.Shared.GameStates;
 
 namespace Content.Shared._Onyx.Wounds;
 
@@ -40,8 +42,90 @@ public readonly record struct PartBleedingChangedEvent(EntityUid Body, EntityUid
 [ByRefEvent]
 public readonly record struct PainChangedEvent(EntityUid Entity, FixedPoint2 OldPain, FixedPoint2 Pain);
 
+public readonly record struct PainNumbnessChangedEvent;
+
+/// <summary>
+/// Pain lives on the nervous hub (brain organ) as aggregated nerve modifiers,
+/// mirroring the Goob-Station nerve model. There is no per-part pain component.
+/// </summary>
+[Serializable, NetSerializable]
+public enum PainDamageTypes : byte
+{
+    WoundPain,
+    TraumaticPain,
+}
+
+[Serializable, NetSerializable]
+public enum PainThresholdTypes : byte
+{
+    None,
+    PainFlinch,
+    Agony,
+    PainShock,
+    PainShockAndAgony,
+}
+
+[Serializable, DataRecord]
+public partial record struct PainModifier(
+    FixedPoint2 Change,
+    string Identifier = "Unspecified",
+    PainDamageTypes PainDamageType = PainDamageTypes.WoundPain,
+    TimeSpan? Time = null,
+    float RecoveryMultiplier = 1f,
+    FixedPoint2 DecayPerSecond = default);
+
+[Serializable, DataRecord]
+public partial record struct PainMultiplier(
+    FixedPoint2 Change,
+    string Identifier = "Unspecified",
+    PainDamageTypes PainDamageType = PainDamageTypes.WoundPain,
+    TimeSpan? Time = null);
+
+[Serializable, DataRecord]
+public partial record struct PainFeelingModifier(FixedPoint2 Change, TimeSpan? Time = null);
+
+[Serializable, NetSerializable]
+public sealed class NerveComponentState : ComponentState
+{
+    public FixedPoint2 PainMultiplier;
+
+    public Dictionary<(NetEntity, string), PainFeelingModifier> PainFeelingModifiers = new();
+
+    public NetEntity ParentedNerveSystem;
+
+    public FixedPoint2 Damage;
+}
+
 [ByRefEvent]
-public record struct ModifyPainGainEvent(float Multiplier = 1f);
+public partial record struct PainThresholdTriggered(
+    Entity<NervousSystemComponent> NerveSystem,
+    PainThresholdTypes ThresholdType,
+    FixedPoint2 PainInput,
+    bool Cancelled = false);
+
+[ByRefEvent]
+public partial record struct PainThresholdEffected(
+    Entity<NervousSystemComponent> NerveSystem,
+    PainThresholdTypes ThresholdType,
+    FixedPoint2 PainInput);
+
+[ByRefEvent]
+public record struct PainFeelsChangedEvent(EntityUid NerveSystem, EntityUid NerveEntity, FixedPoint2 CurrentPainFeels);
+
+[ByRefEvent]
+public record struct PainModifierAddedEvent(EntityUid NerveSystem, EntityUid NerveUid, FixedPoint2 AddedPain);
+
+[ByRefEvent]
+public record struct PainModifierRemovedEvent(EntityUid NerveSystem, EntityUid NerveUid, FixedPoint2 CurrentPain);
+
+[ByRefEvent]
+public record struct PainModifierChangedEvent(EntityUid NerveSystem, EntityUid NerveUid, FixedPoint2 CurrentPain);
+
+[ByRefEvent]
+public readonly record struct NervousSystemRebuiltEvent(EntityUid NerveSystem);
+
+[ByRefEvent]
+public readonly record struct NervousSystemRemovedEvent(EntityUid NerveSystem);
 
 [ByRefEvent]
 public readonly record struct PartDamageAppliedEvent(
@@ -64,7 +148,11 @@ public readonly record struct PartDamageOverflowedEvent(
     EntityUid Part,
     DamageSpecifier Damage,
     bool IsExplosion = false,
-    bool ExplosionAmputationCandidate = false);
+    bool ExplosionAmputationCandidate = false,
+    float WoundSeverityMultiplier = 1f);
+
+[ByRefEvent]
+public record struct BeforeAmputationDamageEvent(bool Cancelled = false);
 
 [ByRefEvent]
 public readonly record struct FractureGradeChangedEvent(

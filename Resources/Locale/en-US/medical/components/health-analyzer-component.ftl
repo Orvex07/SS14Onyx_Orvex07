@@ -19,6 +19,10 @@ health-analyzer-window-body-tab = Body
 health-analyzer-window-organs-tab = Organs
 health-analyzer-window-organs-unavailable = Organ data unavailable.
 health-analyzer-window-organ-health = { $percent } %
+health-analyzer-window-organ-healthy = [color=#69C779]Healthy[/color] · { $percent }%
+health-analyzer-window-organ-damaged = [color=#E6A566]Damaged[/color] · { $percent }%
+health-analyzer-window-organ-critical = [color=#E85D5D]Critical[/color] · { $percent }%
+health-analyzer-window-organ-destroyed = [color=#A0A0A0]Destroyed[/color] · { $percent }%
 # </Onyx-HealthAnalyzerOrgans-edited>
 # <Onyx-HealthAnalyzerChemicals>
 health-analyzer-window-chemicals-tab = Chemicals

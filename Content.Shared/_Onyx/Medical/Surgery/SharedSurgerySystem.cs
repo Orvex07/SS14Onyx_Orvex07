@@ -3,6 +3,7 @@ using Content.Shared._Onyx.Body.Systems;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared.Body.Systems;
 using Content.Shared.DoAfter;
+using Content.Shared.Damage.Systems;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Inventory;
@@ -32,6 +33,7 @@ public abstract partial class SharedSurgerySystem : EntitySystem
     [Dependency] private IComponentFactory _compFactory = default!;
     [Dependency] private IConfigurationManager _configuration = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
+    [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedItemSystem _item = default!;
@@ -39,6 +41,7 @@ public abstract partial class SharedSurgerySystem : EntitySystem
     [Dependency] private INetManager _net = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private PainSystem _pain = default!;
+    [Dependency] private WoundDamageRoutingSystem _woundDamage = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private RotateToFaceSystem _rotateToFace = default!;

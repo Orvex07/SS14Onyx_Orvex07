@@ -40,10 +40,8 @@
             state: jumpsuit-female
   - type: InitialBody
     organs:
-      # <Onyx-ChestGroin-edited>
       Chest: OrganArcanChest
       Groin: OrganArcanGroin
-      # </Onyx-ChestGroin-edited>
       Head: OrganArcanHead
       ArmLeft: OrganArcanArmLeft
       ArmRight: OrganArcanArmRight
