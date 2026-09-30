@@ -52,9 +52,7 @@
         - SurgeryStepWeldCyberneticCasing
   - type: SurgeryMarkerCondition
     all: [ IncisionOpen ]
-  - type: SurgeryPartCondition
-    parts: [ Chest, Head ]
-    inverse: true
+    none: [ SkullOpen, SkullSawed, RibcageOpen, RibcageSawed ]
 
 - type: entity
   parent: SurgeryBase
@@ -86,9 +84,10 @@
       default:
         steps:
         - SurgeryCloseSkull
-        - SurgeryStepCloseIncision
+        - SurgeryCloseIncision
   - type: SurgeryMarkerCondition
     all: [ IncisionOpen ]
+    any: [ SkullOpen, SkullSawed ]
   - type: SurgeryPartCondition
     part: Head
 
@@ -122,15 +121,16 @@
       default:
         steps:
         - SurgeryCloseRibcage
-        - SurgeryStepCloseIncision
+        - SurgeryCloseIncision
       cybernetic:
         required:
         - type: Cybernetics
         steps:
         - SurgeryCloseRibcage
-        - SurgeryStepWeldCyberneticCasing
+        - SurgeryCloseIncision
   - type: SurgeryMarkerCondition
     all: [ IncisionOpen ]
+    any: [ RibcageOpen, RibcageSawed ]
   - type: SurgeryPartCondition
     part: Chest
 
