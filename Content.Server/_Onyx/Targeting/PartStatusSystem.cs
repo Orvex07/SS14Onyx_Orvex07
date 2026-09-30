@@ -1,4 +1,3 @@
-using System.Linq;
 using Content.Shared._Onyx.Targeting;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared.Body.Part;
@@ -62,7 +61,7 @@ public sealed partial class PartStatusSystem : EntitySystem
                 snapshot[TargetBodyPart.Groin] = status;
         }
 
-        if (ent.Comp.Parts.Count == snapshot.Count && snapshot.All(pair => ent.Comp.Parts.GetValueOrDefault(pair.Key) == pair.Value))
+        if (StatusesEqual(ent.Comp.Parts, snapshot))
             return;
         ent.Comp.Parts = snapshot;
         Dirty(ent);
@@ -87,5 +86,21 @@ public sealed partial class PartStatusSystem : EntitySystem
             severity = (PartDamageSeverity) Math.Max((int) severity,
                 (int) Content.Shared._Onyx.Targeting.PartStatusSystem.GetSeverity(_pain.GetPartPain(part).Float()));
         return new(true, severity, bleeding, fracture, scar);
+    }
+
+    private static bool StatusesEqual(
+        IReadOnlyDictionary<TargetBodyPart, PartStatus> current,
+        IReadOnlyDictionary<TargetBodyPart, PartStatus> snapshot)
+    {
+        if (current.Count != snapshot.Count)
+            return false;
+
+        foreach (var (part, status) in snapshot)
+        {
+            if (!current.TryGetValue(part, out var currentStatus) || currentStatus != status)
+                return false;
+        }
+
+        return true;
     }
 }

@@ -1,4 +1,3 @@
-using System.Linq;
 using Content.Shared.Body;
 using Content.Shared.Armor;
 using Content.Shared.Body.Part;
@@ -51,9 +50,13 @@ public sealed partial class OrganDamageSystem : EntitySystem
         if (chance <= 0f || !_random.Prob(Math.Clamp(chance, 0f, 1f)))
             return;
 
-        var organs = _body.GetPartOrgans(part)
-            .Where(organ => organ.Component.Health > FixedPoint2.Zero && HasComp<OrganDamageComponent>(organ.Id))
-            .ToList();
+        var organs = new List<(EntityUid Id, OrganComponent Component)>();
+        foreach (var organ in _body.GetPartOrgans(part))
+        {
+            if (organ.Component.Health > FixedPoint2.Zero && HasComp<OrganDamageComponent>(organ.Id))
+                organs.Add(organ);
+        }
+
         if (organs.Count == 0)
             return;
 

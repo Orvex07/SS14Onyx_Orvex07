@@ -89,7 +89,7 @@ public abstract partial class SharedSurgerySystem
             return;
         }
 
-        if (_net.IsServer && validTools?.Count > 0)
+        if (validTools?.Count > 0)
             foreach (var tool in validTools)
                 if (TryComp(tool, out SurgeryToolComponent? toolComp) && toolComp.StartSound != null)
                     _audio.PlayPvs(toolComp.StartSound, tool);
@@ -107,8 +107,9 @@ public abstract partial class SharedSurgerySystem
     {
         var ev = new SurgeryDoAfterEvent(GetNetEntity(part), surgery, stepId, token,
             GetSurgerySuccessRate(step, validTools));
-        var duration = Comp<SurgeryStepComponent>(step).Duration;
-        if (validTools != null && TryComp(step, out SurgeryStepComponent? surgeryStep) && surgeryStep.Tool != null)
+        var surgeryStep = Comp<SurgeryStepComponent>(step);
+        var duration = surgeryStep.Duration;
+        if (validTools != null && surgeryStep.Tool != null)
         {
             foreach (var requirement in surgeryStep.Tool.Values)
             {
@@ -122,10 +123,10 @@ public abstract partial class SharedSurgerySystem
             }
         }
 
-        if (validTools != null && TryComp(step, out SurgeryStepComponent? toolStep) && toolStep.ToolQuality != null)
+        if (validTools != null && surgeryStep.ToolQuality != null)
         {
             foreach (var tool in validTools)
-                if (TryComp(tool, out ToolComponent? toolComp) && _tools.HasQuality(tool, toolStep.ToolQuality, toolComp))
+                if (TryComp(tool, out ToolComponent? toolComp) && _tools.HasQuality(tool, surgeryStep.ToolQuality, toolComp))
                 {
                     duration /= Math.Max(0.01f, toolComp.SpeedModifier);
                     break;

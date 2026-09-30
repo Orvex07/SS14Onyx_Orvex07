@@ -172,8 +172,13 @@ public sealed partial class PainSystem : EntitySystem
 
     private bool IsPainNumb(EntityUid body)
     {
-        return _statusEffects.EnumerateStatusEffects<PainNumbnessStatusEffectComponent>(body)
-            .Any(effect => effect.Comp1.Applied);
+        foreach (var effect in _statusEffects.EnumerateStatusEffects<PainNumbnessStatusEffectComponent>(body))
+        {
+            if (effect.Comp1.Applied)
+                return true;
+        }
+
+        return false;
     }
 
     #endregion
@@ -569,7 +574,7 @@ public sealed partial class PainSystem : EntitySystem
         }
 
         Dirty(hub.Owner, hub.Comp);
-        UpdatePainConsciousness(body, hub.Owner, hub.Comp);
+        UpdatePainConsciousness(body, hub.Comp);
 
         if (oldFelt != FixedPoint2.Zero)
         {
@@ -633,7 +638,7 @@ public sealed partial class PainSystem : EntitySystem
                 continue;
 
             var applied = ApplyModifiersToPain(nerveUid, modifier.Change, hub, modifier.PainDamageType);
-            if (modifier.PainDamageType == PainDamageTypes.WoundPain)
+            if (modifier.PainDamageType == PainDamageTypes.WoundPain && applied > FixedPoint2.Zero)
                 woundPain += applied;
 
             totalPain += applied;
@@ -696,7 +701,6 @@ public sealed partial class PainSystem : EntitySystem
 
     private void UpdatePainConsciousness(
         EntityUid body,
-        EntityUid hubUid,
         NervousSystemComponent hub,
         FixedPoint2? pain = null)
     {
@@ -712,7 +716,7 @@ public sealed partial class PainSystem : EntitySystem
     private void UpdateFeltPain(EntityUid body, EntityUid hubUid, NervousSystemComponent hub)
     {
         var feltPain = IsPainNumb(body) ? FixedPoint2.Zero : hub.Pain;
-        UpdatePainConsciousness(body, hubUid, hub, feltPain);
+        UpdatePainConsciousness(body, hub, feltPain);
         if (hub.LastFeltPain == feltPain)
             return;
 
@@ -1068,7 +1072,7 @@ public sealed partial class PainSystem : EntitySystem
         hub.LastPainThreshold = FixedPoint2.Zero;
         hub.LastThresholdType = PainThresholdTypes.None;
         Dirty(args.NerveSystem, hub);
-        UpdatePainConsciousness(body, args.NerveSystem, hub);
+        UpdatePainConsciousness(body, hub);
 
         if (oldPain != FixedPoint2.Zero)
         {

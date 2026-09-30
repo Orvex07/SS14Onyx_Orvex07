@@ -25,20 +25,31 @@ public sealed class DamageSpecifierDictionarySerializer :
         var values = new Dictionary<ValidationNode, ValidationNode>();
         var prototypes = dependencies.Resolve<IPrototypeManager>();
         if (node.TryGet<MappingDataNode>("types", out var types))
+        {
             values.Add(new ValidatedValueNode(new ValueDataNode("types")),
                 serializationManager.ValidateNode<Dictionary<ProtoId<DamageTypePrototype>, FixedPoint2>>(types, context));
+        }
 
         if (node.TryGet<MappingDataNode>("groups", out var groups))
+        {
             values.Add(new ValidatedValueNode(new ValueDataNode("groups")),
                 serializationManager.ValidateNode<Dictionary<ProtoId<DamageGroupPrototype>, FixedPoint2>>(groups, context));
+        }
 
         foreach (var (key, value) in node.Children)
         {
-            if (!prototypes.HasIndex<DamageTypePrototype>(key))
+            if (key is "types" or "groups")
                 continue;
 
-            values.Add(new ValidatedValueNode(new ValueDataNode(key)),
-                serializationManager.ValidateNode<FixedPoint2>(value, context));
+            var keyNode = new ValueDataNode(key);
+            if (prototypes.HasIndex<DamageTypePrototype>(key))
+            {
+                values.Add(new ValidatedValueNode(keyNode),
+                    serializationManager.ValidateNode<FixedPoint2>(value, context));
+                continue;
+            }
+
+            values.Add(new ErrorNode(keyNode, $"Unknown damage type: {key}"), new ValidatedValueNode(value));
         }
 
         return new ValidatedMappingNode(values);
@@ -51,8 +62,8 @@ public sealed class DamageSpecifierDictionarySerializer :
         ISerializationContext? context = null,
         ISerializationManager.InstantiationDelegate<Dictionary<ProtoId<DamageTypePrototype>, FixedPoint2>>? instanceProvider = null)
     {
-        var damage = instanceProvider?.Invoke() ?? new();
         var prototypes = dependencies.Resolve<IPrototypeManager>();
+        var damage = instanceProvider?.Invoke() ?? new();
         if (node.TryGet<MappingDataNode>("types", out var types))
         {
             foreach (var (key, value) in types.Children)

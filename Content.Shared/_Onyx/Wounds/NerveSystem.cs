@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Space Onyx Contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-using System.Linq;
 using Content.Shared.Body.Part;
 using Content.Shared.Armor;
 using Content.Shared.Damage;
@@ -44,7 +43,17 @@ public sealed partial class NerveComponent : Component
     /// How feelable pain through this nerve is. Lowered by nerve damage and suppressants.
     /// </summary>
     [ViewVariables(VVAccess.ReadOnly)]
-    public FixedPoint2 PainFeels => FixedPoint2.New(1f + PainFeelingModifiers.Values.Sum(modifier => modifier.Change.Float()));
+    public FixedPoint2 PainFeels
+    {
+        get
+        {
+            var painFeels = 1f;
+            foreach (var modifier in PainFeelingModifiers.Values)
+                painFeels += modifier.Change.Float();
+
+            return FixedPoint2.New(painFeels);
+        }
+    }
 
     [ViewVariables(VVAccess.ReadOnly)]
     public Dictionary<(EntityUid, string), PainFeelingModifier> PainFeelingModifiers = new();

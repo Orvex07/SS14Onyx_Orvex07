@@ -4,7 +4,6 @@ using Content.Shared.CCVar;
 using Content.Shared.Standing;
 using Robust.Shared.Configuration;
 using Robust.Shared.Random;
-using System.Linq;
 
 namespace Content.Shared._Onyx.Targeting;
 
@@ -93,8 +92,13 @@ public sealed partial class TargetResolverSystem : EntitySystem
         if (!component.TargetOdds.TryGetValue(requested, out var outcomes))
             return requested;
 
-        var total = outcomes.Where(entry => SharedTargetingSystem.IsSelectable(entry.Key) && float.IsFinite(entry.Value) && entry.Value > 0f)
-            .Sum(entry => entry.Value);
+        var total = 0f;
+        foreach (var (part, weight) in outcomes)
+        {
+            if (SharedTargetingSystem.IsSelectable(part) && float.IsFinite(weight) && weight > 0f)
+                total += weight;
+        }
+
         if (!float.IsFinite(total) || total <= 0f)
             return requested;
 

@@ -125,8 +125,13 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         if (!TryComp(body, out WoundHostComponent? host) || !_net.IsServer || _routing.Contains(body))
             return false;
 
-        var parts = _body.GetBodyChildren(body).Select(part => part.Id).ToList();
-        parts.RemoveAll(part => !IsAttachedWoundablePart(body, part));
+        var parts = new List<EntityUid>();
+        foreach (var (part, _) in _body.GetBodyChildren(body))
+        {
+            if (IsAttachedWoundablePart(body, part))
+                parts.Add(part);
+        }
+
         if (parts.Count == 0)
             return false;
 

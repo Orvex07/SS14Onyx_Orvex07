@@ -722,6 +722,17 @@ public sealed class WoundDamageFoundationTest : GameTest
             Assert.That(pain.GetPartPain(head), Is.EqualTo(FixedPoint2.New(8.7)));
             Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(3.7)));
 
+            Assert.That(pain.TryAddPainModifier(hub.Owner, head, "HighPain", FixedPoint2.New(150),
+                PainDamageTypes.WoundPain, hub.Comp));
+            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(115)));
+            effects.ApplyEffect(body, new SuppressPain
+            {
+                Amount = 10,
+                DecayDuration = TimeSpan.FromSeconds(10),
+                Identifier = "ImmediateSuppressant",
+            });
+            Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.New(105)));
+
             Assert.That(graph.TryDetachPart(head));
             Assert.That(pain.GetPain(body), Is.EqualTo(FixedPoint2.Zero));
             Assert.That(damage.TryChangeDamage(head, Spec("Blunt", 5)));
