@@ -9,6 +9,10 @@ namespace Content.Client._Onyx.Medical.Surgery;
 [Virtual]
 public partial class SurgeryChoiceControl : Control
 {
+    private string? _status;
+    private Color _statusColor;
+    private bool _selected;
+
     public SurgeryChoiceControl()
     {
         RobustXamlLoader.Load(this);
@@ -16,7 +20,30 @@ public partial class SurgeryChoiceControl : Control
 
     public void Set(string name, Texture? texture)
     {
-        NameLabel.SetMessage(name);
+        NameLabel.Text = name;
+        NameLabel.ToolTip = name;
+        NameLabel.TooltipDelay = 0.2f;
         Texture.Texture = texture;
+    }
+
+    public void SetStatus(string status, Color color)
+    {
+        if (_status == status && _statusColor == color)
+            return;
+
+        _status = status;
+        _statusColor = color;
+        StatusLabel.Text = status;
+        StatusLabel.FontColorOverride = color;
+        StatusLabel.Visible = true;
+    }
+
+    public void SetSelected(bool selected)
+    {
+        if (_selected == selected)
+            return;
+
+        _selected = selected;
+        Button.Modulate = selected ? Color.FromHex("#82CFC0") : Color.White;
     }
 }

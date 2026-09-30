@@ -1,16 +1,18 @@
 <controls:SurgeryChoiceControl
     xmlns="https://spacestation14.io"
-    xmlns:controls="clr-namespace:Content.Client._Onyx.Medical.Surgery">
-    <BoxContainer Orientation="Horizontal" MinHeight="42">
+    xmlns:controls="clr-namespace:Content.Client._Onyx.Medical.Surgery"
+    xmlns:health="clr-namespace:Content.Client._Onyx.Medical.HealthAnalyzer">
+    <BoxContainer Orientation="Horizontal" MinHeight="48">
         <Button Name="Button" Access="Public"
-                 HorizontalExpand="True" VerticalExpand="False"
-                 StyleClasses="ButtonSquare" Margin="0" MinHeight="42">
-            <BoxContainer Orientation="Horizontal" Margin="6 3">
+                  HorizontalExpand="True" VerticalExpand="False"
+                  StyleClasses="ButtonSquare" Margin="0" MinHeight="48">
+            <BoxContainer Orientation="Horizontal" Margin="7 4" SeparationOverride="7">
                 <TextureRect Name="Texture" Access="Public"
-                              HorizontalExpand="False" VerticalExpand="False"
-                              SetSize="32 32" Stretch="KeepAspectCentered" Margin="1" />
-                <Control MinWidth="8" />
-                <RichTextLabel Name="NameLabel" Access="Public" VerticalAlignment="Center" />
+                               HorizontalExpand="False" VerticalExpand="False"
+                               SetSize="34 34" Stretch="KeepAspectCentered" />
+                <health:EllipsisLabel Name="NameLabel" Access="Public" HorizontalExpand="True" />
+                <Label Name="StatusLabel" Access="Public" VerticalAlignment="Center"
+                       StyleClasses="LabelSubText" Visible="False" />
             </BoxContainer>
         </Button>
     </BoxContainer>

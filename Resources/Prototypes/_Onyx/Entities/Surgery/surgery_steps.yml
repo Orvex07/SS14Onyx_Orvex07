@@ -27,7 +27,6 @@
     damage:
       types:
         Slash: 8
-  - type: SurgeryTargetPartContext
 
 - type: entity
   parent: SurgeryStepBase
@@ -37,7 +36,6 @@
   - type: SurgeryStep
     tool: [ { type: BoneSaw } ]
     addMarkers: [ IncisionOpen ]
-  - type: SurgeryTargetPartContext
   - type: MechanicalSurgeryStep
   - type: Sprite
     sprite: _Onyx/Objects/Specific/Medical/Surgery/circular-saw.rsi
@@ -242,7 +240,6 @@
   - type: SurgeryStepPainInflicter
     amount: 9
     sleepModifier: 0.34
-  - type: SurgeryTargetPartContext
 
 - type: entity
   parent: SurgeryStepBase
@@ -252,7 +249,6 @@
   - type: SurgeryStep
     toolQuality: Welding
     removeMarkers: [ SkinRetracted, BleedersClamped, IncisionOpen, AbdominalCavityOpen ]
-  - type: SurgeryTargetPartContext
   - type: MechanicalSurgeryStep
   - type: Sprite
     sprite: Objects/Tools/welder.rsi
@@ -1043,7 +1039,6 @@
   components:
   - type: SurgeryStep
     tool: [ { type: BoneGel } ]
-  - type: SurgeryTargetPartContext
   - type: SurgeryMendFractureEffect
   - type: SurgeryStepPainInflicter
     amount: 12
@@ -1056,7 +1051,6 @@
   components:
   - type: SurgeryStep
     toolQuality: Welding
-  - type: SurgeryTargetPartContext
   - type: SurgeryMendFractureEffect
   - type: MechanicalSurgeryStep
   - type: Sprite

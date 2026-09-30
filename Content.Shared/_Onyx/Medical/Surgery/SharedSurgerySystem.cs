@@ -67,6 +67,7 @@ public abstract partial class SharedSurgerySystem : EntitySystem
         EntityUid Body,
         EntityUid Part,
         EntityUid User,
+        EntProtoId Procedure,
         EntProtoId Surgery,
         EntProtoId Step,
         uint Token);

@@ -22,7 +22,12 @@ public enum SurgeryItemKind : byte
 }
 
 [Serializable, NetSerializable]
-public readonly record struct SurgeryUiItem(EntProtoId Id, SurgeryItemKind Kind, bool Completed);
+public readonly record struct SurgeryUiItem(
+    EntProtoId Surgery,
+    EntProtoId Id,
+    SurgeryItemKind Kind,
+    int Depth,
+    bool Completed);
 
 [Serializable, NetSerializable]
 public sealed class SurgeryBuiState(
@@ -34,9 +39,14 @@ public sealed class SurgeryBuiState(
 }
 
 [Serializable, NetSerializable]
-public sealed class SurgeryStepChosenBuiMsg(NetEntity part, EntProtoId surgery, EntProtoId step) : BoundUserInterfaceMessage
+public sealed class SurgeryStepChosenBuiMsg(
+    NetEntity part,
+    EntProtoId procedure,
+    EntProtoId surgery,
+    EntProtoId step) : BoundUserInterfaceMessage
 {
     public readonly NetEntity Part = part;
+    public readonly EntProtoId Procedure = procedure;
     public readonly EntProtoId Surgery = surgery;
     public readonly EntProtoId Step = step;
 }

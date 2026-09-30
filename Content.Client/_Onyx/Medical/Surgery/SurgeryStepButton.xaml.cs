@@ -9,7 +9,6 @@ namespace Content.Client._Onyx.Medical.Surgery;
 public sealed partial class SurgeryStepButton : SurgeryChoiceControl
 {
     public EntProtoId StepId { get; set; }
-    public SurgeryItemKind Kind { get; set; }
 
     public SurgeryStepButton()
     {

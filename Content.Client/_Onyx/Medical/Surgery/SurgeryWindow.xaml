@@ -4,11 +4,11 @@
     xmlns:ui="clr-namespace:Content.Client.UserInterface.Controls"
     xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
     Title="{Loc 'surgery-ui-title'}"
-    SetSize="960 570"
-    MinSize="820 460">
+    SetSize="650 825"
+    MinSize="650 825">
     <PanelContainer Margin="4">
         <PanelContainer.PanelOverride>
-            <gfx:StyleBoxFlat BackgroundColor="#111619" BorderColor="#5A8F84" BorderThickness="1" />
+            <gfx:StyleBoxFlat BackgroundColor="#101619" BorderColor="#5A8F84" BorderThickness="1" />
         </PanelContainer.PanelOverride>
         <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="10">
             <BoxContainer Orientation="Horizontal" SeparationOverride="10">
@@ -28,56 +28,33 @@
 
             <ui:Separator StyleClasses="LowDivider" Thickness="1" />
 
-            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" VerticalExpand="True" SeparationOverride="10">
-                <PanelContainer SetWidth="255" VerticalExpand="True">
-                    <PanelContainer.PanelOverride>
-                        <gfx:StyleBoxFlat BackgroundColor="#171D20" BorderColor="#303B3E" BorderThickness="1" />
-                    </PanelContainer.PanelOverride>
-                    <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
-                        <Label Text="{Loc 'surgery-ui-navigation'}" StyleClasses="LabelSubText"
-                               FontColorOverride="#718681" Margin="4 0 0 3" />
-                        <Button Name="PartsButton" Access="Public" HorizontalExpand="True"
-                                StyleClasses="ButtonSquare" MinHeight="48">
-                            <BoxContainer Orientation="Vertical" Margin="5 2" VerticalAlignment="Center">
-                                <Label Text="{Loc 'surgery-ui-nav-parts'}" FontColorOverride="#D7F2EC" />
-                            </BoxContainer>
-                        </Button>
-                        <Button Name="SurgeriesButton" Access="Public" HorizontalExpand="True"
-                                StyleClasses="ButtonSquare" MinHeight="48">
-                            <BoxContainer Orientation="Vertical" Margin="5 2" VerticalAlignment="Center">
-                                <Label Text="{Loc 'surgery-ui-nav-surgeries'}" FontColorOverride="#D7F2EC" />
-                            </BoxContainer>
-                        </Button>
-                        <Button Name="StepsButton" Access="Public" HorizontalExpand="True"
-                                StyleClasses="ButtonSquare" MinHeight="48">
-                            <BoxContainer Orientation="Vertical" Margin="5 2" VerticalAlignment="Center">
-                                <Label Text="{Loc 'surgery-ui-nav-steps'}" FontColorOverride="#D7F2EC" />
-                            </BoxContainer>
-                        </Button>
-                        <Control VerticalExpand="True" />
+            <PanelContainer HorizontalExpand="True" VerticalExpand="True">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#1B2225" BorderColor="#3D5552" BorderThickness="1" />
+                </PanelContainer.PanelOverride>
+                <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="8">
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                        <Button Name="BackButton" Access="Public" StyleClasses="ButtonSquare"
+                                Text="{Loc 'surgery-ui-back'}" MinWidth="90" Visible="False" />
+                        <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalAlignment="Center">
+                            <Label Name="SectionTitle" Access="Public" Text="{Loc 'surgery-ui-section-parts'}"
+                                   StyleClasses="LabelHeading" FontColorOverride="#E2ECEA" />
+                            <Label Name="ViewHint" Access="Public" StyleClasses="LabelSubText"
+                                   FontColorOverride="#8FA9A3" Visible="False" />
+                        </BoxContainer>
                     </BoxContainer>
-                </PanelContainer>
-
-                <PanelContainer HorizontalExpand="True" VerticalExpand="True">
-                    <PanelContainer.PanelOverride>
-                        <gfx:StyleBoxFlat BackgroundColor="#1B2225" BorderColor="#303B3E" BorderThickness="1" />
-                    </PanelContainer.PanelOverride>
-                    <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="8">
-                        <Label Name="SectionTitle" Access="Public" Text="{Loc 'surgery-ui-section-parts'}"
-                               StyleClasses="LabelHeading" FontColorOverride="#E2ECEA" />
-                        <ui:Separator StyleClasses="LowDivider" Thickness="1" />
-                        <ScrollContainer VScrollEnabled="True" HScrollEnabled="False"
-                                         ReserveScrollbarSpace="True" HorizontalExpand="True" VerticalExpand="True">
-                            <BoxContainer Name="Parts" Access="Public" Orientation="Vertical"
-                                          HorizontalExpand="True" SeparationOverride="6" Visible="False" />
-                            <BoxContainer Name="Surgeries" Access="Public" Orientation="Vertical"
-                                          HorizontalExpand="True" SeparationOverride="6" Visible="False" />
-                            <BoxContainer Name="Steps" Access="Public" Orientation="Vertical"
-                                          HorizontalExpand="True" SeparationOverride="6" Visible="False" />
-                        </ScrollContainer>
-                    </BoxContainer>
-                </PanelContainer>
-            </BoxContainer>
+                    <ui:Separator StyleClasses="LowDivider" Thickness="1" />
+                    <ScrollContainer VScrollEnabled="True" HScrollEnabled="False" ReserveScrollbarSpace="True"
+                                     HorizontalExpand="True" VerticalExpand="True">
+                        <BoxContainer Name="Parts" Access="Public" Orientation="Vertical"
+                                      HorizontalExpand="True" SeparationOverride="6" />
+                        <BoxContainer Name="Surgeries" Access="Public" Orientation="Vertical"
+                                      HorizontalExpand="True" SeparationOverride="6" Visible="False" />
+                        <BoxContainer Name="Steps" Access="Public" Orientation="Vertical"
+                                      HorizontalExpand="True" SeparationOverride="6" Visible="False" />
+                    </ScrollContainer>
+                </BoxContainer>
+            </PanelContainer>
         </BoxContainer>
     </PanelContainer>
 

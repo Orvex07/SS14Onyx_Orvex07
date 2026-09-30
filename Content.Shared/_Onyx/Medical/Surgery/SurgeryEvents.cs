@@ -9,14 +9,17 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 public sealed partial class SurgeryDoAfterEvent : SimpleDoAfterEvent
 {
     public readonly NetEntity Part;
+    public readonly EntProtoId Procedure;
     public readonly EntProtoId Surgery;
     public readonly EntProtoId Step;
     public readonly uint Token;
     public readonly float SuccessRate;
 
-    public SurgeryDoAfterEvent(NetEntity part, EntProtoId surgery, EntProtoId step, uint token, float successRate)
+    public SurgeryDoAfterEvent(NetEntity part, EntProtoId procedure, EntProtoId surgery, EntProtoId step, uint token,
+        float successRate)
     {
         Part = part;
+        Procedure = procedure;
         Surgery = surgery;
         Step = step;
         Token = token;

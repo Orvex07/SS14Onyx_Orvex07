@@ -36,6 +36,13 @@ public abstract partial class SharedSurgerySystem
         }
 
         var tools = GetActiveTool(args.User);
+        if (!TryGetNextProcedureStep(ent, targetPart, args.Procedure, args.User, tools, out var owner, out var nextStep) ||
+            owner != args.Surgery || nextStep != args.Step)
+        {
+            RefreshUI(ent);
+            return;
+        }
+
         if (!TryValidateSurgeryStep(args.User, ent, targetPart, args.Surgery, args.Step, tools, false,
                 out var part, out var step, out _))
         {
@@ -61,7 +68,7 @@ public abstract partial class SharedSurgerySystem
             CanPerformStep(args.User, ent, part, part.Comp.PartType, step, false, out _, out _, out var validTools))
         {
             var nextToken = ReserveSurgerySite(site, args.User);
-            _pendingSurgeryRepeats.Add(new(ent, part, args.User, args.Surgery, args.Step, nextToken));
+            _pendingSurgeryRepeats.Add(new(ent, part, args.User, args.Procedure, args.Surgery, args.Step, nextToken));
         }
         RefreshUI(ent);
     }
@@ -78,7 +85,9 @@ public abstract partial class SharedSurgerySystem
 
         var tools = GetActiveTool(user);
         var site = (Body: ent.Owner, Part: targetPart);
-        if (ActiveSurgerySites.ContainsKey(site))
+        if (ActiveSurgerySites.ContainsKey(site) ||
+            !TryGetNextProcedureStep(ent, targetPart, args.Procedure, user, tools, out var owner, out var nextStep) ||
+            owner != args.Surgery || nextStep != args.Step)
             return;
 
         var token = ReserveSurgerySite(site, user);
@@ -97,15 +106,15 @@ public abstract partial class SharedSurgerySystem
         if (TryComp(ent, out TransformComponent? xform))
             _rotateToFace.TryFaceCoordinates(user, _transform.GetMapCoordinates(ent, xform).Position);
 
-        if (!StartSurgeryDoAfter(ent, part, args.Surgery, args.Step, user, step, token, validTools))
+        if (!StartSurgeryDoAfter(ent, part, args.Procedure, args.Surgery, args.Step, user, step, token, validTools))
             RemoveSurgerySite(site, token);
     }
 
     private bool StartSurgeryDoAfter(Entity<SurgeryTargetComponent> target, Entity<BodyPartComponent> part,
-        EntProtoId surgery, EntProtoId stepId, EntityUid user, EntityUid step, uint token,
+        EntProtoId procedure, EntProtoId surgery, EntProtoId stepId, EntityUid user, EntityUid step, uint token,
         HashSet<EntityUid>? validTools = null)
     {
-        var ev = new SurgeryDoAfterEvent(GetNetEntity(part), surgery, stepId, token,
+        var ev = new SurgeryDoAfterEvent(GetNetEntity(part), procedure, surgery, stepId, token,
             GetSurgerySuccessRate(step, validTools));
         var surgeryStep = Comp<SurgeryStepComponent>(step);
         var duration = surgeryStep.Duration;
@@ -204,9 +213,11 @@ public abstract partial class SharedSurgerySystem
 
             var tools = GetActiveTool(pending.User);
             if (!TryComp(pending.Body, out SurgeryTargetComponent? targetComp) ||
+                !TryGetNextProcedureStep(pending.Body, pending.Part, pending.Procedure, pending.User, tools,
+                    out var owner, out var nextStep) || owner != pending.Surgery || nextStep != pending.Step ||
                 !TryValidateSurgeryStep(pending.User, (pending.Body, targetComp), pending.Part, pending.Surgery,
                     pending.Step, tools, false, out var part, out var step, out var validTools) ||
-                !StartSurgeryDoAfter((pending.Body, targetComp), part, pending.Surgery, pending.Step,
+                !StartSurgeryDoAfter((pending.Body, targetComp), part, pending.Procedure, pending.Surgery, pending.Step,
                     pending.User, step, pending.Token, validTools))
                 RemoveSurgerySite(site, pending.Token);
         }

@@ -280,6 +280,7 @@
   components:
   - type: Surgery
     icon: { sprite: Mobs/Species/Human/parts.rsi, state: l_arm }
+    sequenceContextStep: SurgeryStepAttachLeftArm
     steps:
       organic:
         steps:
@@ -308,6 +309,7 @@
   components:
   - type: Surgery
     icon: { sprite: Mobs/Species/Human/parts.rsi, state: r_arm }
+    sequenceContextStep: SurgeryStepAttachRightArm
     steps:
       organic:
         steps:
@@ -336,6 +338,7 @@
   components:
   - type: Surgery
     icon: { sprite: Mobs/Species/Human/parts.rsi, state: l_leg }
+    sequenceContextStep: SurgeryStepAttachLeftLeg
     steps:
       organic:
         steps:
@@ -364,6 +367,7 @@
   components:
   - type: Surgery
     icon: { sprite: Mobs/Species/Human/parts.rsi, state: r_leg }
+    sequenceContextStep: SurgeryStepAttachRightLeg
     steps:
       organic:
         steps:
@@ -392,6 +396,7 @@
   components:
   - type: Surgery
     icon: { sprite: Mobs/Species/Human/parts.rsi, state: l_hand }
+    sequenceContextStep: SurgeryStepAttachLeftHand
     steps:
       organic:
         steps:
@@ -421,6 +426,7 @@
   components:
   - type: Surgery
     icon: { sprite: Mobs/Species/Human/parts.rsi, state: r_hand }
+    sequenceContextStep: SurgeryStepAttachRightHand
     steps:
       organic:
         steps:
@@ -450,6 +456,7 @@
   components:
   - type: Surgery
     icon: { sprite: Mobs/Species/Human/parts.rsi, state: l_foot }
+    sequenceContextStep: SurgeryStepAttachLeftFoot
     steps:
       organic:
         steps:
@@ -479,6 +486,7 @@
   components:
   - type: Surgery
     icon: { sprite: Mobs/Species/Human/parts.rsi, state: r_foot }
+    sequenceContextStep: SurgeryStepAttachRightFoot
     steps:
       organic:
         steps:

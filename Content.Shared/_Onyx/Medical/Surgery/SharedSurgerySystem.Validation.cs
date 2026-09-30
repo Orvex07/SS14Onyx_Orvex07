@@ -75,19 +75,6 @@ public abstract partial class SharedSurgerySystem
             : _body.BodyHasChild(target, part);
     }
 
-    protected int? GetNextStep(EntityUid body, EntityUid part, Entity<SurgeryComponent?> surgery, List<EntityUid> tools)
-    {
-        if (!Resolve(surgery, ref surgery.Comp))
-            return null;
-
-        var steps = GetSurgerySteps(body, part, (surgery, surgery.Comp), tools);
-        for (var i = 0; i < steps.Count; i++)
-            if (!IsSurgeryItemComplete(body, part, steps[i], tools))
-                return i;
-
-        return null;
-    }
-
     private bool PreviousStepsComplete(EntityUid body, EntityUid part, Entity<SurgeryComponent> surgery, EntProtoId step, List<EntityUid> tools)
     {
         foreach (var surgeryStep in GetSurgerySteps(body, part, surgery, tools))
@@ -105,6 +92,35 @@ public abstract partial class SharedSurgerySystem
         Entity<SurgeryComponent> surgery, List<EntityUid> tools)
         => GetSurgerySequence(body, part, surgery, tools);
 
+    protected bool TryGetNextProcedureStep(EntityUid body, EntityUid part, EntProtoId surgeryId,
+        EntityUid? user, List<EntityUid> tools, out EntProtoId owner, out EntProtoId step)
+    {
+        owner = default;
+        step = default;
+        if (GetSurgeryEntity(surgeryId) is not { } surgery || !TryComp(surgery, out SurgeryComponent? surgeryComp))
+            return false;
+
+        var valid = new SurgeryValidEvent(body, part, user, tools);
+        RaiseLocalEvent(surgery, ref valid);
+        if (valid.Cancelled)
+            return false;
+
+        foreach (var item in GetSurgerySteps(body, part, (surgery, surgeryComp), tools))
+        {
+            if (IsSurgeryItemComplete(body, part, item, tools))
+                continue;
+
+            if (GetSurgeryEntity(item) != null)
+                return TryGetNextProcedureStep(body, part, item, user, tools, out owner, out step);
+
+            owner = surgeryId;
+            step = item;
+            return true;
+        }
+
+        return false;
+    }
+
     private IReadOnlyList<EntProtoId> GetSurgerySequence(EntityUid body, EntityUid part,
         Entity<SurgeryComponent> surgery, List<EntityUid> tools)
     {
@@ -115,19 +131,18 @@ public abstract partial class SharedSurgerySystem
         if (surgery.Comp.Steps.Values.All(sequence => sequence.Required.Count == 0))
             return fallback;
 
-        var contextEvent = new SurgeryGetStepSequenceContextEvent(body, part, tools);
-        foreach (var stepId in surgery.Comp.Steps.Values.SelectMany(sequence => sequence.Steps))
+        var context = part;
+        if (surgery.Comp.SequenceContextStep is { } contextStep)
         {
-            if (GetSurgeryStepEntity(stepId) is not { } step)
-                continue;
+            if (GetSurgeryStepEntity(contextStep) is not { } step)
+                return fallback;
 
+            var contextEvent = new SurgeryGetStepSequenceContextEvent(body, part, tools);
             RaiseLocalEvent(step, ref contextEvent);
-            if (contextEvent.Context != null)
-                break;
+            if (contextEvent.Context is not { } resolved)
+                return fallback;
+            context = resolved;
         }
-
-        if (contextEvent.Context is not { } context)
-            return fallback;
 
         return surgery.Comp.Steps
             .Where(entry => entry.Value.Required.Count > 0 &&

@@ -22,24 +22,6 @@ public abstract partial class SharedSurgerySystem
         return _stepPrototypes.Contains(step) ? GetOrSpawnPrototypeEntity(step) : null;
     }
 
-    protected bool TryGetSurgeryItemKind(EntProtoId item, out SurgeryItemKind kind)
-    {
-        if (_surgeryPrototypes.ContainsKey(item))
-        {
-            kind = SurgeryItemKind.Surgery;
-            return true;
-        }
-
-        if (_stepPrototypes.Contains(item))
-        {
-            kind = SurgeryItemKind.Step;
-            return true;
-        }
-
-        kind = default;
-        return false;
-    }
-
     private EntityUid GetOrSpawnPrototypeEntity(EntProtoId prototype)
     {
         if (!_singletons.TryGetValue(prototype, out var ent) || TerminatingOrDeleted(ent))
@@ -102,6 +84,12 @@ public abstract partial class SharedSurgerySystem
         if (surgery.Steps.Any(entry => entry.Value.Steps.Count == 0))
         {
             Log.Error($"Surgery prototype {id} contains an empty step section and will be ignored.");
+            return false;
+        }
+
+        if (surgery.SequenceContextStep is { } contextStep && !_stepPrototypes.Contains(contextStep))
+        {
+            Log.Error($"Surgery prototype {id} references invalid sequence context step {contextStep} and will be ignored.");
             return false;
         }
 

@@ -70,7 +70,6 @@ public abstract partial class SharedSurgerySystem
         SubscribeLocalEvent<SurgeryInsertCavityItemEffectComponent, SurgeryCanPerformStepEvent>(OnInsertCavityItemCanPerform);
         SubscribeLocalEvent<SurgeryRemoveCavityItemEffectComponent, SurgeryStepEvent>(OnRemoveCavityItem);
         SubscribeLocalEvent<SurgeryRemoveCavityItemEffectComponent, SurgeryStepCompleteCheckEvent>(OnRemoveCavityItemCheck);
-        SubscribeLocalEvent<SurgeryTargetPartContextComponent, SurgeryGetStepSequenceContextEvent>(OnTargetPartGetSequenceContext);
         SubscribeLocalEvent<SurgeryTargetComponent, StandAttemptEvent>(OnTargetStandAttempt);
         SubscribeLocalEvent<SurgeryTargetComponent, AccessibleOverrideEvent>(OnTargetAccessible);
 
@@ -157,10 +156,5 @@ public abstract partial class SharedSurgerySystem
             QueueDel(singleton);
 
         _singletons.Clear();
-    }
-
-    private void OnTargetPartGetSequenceContext(Entity<SurgeryTargetPartContextComponent> ent, ref SurgeryGetStepSequenceContextEvent args)
-    {
-        args.Context = args.Part;
     }
 }

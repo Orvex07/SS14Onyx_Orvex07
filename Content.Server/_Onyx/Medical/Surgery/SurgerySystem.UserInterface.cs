@@ -79,20 +79,8 @@ public sealed partial class SurgerySystem
         }
 
         var tools = GetActiveTool(args.Actor);
-        var steps = GetSurgerySteps(ent, part, (surgery, surgeryComp), tools).ToList();
-        var items = new List<SurgeryUiItem>(steps.Count);
-        foreach (var step in steps)
-        {
-            if (!TryGetSurgeryItemKind(step, out var kind))
-            {
-                SendStepsState(ent, args, [], -1, false, null, StepInvalidReason.None,
-                    SurgerySelectionState.Invalid);
-                return;
-            }
-            items.Add(new(step, kind, IsSurgeryItemComplete(ent, part, step, tools)));
-        }
-
-        var nextStep = GetNextStep(ent, part, (surgery, surgeryComp), tools) ?? -1;
+        var items = new List<SurgeryUiItem>();
+        BuildProcedureItems(ent, part, args.Surgery, (surgery, surgeryComp), tools, 0, items);
         if (items.All(static item => item.Completed))
         {
             SendStepsState(ent, args, items, -1, false, null, StepInvalidReason.None,
@@ -100,15 +88,18 @@ public sealed partial class SurgerySystem
             return;
         }
 
-        var valid = new SurgeryValidEvent(ent, part);
-        if (nextStep >= 0)
+        if (!TryGetNextProcedureStep(ent, part, args.Surgery, args.Actor, tools, out var owner, out var step))
         {
-            if (GetSurgeryStepEntity(steps[nextStep]) is { } selectedStep)
-                RaiseLocalEvent(selectedStep, ref valid);
-            else if (GetSurgeryEntity(steps[nextStep]) is { } nestedSurgery)
-                RaiseLocalEvent(nestedSurgery, ref valid);
+            SendStepsState(ent, args, items, -1, false, null, StepInvalidReason.None,
+                SurgerySelectionState.Invalid);
+            return;
         }
-        RaiseLocalEvent(surgery, ref valid);
+
+        var nextStep = items.FindIndex(item => !item.Completed && item.Kind == SurgeryItemKind.Step &&
+            item.Surgery == owner && item.Id == step);
+        var valid = new SurgeryValidEvent(ent, part, args.Actor, tools);
+        if (GetSurgeryStepEntity(step) is { } selectedStep)
+            RaiseLocalEvent(selectedStep, ref valid);
         if (valid.Cancelled)
         {
             SendStepsState(ent, args, items, -1, false, null, StepInvalidReason.None,
@@ -126,14 +117,29 @@ public sealed partial class SurgerySystem
         }
         else if (nextStep >= 0)
         {
-            if (GetSurgeryStepEntity(steps[nextStep]) is { } stepEnt)
+            if (GetSurgeryStepEntity(items[nextStep].Id) is { } stepEnt)
                 available = CanPerformStep(args.Actor, ent, part, partComp.PartType, stepEnt, false,
                     out popup, out reason, out _);
-            else
-                available = GetSurgeryEntity(steps[nextStep]) != null;
         }
 
         SendStepsState(ent, args, items, nextStep, available, popup, reason, SurgerySelectionState.Active);
+    }
+
+    private void BuildProcedureItems(EntityUid body, EntityUid part, EntProtoId surgeryId,
+        Entity<SurgeryComponent> surgery, List<EntityUid> tools, int depth, List<SurgeryUiItem> items)
+    {
+        foreach (var item in GetSurgerySteps(body, part, surgery, tools))
+        {
+            var completed = IsSurgeryItemComplete(body, part, item, tools);
+            if (GetSurgeryEntity(item) is { } nested && TryComp(nested, out SurgeryComponent? nestedComp))
+            {
+                items.Add(new(item, item, SurgeryItemKind.Surgery, depth, completed));
+                BuildProcedureItems(body, part, item, (nested, nestedComp), tools, depth + 1, items);
+                continue;
+            }
+
+            items.Add(new(surgeryId, item, SurgeryItemKind.Step, depth, completed));
+        }
     }
 
     private void SendStepsState(Entity<SurgeryTargetComponent> ent, SurgeryStepsStateRequest args,

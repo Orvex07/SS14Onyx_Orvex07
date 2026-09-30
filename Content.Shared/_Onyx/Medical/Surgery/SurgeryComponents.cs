@@ -18,6 +18,7 @@ public sealed partial class SurgeryComponent : Component
     [DataField, AutoNetworkedField] public int Priority;
     [DataField, AutoNetworkedField] public SpriteSpecifier? Icon;
     [DataField, AutoNetworkedField] public bool UseTargetPartIcon;
+    [DataField] public EntProtoId? SequenceContextStep;
     [DataField(required: true)] public Dictionary<string, SurgeryStepSequence> Steps = new();
 }
 
@@ -62,11 +63,3 @@ public enum SurgeryEntityTarget : byte
 [RegisterComponent] public sealed partial class SlimeCoreComponent : Component;
 
 [RegisterComponent] public sealed partial class TorsoOrganComponent : Component;
-
-/// <summary>
-/// Marker for surgery steps whose sequence should be chosen by the target part itself.
-/// When present, <see cref="SurgeryGetStepSequenceContextEvent"/> sets Context to the operated part,
-/// so alternative <c>required</c> sections can match components on the part (e.g. Cybernetics for frame fractures).
-/// </summary>
-[RegisterComponent]
-public sealed partial class SurgeryTargetPartContextComponent : Component;

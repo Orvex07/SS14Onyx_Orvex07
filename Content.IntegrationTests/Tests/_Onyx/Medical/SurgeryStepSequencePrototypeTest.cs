@@ -71,6 +71,7 @@ public sealed class SurgeryStepSequencePrototypeTest : GameTest
             Assert.That(steps.TryGetValue("cybernetic", out var cybernetic), Is.True, id.Id);
             Assert.That(cybernetic!.Required.Values.Any(component =>
                 component.Component.GetType() == typeof(CyberneticsComponent)), Is.True, id.Id);
+            Assert.That(surgery.SequenceContextStep, Is.Not.Null, id.Id);
 
             foreach (var step in steps.Values.SelectMany(section => section.Steps))
             {
