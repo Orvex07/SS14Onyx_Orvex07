@@ -12,3 +12,5 @@ ent-AdvancedBoneGel = bone multitool
     .desc = A mechanized bone healer, also serves as bone setter in its powered state.
 ent-OmnimedTool = surgical omnitool
     .desc = A compact surgical omnitool conveniently packed like a Swiss Army knife.
+ent-BloodFilter = blood filter
+    .desc = A compact extracorporeal filter used to remove chemicals from a patient's bloodstream.

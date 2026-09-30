@@ -131,3 +131,12 @@ public sealed partial class SurgeryFailureDamageComponent : Component
     [DataField]
     public SurgeryEntityTarget Target = SurgeryEntityTarget.Part;
 }
+
+/// <summary>Removes a bounded proportion of each non-blood reagent per surgery cycle.</summary>
+[RegisterComponent]
+public sealed partial class SurgeryBloodFilterEffectComponent : Component
+{
+    [DataField] public float Proportion = 0.22f;
+    [DataField] public FixedPoint2 Minimum = 0.4;
+    [DataField] public FixedPoint2 Maximum = 10;
+}

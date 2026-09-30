@@ -408,6 +408,7 @@
   position: 6,-9
   recipeUnlocks:
     - MedicalScannerMachineCircuitboard
+    - BloodFilter
   icon:
     sprite: Structures/Machines/scanner.rsi
     state: occupied

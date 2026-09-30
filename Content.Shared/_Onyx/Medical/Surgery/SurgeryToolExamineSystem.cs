@@ -71,6 +71,7 @@ public sealed partial class SurgeryToolExamineSystem : EntitySystem
         AddUse<StitchesComponent>(tool, "surgery-tool-use-stitches", uses);
         AddUse<DrillComponent>(tool, "surgery-tool-use-drill", uses);
         AddUse<TendingComponent>(tool, "surgery-tool-use-tending", uses);
+        AddUse<BloodFilterComponent>(tool, "surgery-tool-use-blood-filter", uses);
 
         foreach (var use in component.CustomUses)
         {

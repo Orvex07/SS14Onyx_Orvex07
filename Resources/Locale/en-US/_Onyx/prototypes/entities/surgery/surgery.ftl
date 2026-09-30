@@ -137,6 +137,8 @@ ent-SurgeryCutVocalCords = Cut vocal cords
 ent-SurgeryRestoreVocalCords = Restore vocal cords
 ent-SurgeryStepCutVocalCords = Cut vocal cords
 ent-SurgeryStepRestoreVocalCords = Restore vocal cords
+ent-SurgeryBloodFiltration = Blood filtration
+ent-SurgeryStepFilterBlood = Filter bloodstream
 ent-MedicalStitches = medical stitches
     .desc = A fine, curved needle with a length of absorbable polyglycolide suture thread.
 

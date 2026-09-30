@@ -1282,3 +1282,19 @@
     part: Head
   - type: SurgeryMutingCondition
     muted: true
+
+- type: entity
+  parent: SurgeryBase
+  id: SurgeryBloodFiltration
+  name: Blood filtration
+  components:
+  - type: Surgery
+    icon: { sprite: Objects/Specific/Medical/advanced_jetinjector.rsi, state: jetinjector_base }
+    steps:
+      default:
+        steps:
+        - SurgeryOpenRibcage
+        - SurgeryStepFilterBlood
+  - type: SurgeryPartCondition
+    part: Chest
+  - type: SurgeryBloodstreamCondition

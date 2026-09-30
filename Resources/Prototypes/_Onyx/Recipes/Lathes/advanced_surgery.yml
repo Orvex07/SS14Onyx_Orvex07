@@ -58,3 +58,13 @@
     Plasma: 600
     Gold: 300
     Silver: 300
+
+- type: latheRecipe
+  parent: BaseSurgicalRecipe
+  id: BloodFilter
+  result: BloodFilter
+  completetime: 3
+  materials:
+    Steel: 500
+    Glass: 200
+    Plastic: 200

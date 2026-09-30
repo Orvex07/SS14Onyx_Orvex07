@@ -16,6 +16,19 @@ public abstract partial class SharedSurgerySystem
         ApplySurgeryDamage(args.Body, args.Part, args.User, effect.Comp.Target, effect.Comp.Damage, false);
     }
 
+    private void OnBloodFilter(Entity<SurgeryBloodFilterEffectComponent> effect, ref SurgeryStepEvent args)
+    {
+        if (_net.IsServer)
+            _bloodstream.FilterChemicals(args.Body, effect.Comp.Proportion, effect.Comp.Minimum, effect.Comp.Maximum);
+    }
+
+    private void OnBloodFilterCheck(Entity<SurgeryBloodFilterEffectComponent> effect,
+        ref SurgeryStepCompleteCheckEvent args)
+    {
+        if (_bloodstream.HasFilterableChemicals(args.Body))
+            args.Cancelled = true;
+    }
+
     private void ApplySurgeryDamage(EntityUid body, EntityUid part, EntityUid user, SurgeryEntityTarget target,
         Content.Shared.Damage.DamageSpecifier damage, bool healWounds)
     {

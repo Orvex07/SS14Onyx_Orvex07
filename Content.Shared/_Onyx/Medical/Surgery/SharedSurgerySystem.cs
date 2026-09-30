@@ -29,6 +29,7 @@ public abstract partial class SharedSurgerySystem : EntitySystem
 {
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private SharedBodySystem _body = default!;
+    [Dependency] private BloodstreamSystem _bloodstream = default!;
     [Dependency] private OrganHealthSystem _organHealth = default!;
     [Dependency] private IComponentFactory _compFactory = default!;
     [Dependency] private IConfigurationManager _configuration = default!;

@@ -102,3 +102,7 @@ public sealed partial class SurgeryMutingConditionComponent : Component
 {
     [DataField] public bool Muted;
 }
+
+/// <summary>Requires the patient to have removable chemicals in their bloodstream.</summary>
+[RegisterComponent]
+public sealed partial class SurgeryBloodstreamConditionComponent : Component;

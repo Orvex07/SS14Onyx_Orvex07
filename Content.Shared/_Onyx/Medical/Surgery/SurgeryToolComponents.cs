@@ -24,3 +24,7 @@ public sealed partial class SurgeryToolComponent : Component
 [RegisterComponent] public sealed partial class DrillComponent : Component;
 [RegisterComponent] public sealed partial class StitchesComponent : Component;
 [RegisterComponent] public sealed partial class TendingComponent : Component;
+
+/// <summary>Marks a tool capable of filtering chemicals from a patient's bloodstream.</summary>
+[RegisterComponent]
+public sealed partial class BloodFilterComponent : Component;

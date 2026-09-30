@@ -12,6 +12,8 @@ ent-AdvancedBoneGel = костный мультитул
     .desc = Механизированный инструмент для лечения костей, в активированном состоянии также служит костной шиной.
 ent-OmnimedTool = хирургический мультитул
     .desc = Компактный хирургический инструмент, удобно упакованный, как швейцарский армейский нож.
+ent-BloodFilter = гемофильтр
+    .desc = Компактный экстракорпоральный фильтр для удаления химических веществ из кровотока пациента.
 ent-SurgeryRemovePart = Ампутировать
 ent-SurgeryOpenAbdomen = Вскрыть живот
 ent-SurgeryHideItem = Спрятать предмет
@@ -212,6 +214,8 @@ ent-SurgeryCutVocalCords = Перерезать голосовые связки
 ent-SurgeryRestoreVocalCords = Восстановить голосовые связки
 ent-SurgeryStepCutVocalCords = Перерезать голосовые связки
 ent-SurgeryStepRestoreVocalCords = Восстановить голосовые связки
+ent-SurgeryBloodFiltration = Провести гемофильтрацию
+ent-SurgeryStepFilterBlood = Фильтровать кровь
 ent-MedicalStitches = медицинские швы
     .desc = Тонкая изогнутая игла с рассасывающейся полигликолидной хирургической нитью.
 

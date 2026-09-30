@@ -144,4 +144,11 @@ public abstract partial class SharedSurgerySystem
             found && ent.Comp.Damaged && organ.Comp.Health >= organ.Comp.MaxHealth)
             args.Cancelled = true;
     }
+
+    private void OnBloodstreamConditionValid(Entity<SurgeryBloodstreamConditionComponent> ent,
+        ref SurgeryValidEvent args)
+    {
+        if (!_bloodstream.HasFilterableChemicals(args.Body))
+            args.Cancelled = true;
+    }
 }

@@ -173,6 +173,7 @@
       Stitches: 3
       Drill: 3
       Tending: 3
+      BloodFilter: 3
   - type: Scalpel
   - type: Hemostat
   - type: Retractor
@@ -183,3 +184,20 @@
   - type: Stitches
   - type: Drill
   - type: Tending
+  - type: BloodFilter
+
+- type: entity
+  id: BloodFilter
+  parent: BaseToolSurgery
+  name: blood filter
+  description: A compact extracorporeal filter used to remove chemicals from a patient's bloodstream.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/advanced_jetinjector.rsi
+    state: jetinjector_base
+  - type: Item
+    sprite: Objects/Specific/Medical/advanced_jetinjector.rsi
+  - type: SurgeryTool
+    successModifiers:
+      BloodFilter: 0.95
+  - type: BloodFilter
