@@ -9,7 +9,7 @@ tiered-machine-part-panel-closed = Open maintenance panel first.
 tiered-machine-part-unsupported = This machine cannot use this module.
 tiered-machine-part-not-better = Installed module is already at least as efficient.
 tiered-machine-part-installed = Tier { $tier } module installed.
-tiered-machine-part-installed-examine = Installed { $kind }: [color=cyan]tier { $tier }[/color].
+tiered-machine-part-installed-examine = { CAPITALIZE($kind) }: [color=cyan]tier { $tier }[/color], quantity: { $amount }.
 tiered-machine-part-kind-servo = Servo
 tiered-machine-part-kind-capacitor = Capacitor
 tiered-machine-part-kind-matterbin = Matter Bin
@@ -17,7 +17,6 @@ tiered-machine-part-kind-scanner = Scanning Module
 tiered-machine-part-kind-laser = Micro-laser
 machine-part-exchanger-nothing = No better compatible modules found.
 machine-part-exchanger-complete = Machine modules upgraded.
-tiered-machine-frame-missing = Missing required module: { $amount }× { $kind }.
 machine-upgrade-bluespace-mining-speed = mining speed
 machine-upgrade-bluespace-mining-output = material output
 machine-upgrade-bluespace-mining-core-life = core lifetime

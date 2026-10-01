@@ -14,7 +14,6 @@ using Content.Shared.Stacks;
 using Content.Shared.Wires;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
-using Robust.Shared.Prototypes;
 
 namespace Content.Server._Onyx.Construction;
 
@@ -27,15 +26,6 @@ public sealed partial class TieredMachinePartSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
 
     private const float TierBonusScale = 2f / 3f;
-
-    private static readonly Dictionary<MachinePartKind, EntProtoId> TierOneParts = new()
-    {
-        [MachinePartKind.Servo] = "StandardServoDrive",
-        [MachinePartKind.Capacitor] = "StandardCapacitorModule",
-        [MachinePartKind.MatterBin] = "StandardMatterRecycler",
-        [MachinePartKind.Scanner] = "StandardScannerModule",
-        [MachinePartKind.Laser] = "StandardLaserModule",
-    };
 
     public override void Initialize()
     {
@@ -119,14 +109,26 @@ public sealed partial class TieredMachinePartSystem : EntitySystem
 
     private void OnUpgradeExamine(Entity<MachineComponent> ent, ref MachineUpgradeExamineEvent args)
     {
+        var installed = new Dictionary<MachinePartKind, SortedDictionary<int, int>>();
         foreach (var uid in ent.Comp.PartContainer.ContainedEntities)
         {
             if (!TryComp<TieredMachinePartComponent>(uid, out var part))
                 continue;
 
-            args.AddLine(Loc.GetString("tiered-machine-part-installed-examine",
-                ("kind", Loc.GetString($"tiered-machine-part-kind-{part.Kind.ToString().ToLowerInvariant()}")),
-                ("tier", part.Tier)));
+            if (!installed.TryGetValue(part.Kind, out var tiers))
+                installed[part.Kind] = tiers = new SortedDictionary<int, int>();
+
+            var count = TryComp<StackComponent>(uid, out var stack) ? stack.Count : 1;
+            tiers[part.Tier] = tiers.GetValueOrDefault(part.Tier) + count;
+        }
+
+        foreach (var kind in Enum.GetValues<MachinePartKind>())
+        {
+            if (!installed.TryGetValue(kind, out var tiers))
+                continue;
+
+            foreach (var (tier, amount) in tiers)
+                args.AddPart(kind, tier, amount);
         }
     }
 
@@ -144,15 +146,25 @@ public sealed partial class TieredMachinePartSystem : EntitySystem
             totals[part.Kind] = (total.Ratings + rating * count, total.Count + count);
         }
 
-        var ratings = new Dictionary<MachinePartKind, float>();
-        var sums = new Dictionary<MachinePartKind, float>();
+        var ratings = new Dictionary<MachinePartKind, MachinePartRating>();
         foreach (var (kind, total) in totals)
+            ratings[kind] = new MachinePartRating(total.Ratings / total.Count, total.Ratings);
+
+        RaiseLocalEvent(ent, new MachinePartsChangedEvent(ratings), broadcast: true);
+
+        if (ratings.Count == 0)
         {
-            ratings[kind] = total.Ratings / total.Count;
-            sums[kind] = total.Ratings;
+            RemComp<TieredMachinePartExamineComponent>(ent);
+            return;
         }
 
-        RaiseLocalEvent(ent, new MachinePartsChangedEvent(ratings, sums), broadcast: true);
+        var examineEvent = new MachineUpgradeExamineEvent();
+        RaiseLocalEvent(ent, examineEvent);
+
+        var examine = EnsureComp<TieredMachinePartExamineComponent>(ent);
+        examine.Parts = examineEvent.Parts;
+        examine.Upgrades = examineEvent.Upgrades;
+        Dirty(ent, examine);
     }
 
     private void EnsureBoardParts(Entity<MachineComponent> ent)
@@ -177,7 +189,7 @@ public sealed partial class TieredMachinePartSystem : EntitySystem
         {
             for (var i = installed.GetValueOrDefault(kind); i < required; i++)
             {
-                var part = Spawn(TierOneParts[kind], Transform(ent).Coordinates);
+                var part = Spawn(TieredMachinePartRequirements.GetDefaultPrototype(kind), Transform(ent).Coordinates);
                 if (!_container.Insert(part, ent.Comp.PartContainer))
                     QueueDel(part);
             }

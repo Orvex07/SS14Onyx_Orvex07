@@ -123,7 +123,6 @@ public abstract partial class SharedCryoPodSystem : EntitySystem
 
         if (solutionToInject.Volume > 0)
         {
-            solutionToInject.ScaleSolution(entity.Comp.CoolingEfficiency); // <Onyx-TieredMachineParts>
             _bloodstream.TryAddToBloodstream((patient.Value, bloodstream), solutionToInject);
             _reactive.DoEntityReaction(patient.Value, solutionToInject, ReactionMethod.Injection);
         }

@@ -5,12 +5,14 @@ machine-part-name-micro-laser = Micro-laser
 machine-upgrade-increased-by-percentage-extra = [color=yellow]{CAPITALIZE( $upgraded )}[/color] increased by [color={ $color }]{ $percent }%[/color].
 machine-upgrade-decreased-by-percentage-extra = [color=yellow]{CAPITALIZE( $upgraded )}[/color] decreased by [color={ $color }]{ $percent }%[/color].
 machine-upgrade-not-upgraded-extra = [color=yellow]{CAPITALIZE( $upgraded )}[/color] unchanged.
+machine-upgrade-value = [color=yellow]{ CAPITALIZE($upgraded) }[/color]: { $value }.
 
 machine-upgrade-charging-efficiency = charging efficiency
-machine-upgrade-quantum-cooldown = quantum cooldown time
+machine-upgrade-quantum-cooldown = quantum server recovery speed
 machine-upgrade-quantum-reward-bonus = quantum reward bonus
-machine-upgrade-quantum-exit-injury = unsafe ejection injury
+machine-upgrade-quantum-exit-injury = emergency ejection protection
 machine-upgrade-charging-speed = recharge speed
+machine-upgrade-battery-recharge-speed = internal battery recharge speed
 machine-upgrade-power-input = power input throughput
 machine-upgrade-power-output = power output throughput
 machine-upgrade-process-speed = processing speed
@@ -26,8 +28,6 @@ machine-upgrade-stasis-bed-power = stasis power draw
 machine-upgrade-thermomachine-heat-capacity = heat capacity
 machine-upgrade-thermomachine-temp-range = temperature range
 machine-upgrade-smartfridge-capacity = storage capacity
-machine-upgrade-cryo-transfer = reagent transfer
-machine-upgrade-cryo-cooling = cooling efficiency
 machine-upgrade-spaceheater-power = thermal power
 machine-upgrade-spaceheater-temp-range = temperature range
 machine-upgrade-hydro-water = water capacity

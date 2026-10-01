@@ -64,13 +64,13 @@ public sealed partial class TieredMachineFrameSystem : EntitySystem
 
         foreach (var (kind, required) in ent.Comp.TieredPartRequirements)
         {
-            var missing = required - ent.Comp.TieredPartProgress.GetValueOrDefault(kind);
-            if (missing <= 0)
+            var amount = required - ent.Comp.TieredPartProgress.GetValueOrDefault(kind);
+            if (amount <= 0)
                 continue;
 
-            args.PushMarkup(Loc.GetString("tiered-machine-frame-missing",
-                ("amount", missing),
-                ("kind", Loc.GetString($"tiered-machine-part-kind-{kind.ToString().ToLowerInvariant()}"))));
+            args.PushMarkup(Loc.GetString("construction-condition-machine-frame-required-element-entry",
+                ("amount", amount),
+                ("elementName", Loc.GetString(TieredMachinePartRequirements.GetName(kind)))));
         }
     }
 

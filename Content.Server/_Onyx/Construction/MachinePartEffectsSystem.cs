@@ -21,6 +21,7 @@ namespace Content.Server._Onyx.Construction;
 public sealed partial class MachinePartEffectsSystem : EntitySystem
 {
     [Dependency] private Content.Server._Onyx.Bitrunning.Systems.QuantumConsoleSystem _quantumConsole = default!;
+    [Dependency] private SpaceHeaterSystem _spaceHeater = default!;
 
     public override void Initialize()
     {
@@ -56,7 +57,7 @@ public sealed partial class MachinePartEffectsSystem : EntitySystem
         ent.Comp.MinTemperature = GetBaseline(baseline, "heater-min", ent.Comp.MinTemperature) - rangeBonus;
         ent.Comp.MaxTemperature = GetBaseline(baseline, "heater-max", ent.Comp.MaxTemperature) + rangeBonus;
         if (TryComp<GasThermoMachineComponent>(ent, out var thermo))
-            thermo.HeatCapacity = ent.Comp.PowerConsumption;
+            _spaceHeater.RefreshTieredPartEffects(ent, thermo);
     }
 
     private void OnMicrowavePartsChanged(Entity<MicrowaveComponent> ent, ref MachinePartsChangedEvent args)
@@ -182,6 +183,7 @@ public sealed partial class MachinePartEffectsSystem : EntitySystem
     private static void OnQuantumServerExamine(Entity<QuantumServerComponent> ent, ref MachineUpgradeExamineEvent args)
     {
         args.Add("machine-upgrade-quantum-cooldown", 1f / Math.Max(ent.Comp.CooldownMultiplier, 0.001f));
+        args.AddValue("machine-upgrade-quantum-scanner-tier", ent.Comp.ScannerTier);
         args.Add("machine-upgrade-quantum-reward-bonus", 1f + ent.Comp.QualityBonus);
         args.Add("machine-upgrade-quantum-exit-injury", 1f / Math.Max(ent.Comp.FinalExitDamageMultiplier, 0.001f));
     }

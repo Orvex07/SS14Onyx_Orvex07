@@ -668,11 +668,6 @@
       stackRequirements:
         Glass: 5
         Cable: 1
-      # <Onyx-TieredMachineParts>
-      partRequirements:
-        MatterBin: 2
-        Laser: 2
-      # </Onyx-TieredMachineParts>
 
 - type: entity
   id: ChemMasterMachineCircuitboard

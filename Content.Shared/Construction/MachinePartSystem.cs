@@ -1,5 +1,4 @@
 using System.Linq;
-using Content.Shared._Onyx.Construction; // <Onyx-TieredMachineParts>
 using Content.Shared.Construction.Components;
 using Content.Shared.Examine;
 using Content.Shared.Lathe;
@@ -31,8 +30,7 @@ namespace Content.Shared.Construction
                 args.PushMarkup(Loc.GetString("machine-board-component-on-examine-label"));
                 foreach (var (material, amount) in component.StackRequirements)
                 {
-                    if (material == TieredMachinePartRequirements.LegacyManipulator
-                        && TieredMachinePartRequirements.ReplacesManipulators(component)) // <Onyx-TieredMachineParts>
+                    if (ReplacesLegacyRequirement(component, material)) // <Onyx-TieredMachineParts-edited>
                         continue;
 
                     var stack = ProtoMan.Index(material);
@@ -43,16 +41,7 @@ namespace Content.Shared.Construction
                         ("requiredElement", Loc.GetString(name))));
                 }
 
-                // <Onyx-TieredMachineParts>
-                var partRequirements = new Dictionary<MachinePartKind, int>();
-                TieredMachinePartRequirements.CopyFromBoard(component, partRequirements);
-                foreach (var (kind, amount) in partRequirements)
-                {
-                    args.PushMarkup(Loc.GetString("machine-board-component-required-element-entry-text",
-                        ("amount", amount),
-                        ("requiredElement", Loc.GetString($"tiered-machine-part-kind-{kind.ToString().ToLowerInvariant()}"))));
-                }
-                // </Onyx-TieredMachineParts>
+                AppendTieredPartRequirements(component, args); // <Onyx-TieredMachineParts-edited>
 
                 foreach (var (_, info) in component.ComponentRequirements)
                 {
@@ -80,8 +69,7 @@ namespace Content.Shared.Construction
 
             foreach (var (stackId, amount) in comp.StackRequirements)
             {
-                if (stackId == TieredMachinePartRequirements.LegacyManipulator
-                    && TieredMachinePartRequirements.ReplacesManipulators(comp)) // <Onyx-TieredMachineParts>
+                if (ReplacesLegacyRequirement(comp, stackId)) // <Onyx-TieredMachineParts-edited>
                     continue;
 
                 var stackProto = ProtoMan.Index(stackId);
@@ -114,32 +102,10 @@ namespace Content.Shared.Construction
                 }
             }
 
-            // <Onyx-TieredMachineParts>
-            var partRequirements = new Dictionary<MachinePartKind, int>();
-            TieredMachinePartRequirements.CopyFromBoard(comp, partRequirements);
-            foreach (var (kind, amount) in partRequirements)
-            {
-                var prototype = kind switch
-                {
-                    MachinePartKind.Servo => "StandardServoDrive",
-                    MachinePartKind.Capacitor => "StandardCapacitorModule",
-                    MachinePartKind.MatterBin => "StandardMatterRecycler",
-                    MachinePartKind.Scanner => "StandardScannerModule",
-                    MachinePartKind.Laser => "StandardLaserModule",
-                    _ => throw new ArgumentOutOfRangeException(),
-                };
-
-                if (!_lathe.TryGetRecipesFromEntity(prototype, out var recipes))
-                    return false;
-
-                var recipe = recipes.MinBy(p => p.Materials.Values.Sum())!;
-                foreach (var (material, materialAmount) in recipe.Materials)
-                {
-                    materials.TryAdd(material, 0);
-                    materials[material] += materialAmount * amount * coefficient;
-                }
-            }
-            // </Onyx-TieredMachineParts>
+            // <Onyx-TieredMachineParts-edited>
+            if (!TryAddTieredPartMaterialCost(comp, materials, coefficient))
+                return false;
+            // </Onyx-TieredMachineParts-edited>
 
             var genericPartInfo = comp.ComponentRequirements.Values.Concat(comp.TagRequirements.Values);
             foreach (var info in genericPartInfo)

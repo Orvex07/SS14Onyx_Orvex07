@@ -5,12 +5,14 @@ machine-part-name-micro-laser = Микро-лазер
 machine-upgrade-increased-by-percentage-extra = Параметр [color=yellow]{ CAPITALIZE( $upgraded ) }[/color] увеличен на [color={ $color }]{ $percent }%[/color].
 machine-upgrade-decreased-by-percentage-extra = Параметр [color=yellow]{ CAPITALIZE( $upgraded ) }[/color] уменьшен на [color={ $color }]{ $percent }%[/color].
 machine-upgrade-not-upgraded-extra = Параметр [color=yellow]{ CAPITALIZE( $upgraded ) }[/color] не изменился.
+machine-upgrade-value = Параметр [color=yellow]{ CAPITALIZE($upgraded) }[/color]: { $value }.
 
 machine-upgrade-charging-efficiency = эффективность зарядки
-machine-upgrade-quantum-cooldown = время охлаждения квантового сервера
+machine-upgrade-quantum-cooldown = скорость восстановления квантового сервера
 machine-upgrade-quantum-reward-bonus = бонус наград квантового сервера
-machine-upgrade-quantum-exit-injury = травмы от небезопасного выхода
+machine-upgrade-quantum-exit-injury = защита при аварийном выходе
 machine-upgrade-charging-speed = скорость восстановления заряда
+machine-upgrade-battery-recharge-speed = скорость зарядки внутренней батареи
 machine-upgrade-power-input = входная мощность
 machine-upgrade-power-output = выходная мощность
 machine-upgrade-process-speed = скорость обработки
@@ -26,8 +28,6 @@ machine-upgrade-stasis-bed-power = потребление энергии ста�
 machine-upgrade-thermomachine-heat-capacity = теплоёмкость
 machine-upgrade-thermomachine-temp-range = температурный диапазон
 machine-upgrade-smartfridge-capacity = вместимость холодильника
-machine-upgrade-cryo-transfer = перенос реагентов
-machine-upgrade-cryo-cooling = эффективность охлаждения
 machine-upgrade-spaceheater-power = тепловая мощность
 machine-upgrade-spaceheater-temp-range = температурный диапазон
 machine-upgrade-hydro-water = вместимость воды

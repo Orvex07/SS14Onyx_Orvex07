@@ -6,28 +6,23 @@
 
 namespace Content.Shared._Onyx.Construction;
 
-using Robust.Shared.Utility;
-
 public sealed class MachinePartsChangedEvent : EntityEventArgs
 {
-    public readonly IReadOnlyDictionary<MachinePartKind, float> Ratings;
-    public readonly IReadOnlyDictionary<MachinePartKind, float> RatingSums;
+    public readonly IReadOnlyDictionary<MachinePartKind, MachinePartRating> Ratings;
 
-    public MachinePartsChangedEvent(IReadOnlyDictionary<MachinePartKind, float> ratings,
-        IReadOnlyDictionary<MachinePartKind, float> ratingSums)
+    public MachinePartsChangedEvent(IReadOnlyDictionary<MachinePartKind, MachinePartRating> ratings)
     {
         Ratings = ratings;
-        RatingSums = ratingSums;
     }
 
     public float GetRating(MachinePartKind kind)
     {
-        return Ratings.GetValueOrDefault(kind, 1f);
+        return Ratings.TryGetValue(kind, out var rating) ? rating.Average : 1f;
     }
 
     public float GetRatingSum(MachinePartKind kind)
     {
-        return RatingSums.GetValueOrDefault(kind);
+        return Ratings.TryGetValue(kind, out var rating) ? rating.Sum : 0f;
     }
 
     public float GetTierBonusSum(MachinePartKind kind)
@@ -38,32 +33,25 @@ public sealed class MachinePartsChangedEvent : EntityEventArgs
     }
 }
 
+public readonly record struct MachinePartRating(float Average, float Sum);
+
 public sealed class MachineUpgradeExamineEvent : EntityEventArgs
 {
-    private readonly FormattedMessage _message;
+    public readonly List<MachinePartExamineEntry> Parts = [];
+    public readonly List<MachineUpgradeExamineEntry> Upgrades = [];
 
-    public MachineUpgradeExamineEvent(FormattedMessage message)
+    public void Add(LocId name, float multiplier)
     {
-        _message = message;
+        Upgrades.Add(new MachineUpgradeExamineEntry(name, multiplier, true));
     }
 
-    public void Add(string name, float multiplier)
+    public void AddValue(LocId name, float value)
     {
-        var percent = Math.Round(MathF.Abs(multiplier - 1f) * 100f, 2);
-        var message = multiplier switch
-        {
-            < 1f => "machine-upgrade-decreased-by-percentage",
-            > 1f => "machine-upgrade-increased-by-percentage",
-            _ => "machine-upgrade-not-upgraded",
-        };
-
-        _message.TryAddMarkup(Loc.GetString(message,
-            ("upgraded", Loc.GetString(name)),
-            ("percent", percent)) + '\n', out _);
+        Upgrades.Add(new MachineUpgradeExamineEntry(name, value, false));
     }
 
-    public void AddLine(string markup)
+    public void AddPart(MachinePartKind kind, int tier, int amount)
     {
-        _message.TryAddMarkup(markup + '\n', out _);
+        Parts.Add(new MachinePartExamineEntry(kind, tier, amount));
     }
 }

@@ -12,6 +12,8 @@ namespace Content.Shared._Onyx.Lathe;
 
 public sealed partial class TieredLathePartSystem : EntitySystem
 {
+    private const int DefaultBaseStorageLimit = 20000;
+
     public override void Initialize()
     {
         base.Initialize();
@@ -21,22 +23,26 @@ public sealed partial class TieredLathePartSystem : EntitySystem
 
     private void OnPartsChanged(Entity<LatheComponent> ent, ref MachinePartsChangedEvent args)
     {
-        if (args.Ratings.Count == 0)
-            return;
+        if (!TryComp<TieredLathePartComponent>(ent, out var baseline))
+        {
+            if (args.Ratings.Count == 0)
+                return;
 
-        var baseline = EnsureComp<TieredLathePartComponent>(ent);
+            baseline = AddComp<TieredLathePartComponent>(ent);
+        }
+
         if (baseline.BaseTimeMultiplier == 0f)
         {
             baseline.BaseTimeMultiplier = ent.Comp.TimeMultiplier;
             baseline.BaseMaterialUseMultiplier = ent.Comp.MaterialUseMultiplier;
         }
 
-        var efficiency = Math.Clamp(1f - args.GetTierBonusSum(MachinePartKind.Servo) * 0.1f, 0.1f, 1f);
-        ent.Comp.TimeMultiplier = baseline.BaseTimeMultiplier * MathF.Pow(efficiency, 0.8f);
-        ent.Comp.MaterialUseMultiplier = baseline.BaseMaterialUseMultiplier * efficiency;
+        var speed = Math.Clamp(1f - args.GetTierBonusSum(MachinePartKind.Servo) * 0.1f, 0.1f, 1f);
+        ent.Comp.TimeMultiplier = baseline.BaseTimeMultiplier * MathF.Pow(speed, 0.8f);
+        ent.Comp.MaterialUseMultiplier = baseline.BaseMaterialUseMultiplier;
         if (TryComp<MaterialStorageComponent>(ent, out var storage))
         {
-            baseline.BaseStorageLimit ??= storage.StorageLimit;
+            baseline.BaseStorageLimit ??= storage.StorageLimit ?? DefaultBaseStorageLimit;
             if (baseline.BaseStorageLimit is { } baseLimit)
             {
                 storage.StorageLimit = Math.Max(baseLimit,
@@ -53,6 +59,11 @@ public sealed partial class TieredLathePartSystem : EntitySystem
             return;
 
         args.Add("lathe-component-upgrade-speed", baseline.BaseTimeMultiplier / ent.Comp.TimeMultiplier);
-        args.Add("lathe-component-upgrade-material-use", ent.Comp.MaterialUseMultiplier / baseline.BaseMaterialUseMultiplier);
+        if (baseline.BaseStorageLimit is { } baseLimit &&
+            TryComp<MaterialStorageComponent>(ent, out var storage) &&
+            storage.StorageLimit is { } storageLimit)
+        {
+            args.Add("machine-upgrade-capacity", (float) storageLimit / baseLimit);
+        }
     }
 }

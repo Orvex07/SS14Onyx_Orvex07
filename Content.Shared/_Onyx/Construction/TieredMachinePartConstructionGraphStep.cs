@@ -31,7 +31,7 @@ public sealed partial class TieredMachinePartConstructionGraphStep : EntityInser
     {
         examinedEvent.PushMarkup(Loc.GetString("construction-insert-material-entity",
             ("amount", Amount),
-            ("materialName", Loc.GetString($"tiered-machine-part-kind-{MachinePart.ToString().ToLowerInvariant()}"))));
+            ("materialName", Loc.GetString(TieredMachinePartRequirements.GetName(MachinePart)))));
     }
 
     public override ConstructionGuideEntry GenerateGuideEntry()
@@ -39,7 +39,7 @@ public sealed partial class TieredMachinePartConstructionGraphStep : EntityInser
         return new ConstructionGuideEntry
         {
             Localization = "construction-presenter-material-step",
-            Arguments = [("amount", Amount), ("material", Loc.GetString($"tiered-machine-part-kind-{MachinePart.ToString().ToLowerInvariant()}"))],
+            Arguments = [("amount", Amount), ("material", Loc.GetString(TieredMachinePartRequirements.GetName(MachinePart)))],
         };
     }
 }

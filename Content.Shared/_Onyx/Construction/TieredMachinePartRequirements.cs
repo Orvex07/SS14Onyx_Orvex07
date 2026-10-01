@@ -28,4 +28,22 @@ public static class TieredMachinePartRequirements
     {
         return board.PartRequirements.Count > 0 || board.StackRequirements.ContainsKey(LegacyManipulator);
     }
+
+    public static EntProtoId GetDefaultPrototype(MachinePartKind kind)
+    {
+        return kind switch
+        {
+            MachinePartKind.Servo => "StandardServoDrive",
+            MachinePartKind.Capacitor => "StandardCapacitorModule",
+            MachinePartKind.MatterBin => "StandardMatterRecycler",
+            MachinePartKind.Scanner => "StandardScannerModule",
+            MachinePartKind.Laser => "StandardLaserModule",
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
+        };
+    }
+
+    public static string GetName(MachinePartKind kind)
+    {
+        return $"tiered-machine-part-kind-{kind.ToString().ToLowerInvariant()}";
+    }
 }

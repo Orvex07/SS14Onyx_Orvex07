@@ -8,14 +8,16 @@ using Content.Shared.Atmos.Piping.Unary.Components;
 using Content.Shared.Atmos;
 using Content.Shared.Botany.Components;
 using Content.Shared.Kitchen.Components;
-using Content.Shared.Medical.Cryogenics;
 using Content.Shared.Power.Components;
+using Content.Shared.Power.EntitySystems;
 using Content.Shared.SmartFridge;
 
 namespace Content.Shared._Onyx.Construction;
 
 public sealed partial class MachinePartEffectsSystem : EntitySystem
 {
+    [Dependency] private ChargerSystem _charger = default!;
+
     public override void Initialize()
     {
         base.Initialize();
@@ -25,15 +27,14 @@ public sealed partial class MachinePartEffectsSystem : EntitySystem
         SubscribeLocalEvent<PlantTrayComponent, MachinePartsChangedEvent>(OnPlantTrayPartsChanged);
         SubscribeLocalEvent<SeedExtractorComponent, MachinePartsChangedEvent>(OnSeedExtractorPartsChanged);
         SubscribeLocalEvent<ReagentGrinderComponent, MachinePartsChangedEvent>(OnGrinderPartsChanged);
-        SubscribeLocalEvent<CryoPodComponent, MachinePartsChangedEvent>(OnCryoPartsChanged);
         SubscribeLocalEvent<SmartFridgeComponent, MachinePartsChangedEvent>(OnSmartFridgePartsChanged);
         SubscribeLocalEvent<ChargerComponent, MachineUpgradeExamineEvent>(OnChargerExamine);
         SubscribeLocalEvent<GasThermoMachineComponent, MachineUpgradeExamineEvent>(OnThermoExamine);
         SubscribeLocalEvent<PlantTrayComponent, MachineUpgradeExamineEvent>(OnPlantTrayExamine);
         SubscribeLocalEvent<SeedExtractorComponent, MachineUpgradeExamineEvent>(OnSeedExtractorExamine);
         SubscribeLocalEvent<ReagentGrinderComponent, MachineUpgradeExamineEvent>(OnGrinderExamine);
-        SubscribeLocalEvent<CryoPodComponent, MachineUpgradeExamineEvent>(OnCryoExamine);
         SubscribeLocalEvent<SmartFridgeComponent, MachineUpgradeExamineEvent>(OnSmartFridgeExamine);
+        SubscribeLocalEvent<ApcPowerReceiverBatteryComponent, MachineUpgradeExamineEvent>(OnInternalBatteryExamine);
     }
 
     private void OnChargerPartsChanged(Entity<ChargerComponent> ent, ref MachinePartsChangedEvent args)
@@ -41,6 +42,7 @@ public sealed partial class MachinePartEffectsSystem : EntitySystem
         var baseline = EnsureComp<MachinePartBaselineComponent>(ent);
         ent.Comp.ChargeRate = GetBaseline(baseline, "charger-rate", ent.Comp.ChargeRate) * Positive(args.GetRating(MachinePartKind.Capacitor));
         Dirty(ent);
+        _charger.RefreshTieredPartEffects(ent);
     }
 
     private void OnInternalBatteryPartsChanged(Entity<ApcPowerReceiverBatteryComponent> ent, ref MachinePartsChangedEvent args)
@@ -59,6 +61,7 @@ public sealed partial class MachinePartEffectsSystem : EntitySystem
         ent.Comp.MinTemperature = Math.Max(Atmospherics.TCMB, GetBaseline(baseline, "thermo-min", ent.Comp.MinTemperature) - rangeBonus);
         ent.Comp.MaxTemperature = GetBaseline(baseline, "thermo-max", ent.Comp.MaxTemperature) + rangeBonus;
         ent.Comp.TargetTemperature = Math.Clamp(ent.Comp.TargetTemperature, ent.Comp.MinTemperature, ent.Comp.MaxTemperature);
+        Dirty(ent);
     }
 
     private void OnPlantTrayPartsChanged(Entity<PlantTrayComponent> ent, ref MachinePartsChangedEvent args)
@@ -84,13 +87,6 @@ public sealed partial class MachinePartEffectsSystem : EntitySystem
     private void OnSeedExtractorPartsChanged(Entity<SeedExtractorComponent> ent, ref MachinePartsChangedEvent args)
     {
         ent.Comp.SeedMultiplier = Math.Max(1f, args.GetRating(MachinePartKind.Servo));
-    }
-
-    private void OnCryoPartsChanged(Entity<CryoPodComponent> ent, ref MachinePartsChangedEvent args)
-    {
-        var baseline = EnsureComp<MachinePartBaselineComponent>(ent);
-        ent.Comp.BeakerTransferAmount = GetBaseline(baseline, "cryo-amount", ent.Comp.BeakerTransferAmount.Float()) * Positive(args.GetRating(MachinePartKind.MatterBin));
-        ent.Comp.CoolingEfficiency = Positive(args.GetRating(MachinePartKind.Laser));
     }
 
     private void OnSmartFridgePartsChanged(Entity<SmartFridgeComponent> ent, ref MachinePartsChangedEvent args)
@@ -136,17 +132,16 @@ public sealed partial class MachinePartEffectsSystem : EntitySystem
         args.Add("machine-upgrade-capacity", ent.Comp.StorageMaxEntities / baseline.Values["grinder-capacity"]);
     }
 
-    private void OnCryoExamine(Entity<CryoPodComponent> ent, ref MachineUpgradeExamineEvent args)
-    {
-        if (!TryComp<MachinePartBaselineComponent>(ent, out var baseline))
-            return;
-        args.Add("machine-upgrade-cryo-transfer", ent.Comp.BeakerTransferAmount.Float() / baseline.Values["cryo-amount"]);
-        args.Add("machine-upgrade-cryo-cooling", ent.Comp.CoolingEfficiency);
-    }
-
     private static void OnSmartFridgeExamine(Entity<SmartFridgeComponent> ent, ref MachineUpgradeExamineEvent args)
     {
         args.Add("machine-upgrade-smartfridge-capacity", (float) ent.Comp.Capacity / ent.Comp.BaseCapacity);
+    }
+
+    private void OnInternalBatteryExamine(Entity<ApcPowerReceiverBatteryComponent> ent, ref MachineUpgradeExamineEvent args)
+    {
+        if (TryComp<MachinePartBaselineComponent>(ent, out var baseline))
+            args.Add("machine-upgrade-battery-recharge-speed",
+                ent.Comp.BatteryRechargeRate / baseline.Values["battery-recharge"]);
     }
 
     private static float Positive(float tier)
