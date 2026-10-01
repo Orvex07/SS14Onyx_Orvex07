@@ -1262,7 +1262,6 @@ DrinkWaterJug: JugWater
 #2026-09-05
 AsimovCircuitBoard: CrewsimovCircuitBoard
 
-
 # 2026-09-07 Onyx
 PosterLegitGoobNTRAdvert: null
 
@@ -1274,3 +1273,13 @@ OperatingTableFilled: OperatingTable
 
 # 2026-09-12 Onyx
 MicroManipulatorStockPart: StandardServoDrive
+
+# 2026-09-24
+ClothingShoesTourist: ClothingShoesSandalsBlack
+ClothingShoesWizard: ClothingShoesSandalsBrown
+
+# 2026-09-29
+WallMalign: WallSolid
+WallMalignIndestructible: WallSolid
+WallMalignIndestructibleNoOcclusion: WallSolid
+MalignWindow: Window

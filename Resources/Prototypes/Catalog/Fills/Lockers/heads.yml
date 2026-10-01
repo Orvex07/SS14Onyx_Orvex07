@@ -58,6 +58,17 @@
     - id: SpaceCash1000
     - id: WeaponDisabler
     # </Onyx-LockerInventories-edited>
+    - id: ClothingEyesGlassesCommand
+    - id: OrganSkeletonPersonHead # A skull to accompany your skeleton crew
+      conditions:
+      - !type:PlayerCountCondition
+        max: 15
+    - id: PlushieLizardJobCaptain
+      prob: 0.02
+    # Corvax-Start
+    - id: PrinterDocFlatpack
+    - id: ClothingOuterCoatCaptain
+    # Corvax-End
 
 # No laser table + Laser table
 - type: entityTable
@@ -386,6 +397,10 @@
     - id: WantedListCartridge
     - id: DrinkHosFlask
     - id: ClothingBeltSheathHeadOfSecurityFilled
+    - id: PlushieLizardJobHeadofsecurity
+      prob: 0.02
+    # Corvax-Start
+    - id: BookBusido
     - id: SecApartmentTablet
     # </Onyx-LockerInventories-edited>
 

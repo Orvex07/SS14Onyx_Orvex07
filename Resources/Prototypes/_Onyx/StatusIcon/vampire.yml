@@ -1,5 +1,5 @@
 # Content taken from Wega (https://github.com/wega-team/ss14-wega), licensed under GNU GPL v3.
-- type: factionIcon
+- type: statusIcon
   id: VampireFaction
   isShaded: true
   priority: 11
@@ -12,7 +12,7 @@
     sprite: /Textures/_Onyx/Interface/Misc/vampire_icons.rsi
     state: Vampire
 
-- type: factionIcon
+- type: statusIcon
   id: ThrallFaction
   isShaded: true
   priority: 11

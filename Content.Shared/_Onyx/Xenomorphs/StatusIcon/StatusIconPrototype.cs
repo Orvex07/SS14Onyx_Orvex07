@@ -5,8 +5,11 @@ using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototy
 namespace Content.Shared._Onyx.Xenomorphs.StatusIcon;
 
 [Prototype]
-public sealed partial class InfectionIconPrototype : StatusIconPrototype, IInheritingPrototype
+public sealed partial class InfectionIconPrototype : StatusIconData, IPrototype, IInheritingPrototype
 {
+    [IdDataField]
+    public string ID { get; private set; } = default!;
+
     [DataField]
     public bool VisibleToOwner = true;
 

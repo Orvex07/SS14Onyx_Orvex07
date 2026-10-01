@@ -7,6 +7,7 @@ using Robust.Shared.Enums;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using System.Numerics;
+using Robust.Client.Utility;
 
 namespace Content.Client.StatusIcon;
 
@@ -86,11 +87,16 @@ public sealed partial class StatusIconOverlay : Overlay
 
                 // the icons are ordered left to right, top to bottom.
                 // extra icons that don't fit are just cut off.
-                if (proto.LocationPreference == StatusIconLocationPreference.Left ||
-                    proto.LocationPreference == StatusIconLocationPreference.None && countL <= countR)
+                if (proto.LocationPreference == StatusIconLocationPreference.Fixed)
+                {
+                    yOffset = sprite.Offset.Y + bounds.Height / 2f - (float)proto.Offset / EyeManager.PixelsPerMeter;
+                    xOffset = sprite.Offset.X - bounds.Width / 2f + (float)proto.OffsetHorizontal / EyeManager.PixelsPerMeter;
+                }
+                else if (proto.LocationPreference == StatusIconLocationPreference.Left ||
+                         proto.LocationPreference == StatusIconLocationPreference.None && countL <= countR)
                 {
                     if (accOffsetL + texture.Height > bounds.Height * EyeManager.PixelsPerMeter) // <Onyx-MarkingBounds-edited>
-                        break;
+                        continue;
                     if (proto.Layer == StatusIconLayer.Base)
                     {
                         accOffsetL += texture.Height;
@@ -103,7 +109,7 @@ public sealed partial class StatusIconOverlay : Overlay
                 else
                 {
                     if (accOffsetR + texture.Height > bounds.Height * EyeManager.PixelsPerMeter) // <Onyx-MarkingBounds-edited>
-                        break;
+                        continue;
                     if (proto.Layer == StatusIconLayer.Base)
                     {
                         accOffsetR += texture.Height;
@@ -111,7 +117,6 @@ public sealed partial class StatusIconOverlay : Overlay
                     }
                     yOffset = sprite.Offset.Y + bounds.Height / 2f - (float)(accOffsetR - proto.Offset) / EyeManager.PixelsPerMeter;
                     xOffset = sprite.Offset.X + bounds.Width / 2f - (float)(texture.Width - proto.OffsetHorizontal) / EyeManager.PixelsPerMeter;
-
                 }
 
                 if (proto.IsShaded)

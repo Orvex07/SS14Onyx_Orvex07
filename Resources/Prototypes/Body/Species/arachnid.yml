@@ -90,7 +90,7 @@
   components:
   - type: DnaModifier # <Onyx-WegaGenetics>
     upper: MobArachnid
-    lowest: MobGiantSpider
+    lowest: MobGiantSpiderTarantula
   - type: Respirator
     damage:
       types:

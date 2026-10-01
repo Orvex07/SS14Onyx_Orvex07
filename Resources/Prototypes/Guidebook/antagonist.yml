@@ -3,18 +3,19 @@
   name: guide-entry-antagonists
   text: "/ServerInfo/Guidebook/Antagonist/Antagonists.xml"
   children:
-  - Traitors
-  - Thieves
-  - Revolutionaries
-  - NuclearOperatives
-  - SpaceNinja
-  - Wizard
-  - Zombies
-  - Xenoborgs
   - Changelings
   - Vampires # <Wega-Vampire>
   - CosmicCult # <Onyx-CosmicCult>
-  - Blob # <Onyx-Blob>  - MinorAntagonists
+  - Blob # <Onyx-Blob>
+  - NuclearOperatives
+  - Revolutionaries
+  - SpaceNinja
+  - Thieves
+  - Traitors
+  - Wizard
+  - Xenoborgs
+  - Zombies
+  - MinorAntagonists
 
 - type: guideEntry
   id: Traitors

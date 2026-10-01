@@ -81,8 +81,9 @@ public sealed partial class ChatSystem
         var fontEv = new TransformSpeakerFontEvent(source);
         RaiseLocalEvent(source, fontEv);
         // </Onyx-SpeakFontOverride>
-
-        name = FormattedMessage.EscapeText(name);
+        var messageName = ChatNameLinks
+            ? $"[textlink=\"{FormattedMessage.EscapeStringParameter(name)}\" entity=\"{GetNetEntity(source)}\" entitynamecolor=\"true\"]"
+            : FormattedMessage.EscapeText(name); // <Onyx-Languages-edited>
 
         var content = FormattedMessage.EscapeText(restoredMessage);
         var inlineFormattedMessage = InlineActionFormatter.Format(content); // <Onyx-InlineActions>
@@ -95,7 +96,7 @@ public sealed partial class ChatSystem
         // <Onyx-Languages-edited>
         var wrappedMessage = WrapLanguageMessage(
             speech.Bold ? "chat-manager-entity-say-language-bold-wrap-message" : "chat-manager-entity-say-language-wrap-message",
-            name,
+            messageName,
             speechVerb,
             inlineFormattedMessage,
             speech,
@@ -131,7 +132,7 @@ public sealed partial class ChatSystem
             var perceivedContent = InlineActionFormatter.Format(FormattedMessage.EscapeText(perceived));
             var perceivedWrap = WrapLanguageMessage(
                 speech.Bold ? "chat-manager-entity-say-language-bold-wrap-message" : "chat-manager-entity-say-language-wrap-message",
-                name,
+                messageName,
                 speechVerb,
                 perceivedContent,
                 speech,
@@ -222,11 +223,13 @@ public sealed partial class ChatSystem
             RaiseLocalEvent(source, nameEv);
             name = nameEv.VoiceName;
         }
-        name = FormattedMessage.EscapeText(name);
+        var messageName = ChatNameLinks
+            ? $"[textlink=\"{FormattedMessage.EscapeStringParameter(name)}\" entity=\"{GetNetEntity(source)}\" entitynamecolor=\"true\"]"
+            : FormattedMessage.EscapeText(name); // <Onyx-Languages-edited>
 
         var content = FormattedMessage.EscapeText(restoredMessage);
         var inlineFormattedMessage = InlineActionFormatter.Format(content); // <Onyx-InlineActions>
-        var wrappedMessage = WrapLanguageWhisper(name, inlineFormattedMessage, language);
+        var wrappedMessage = WrapLanguageWhisper(messageName, inlineFormattedMessage, language);
 
         foreach (var (session, data) in GetRecipients(source, WhisperMuffledRange))
         {
@@ -250,7 +253,7 @@ public sealed partial class ChatSystem
             // <Onyx-Languages-edited>
             var understoodMessage = _language.CanUnderstand(listener, language.ID) ? restoredMessage : languageObfuscatedMessage;
             var understoodWrap = WrapLanguageWhisper(
-                name,
+                messageName,
                 InlineActionFormatter.Format(FormattedMessage.EscapeText(understoodMessage)),
                 language);
 

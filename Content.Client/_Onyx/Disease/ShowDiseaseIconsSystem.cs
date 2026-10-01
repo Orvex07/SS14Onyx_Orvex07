@@ -2,6 +2,7 @@ using Content.Client.Overlays;
 using Content.Shared._Onyx.Disease;
 using Content.Shared._Onyx.Disease.Components;
 using Content.Shared.Inventory.Events;
+using Content.Shared.StatusIcon;
 using Content.Shared.StatusIcon.Components;
 using Robust.Shared.Prototypes;
 
@@ -61,7 +62,7 @@ public sealed partial class ShowDiseaseIconsSystem : EquipmentHudSystem<ShowDise
                 total += component.InfectionProgress * component.Complexity;
         }
 
-        DiseaseIconPrototype? icon = null;
+        StatusIconPrototype? icon = null;
         if (total > (_highThreshold ?? float.MaxValue))
             _prototype.TryIndex(ent.Comp.HighIcon, out icon);
         else if (total > (_mediumThreshold ?? float.MaxValue))

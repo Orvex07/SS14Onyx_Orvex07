@@ -10,7 +10,7 @@
     subtype: role-subtype-blob
   - type: BlobRole
 
-- type: factionIcon
+- type: statusIcon
   id: BlobFaction
   isShaded: false
   priority: 10

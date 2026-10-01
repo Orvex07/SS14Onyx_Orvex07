@@ -1,5 +1,4 @@
 using Content.Server.Administration.Managers;
-using Content.Server.Chat;
 using Content.Server.Chat.Managers;
 using Content.Server.Chat.Systems;
 using Content.Server.EUI;
@@ -91,7 +90,7 @@ namespace Content.Server.Administration.UI
                     switch (doAnnounce.AnnounceType)
                     {
                         case AdminAnnounceType.Server:
-                            _chatManager.DispatchServerAnnouncement(doAnnounce.Announcement, color); // <Onyx-AdminAnnouncements-edited>
+                            _chatManager.DispatchServerAnnouncement(doAnnounce.Announcement, color, sender: Player); // <Onyx-AdminAnnouncements-edited>
                             break;
                         // <Onyx-AdminAnnouncements-edited>
                         case AdminAnnounceType.AllStations:

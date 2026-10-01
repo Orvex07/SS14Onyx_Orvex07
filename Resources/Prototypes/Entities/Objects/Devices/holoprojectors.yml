@@ -120,7 +120,7 @@
 # </Onyx-HolofanProjector-edited>
 
 - type: entity
-  parent: HolofanProjectorBorg
+  parent: [ BaseXenoborgContraband, HolofanProjectorBorg ]
   id: HoloprojectorXenoField
   name: Xenoborg deflector field projector
   description: An alien device, projecting fields that deflect projectiles.

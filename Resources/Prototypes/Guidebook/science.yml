@@ -3,12 +3,12 @@
   name: guide-entry-science
   text: "/ServerInfo/Guidebook/Science/Science.xml"
   children:
-  - Technologies
   - AnomalousResearch
   - Xenoarchaeology
   # <Onyx-Xenobiology>
   - XenobiologyGuide
   # </Onyx-Xenobiology>
+  - Technologies
   - Robotics
 
 - type: guideEntry

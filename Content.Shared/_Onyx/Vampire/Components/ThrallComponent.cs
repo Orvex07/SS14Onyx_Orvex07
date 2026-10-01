@@ -17,5 +17,5 @@ public sealed partial class ThrallComponent : Component
     public EntityUid? VampireOwner = default!;
 
     [DataField]
-    public ProtoId<FactionIconPrototype> StatusIcon = "ThrallFaction";
+    public ProtoId<StatusIconPrototype> StatusIcon = "ThrallFaction";
 }

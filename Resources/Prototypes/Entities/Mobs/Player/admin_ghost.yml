@@ -136,6 +136,7 @@
     damageCoefficient: 0
   - type: GluedImmune
   - type: LubedImmune
+  - type: ShowNewPlayerIcon
   # Corvax-Start
   - type: MovementSpeedModifier
     baseWalkSpeed: 30

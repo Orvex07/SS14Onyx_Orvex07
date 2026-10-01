@@ -128,6 +128,8 @@
     - id: PosterLegitGoobMakeshift
     - id: PosterLegitGoobSuperMatter
     # </Onyx-BagelPosters>
+    - id: PosterLegitRaptor
+    - id: PosterLegitVulture
 
 - type: entity
   parent: MarkerBase
