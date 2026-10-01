@@ -78,7 +78,7 @@
   id: LossOfSurprise
   category: Ninjutsu
   icons:
-  - sprite: /Textures/Structures/Storage/closet.rsi
-    state: cardboard_special
+  - sprite: /Textures/Effects/exclamation.rsi
+    state: exclamation_mark
   name: alerts-loss-of-surprise-name
   description: alerts-loss-of-surprise-desc

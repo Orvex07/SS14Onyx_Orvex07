@@ -35,8 +35,8 @@
   categories: [HideSpawnMenu]
   components:
   - type: Sprite
-    sprite: Structures/Storage/closet.rsi
-    state: cardboard_special
+    sprite: Effects/exclamation.rsi
+    state: exclamation_mark
 
 - type: entity
   id: GuidebookDragonPower
