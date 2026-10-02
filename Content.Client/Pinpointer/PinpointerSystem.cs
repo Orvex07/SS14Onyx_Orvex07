@@ -23,6 +23,7 @@ public sealed partial class PinpointerSystem : SharedPinpointerSystem
         {
             if (!pinpointer.HasTarget)
                 continue;
+            if (!_sprite.LayerExists((uid, sprite), PinpointerLayers.Screen)) continue; // <Onyx-XenomorphPinpointer>
             var eye = _eyeManager.CurrentEye;
             var angle = pinpointer.ArrowAngle + eye.Rotation;
 

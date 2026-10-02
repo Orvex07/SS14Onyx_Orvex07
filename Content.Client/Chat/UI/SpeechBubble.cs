@@ -304,7 +304,7 @@ namespace Content.Client.Chat.UI
             };
 
             //We'll be honest. *Yes* this is hacky. Doing this in a cleaner way would require a bottom-up refactor of how saycode handles sending chat messages. -Myr
-            bubbleHeader.SetMessage(ExtractAndFormatSpeechSubstring(message, "BubbleHeader", fontColor));
+            bubbleHeader.SetMessage(ExtractAndFormatSpeechSubstring(message, "BubbleHeader", fontColor), tagsAllowed: null);
             SetBarkRevealedMessage(bubbleContent, ExtractAndFormatSpeechSubstring(message, "BubbleContent", fontColor)); // <Onyx-SpeechBubbleBarks-edited>
 
             //As for below: Some day this could probably be converted to xaml. But that is not today. -Myr
