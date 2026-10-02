@@ -243,7 +243,7 @@ namespace Content.Client.Chat.UI
                 OutlineColorOverride = Color.Transparent, // Corvax-SpeechBubble убрал обводку текста
             };
 
-            label.SetMessage(FormatSpeech(message.WrappedMessage, fontColor));
+            label.SetMessage(FormatSpeech(message.WrappedMessage, fontColor), tagsAllowed: null);
 
             var panel = new PanelContainer
             {

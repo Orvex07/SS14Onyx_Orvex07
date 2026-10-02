@@ -19,7 +19,7 @@ public abstract partial class SpeechBubble
 
     protected void SetBarkRevealedMessage(RichTextLabel label, FormattedMessage message)
     {
-        label.SetMessage(message);
+        label.SetMessage(message, tagsAllowed: null);
 
         if (RevealWithBarks)
             _barkTextReveals.Add(new BarkTextReveal(label, message));
@@ -46,7 +46,7 @@ public abstract partial class SpeechBubble
                 continue;
 
             reveal.VisibleRunes = visibleRunes;
-            reveal.Label.SetMessage(CreateBarkRevealedMessage(reveal.Message, visibleRunes));
+            reveal.Label.SetMessage(CreateBarkRevealedMessage(reveal.Message, visibleRunes), tagsAllowed: null);
         }
 
         _deathTime = _timing.RealTime + TotalTime;
