@@ -991,7 +991,8 @@ namespace Content.Shared.Preferences
             Name = name;
             FlavorText = flavortext;
             EnsureDescriptionFieldsValid(configManager); // <Onyx-CharacterDescriptions>
-            EnsureBarkValid(prototypeManager, configManager); // <Onyx-ProfilePersistence>
+            EnsureBarkValid(prototypeManager, configManager); // <Onyx-Barks-edited>
+            EnsureSpeechTextRevealValid(configManager); // <Onyx-SpeechTextReveal>
             Age = age;
             // <Onyx-HeightWidth>
             Height = height;

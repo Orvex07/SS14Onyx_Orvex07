@@ -461,6 +461,7 @@ public sealed partial class ChatUIController : UIController
             SpeechBubble.CreateSpeechBubble(speechData.Type, speechData.Message, entity);
 
         bubble.OnDied += SpeechBubbleDied;
+        bubble.OnHeightChanged += SpeechBubbleHeightChanged; // <Onyx-SpeechTextReveal>
 
         if (_activeSpeechBubbles.TryGetValue(entity, out var existing))
         {

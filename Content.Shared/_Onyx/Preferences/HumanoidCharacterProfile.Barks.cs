@@ -4,8 +4,8 @@
 // This file is licensed under AGPL-3.0-or-later.
 // See LICENSES for the full license text.
 
-using Content.Shared.CCVar;
 using Content.Shared._Onyx.SpeechBarks;
+using Content.Shared.CCVar;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
 
@@ -15,11 +15,6 @@ public sealed partial class HumanoidCharacterProfile
 {
     private void EnsureBarkValid(IPrototypeManager prototypeManager, IConfigurationManager configManager)
     {
-        SpeechBubbleRevealSpeed = Math.Clamp(
-            SpeechBubbleRevealSpeed,
-            configManager.GetCVar(CCVars.SpeechBubbleRevealMinSpeed),
-            configManager.GetCVar(CCVars.SpeechBubbleRevealMaxSpeed));
-
         if (!prototypeManager.TryIndex(Bark.Proto, out BarkPrototype? barkProto) || !barkProto.RoundStart)
         {
             Bark = new BarkData();

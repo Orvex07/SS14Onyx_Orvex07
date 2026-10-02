@@ -263,12 +263,14 @@ public abstract partial class SharedRadioDeviceSystem : EntitySystem
             ("originalName", nameEv.VoiceName));
 
         // log to chat so people can identity the speaker/source, but avoid clogging ghost chat if there are many radios
-        _chat.TrySendInGameICMessage(ent.Owner,
+        // <Onyx-SpeechRelay-edited>
+        _chat.SendRelayedSpeech(ent.Owner, args.MessageSource,
             args.Message,
             InGameICChatType.Whisper,
             ChatTransmitRange.GhostRangeLimit,
-            nameOverride: name,
-            checkRadioPrefix: false);
+            name,
+            relayBarks: false);
+        // </Onyx-SpeechRelay-edited>
     }
 
     [SubscribeLocalEvent]

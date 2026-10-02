@@ -40,6 +40,7 @@ namespace Content.Shared.Chat
         // <Onyx-ChatCoalescing>
         public bool CanCoalesce;
         // </Onyx-ChatCoalescing>
+        public float? RevealSpeed; // <Onyx-SpeechTextReveal>
 
         [NonSerialized]
         public bool Read;
@@ -77,6 +78,7 @@ namespace Content.Shared.Chat
             // <Onyx-ChatCoalescing>
             CanCoalesce = copyFrom.CanCoalesce;
             // </Onyx-ChatCoalescing>
+            RevealSpeed = copyFrom.RevealSpeed; // <Onyx-SpeechTextReveal>
             Read = copyFrom.Read;
         }
     }

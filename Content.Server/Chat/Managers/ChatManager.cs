@@ -366,6 +366,7 @@ private ISawmill? _sawmill = default!;
         user?.AddEntity(netSource);
 
         var msg = new ChatMessage(channel, message, wrappedMessage, netSource, user?.Key, hideChat, colorOverride, audioPath, audioVolume);
+        ApplySpeechTextReveal(msg, channel, source); // <Onyx-SpeechTextReveal>
         _netManager.ServerSendMessage(new MsgChatMessage() { Message = msg }, client);
 
         if (!recordReplay)
@@ -388,6 +389,7 @@ private ISawmill? _sawmill = default!;
         user?.AddEntity(netSource);
 
         var msg = new ChatMessage(channel, message, wrappedMessage, netSource, user?.Key, hideChat, colorOverride, audioPath, audioVolume);
+        ApplySpeechTextReveal(msg, channel, source); // <Onyx-SpeechTextReveal>
         _netManager.ServerSendToMany(new MsgChatMessage() { Message = msg }, clients);
 
         if (!recordReplay)
@@ -422,6 +424,7 @@ private ISawmill? _sawmill = default!;
         user?.AddEntity(netSource);
 
         var msg = new ChatMessage(channel, message, wrappedMessage, netSource, user?.Key, hideChat, colorOverride, audioPath, audioVolume);
+        ApplySpeechTextReveal(msg, channel, source); // <Onyx-SpeechTextReveal>
         _netManager.ServerSendToAll(new MsgChatMessage() { Message = msg });
 
         if (!recordReplay)

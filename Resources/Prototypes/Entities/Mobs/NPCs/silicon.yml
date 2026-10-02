@@ -5,6 +5,10 @@
   parent: [BaseMob, TTS_speaker] # Corvax-TTS
   id: MobRobotic
   components:
+  # <Onyx-SpeechTextReveal>
+  - type: SpeechTextReveal
+    speed: 25
+  # </Onyx-SpeechTextReveal>
   - type: Reactive
     groups:
       Acidic: [Touch]

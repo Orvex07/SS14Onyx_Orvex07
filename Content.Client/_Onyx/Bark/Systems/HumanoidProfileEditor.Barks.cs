@@ -13,7 +13,6 @@ public sealed partial class HumanoidProfileEditor
 {
     private List<BarkPrototype> _barkList = new();
     private FancyWindow? _barkWindow;
-    private bool _updatingSpeechRevealSpeed;
 
     private void InitializeBarks()
     {
@@ -21,7 +20,6 @@ public sealed partial class HumanoidProfileEditor
             return;
 
         BarksContainer.Visible = true;
-        SpeechRevealSpeedContainer.Visible = _cfgManager.GetCVar(CCVars.SpeechBubbleRevealEnabled);
         _barkList = _prototypeManager
             .EnumeratePrototypes<BarkPrototype>()
             .Where(o => o.RoundStart)
@@ -30,18 +28,6 @@ public sealed partial class HumanoidProfileEditor
 
         BarkProtoButton.OnPressed += _ => OpenBarkWindow();
         BarkPlayButton.OnPressed += _ => PlayPreviewBark();
-        SpeechRevealSpeedSlider.MinValue = _cfgManager.GetCVar(CCVars.SpeechBubbleRevealMinSpeed);
-        SpeechRevealSpeedSlider.MaxValue = _cfgManager.GetCVar(CCVars.SpeechBubbleRevealMaxSpeed);
-        SpeechRevealSpeedSlider.OnValueChanged += _ =>
-        {
-            if (!_updatingSpeechRevealSpeed)
-                SetSpeechBubbleRevealSpeed(SpeechRevealSpeedSlider.Value);
-        };
-        SpeechRevealSpeedEdit.OnTextChanged += args =>
-        {
-            if (!_updatingSpeechRevealSpeed && float.TryParse(args.Text, out var speed))
-                SetSpeechBubbleRevealSpeed(speed, updateEdit: false);
-        };
     }
 
     private void OpenBarkWindow()
@@ -111,10 +97,6 @@ public sealed partial class HumanoidProfileEditor
             return;
 
         UpdateBarkButtonText();
-        _updatingSpeechRevealSpeed = true;
-        SpeechRevealSpeedSlider.Value = Profile.SpeechBubbleRevealSpeed;
-        SpeechRevealSpeedEdit.Text = MathF.Round(Profile.SpeechBubbleRevealSpeed).ToString();
-        _updatingSpeechRevealSpeed = false;
         // Обновляем окно барков если оно открыто
         if (_barkWindow != null && _barkWindow.ContentsContainer.ChildCount > 0)
         {
@@ -157,27 +139,6 @@ public sealed partial class HumanoidProfileEditor
             Profile.Bark.MinVar,
             Profile.Bark.MaxVar
         );
-    }
-
-    private void SetSpeechBubbleRevealSpeed(float speed, bool updateEdit = true)
-    {
-        if (Profile is null)
-            return;
-
-        speed = MathF.Round(Math.Clamp(
-            speed,
-            _cfgManager.GetCVar(CCVars.SpeechBubbleRevealMinSpeed),
-            _cfgManager.GetCVar(CCVars.SpeechBubbleRevealMaxSpeed)));
-        if (Profile.SpeechBubbleRevealSpeed == speed)
-            return;
-
-        Profile = Profile.WithSpeechBubbleRevealSpeed(speed);
-        _updatingSpeechRevealSpeed = true;
-        SpeechRevealSpeedSlider.Value = speed;
-        if (updateEdit)
-            SpeechRevealSpeedEdit.Text = speed.ToString();
-        _updatingSpeechRevealSpeed = false;
-        SetDirty();
     }
 
     private void SetBarkProto(string prototype)

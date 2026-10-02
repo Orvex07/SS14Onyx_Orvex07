@@ -37,6 +37,7 @@ public sealed partial class ChatOutputPanel : Control
     private int _totalContentHeight;
     private bool _firstLine = true;
     private StyleBox? _styleBoxOverride;
+    private uint _nextEntryId;
     private VScrollBar _scrollBar;
     private Button _scrollDownButton;
 
@@ -144,14 +145,15 @@ public sealed partial class ChatOutputPanel : Control
         AddMessage(msg);
     }
 
-    public void AddMessage(FormattedMessage message, Color? defaultColor = null)
+    public uint AddMessage(FormattedMessage message, Color? defaultColor = null)
     {
-        AddMessage(message, ChatRichTextEntry.DefaultTags, defaultColor);
+        return AddMessage(message, ChatRichTextEntry.DefaultTags, defaultColor);
     }
 
-    public void AddMessage(FormattedMessage message, Type[]? tagsAllowed, Color? defaultColor = null)
+    public uint AddMessage(FormattedMessage message, Type[]? tagsAllowed, Color? defaultColor = null)
     {
-        var entry = new ChatRichTextEntry(message, this, _tagManager, tagsAllowed, defaultColor);
+        var id = ++_nextEntryId;
+        var entry = new ChatRichTextEntry(message, this, _tagManager, tagsAllowed, defaultColor, id);
 
         entry.Update(_tagManager, _getFont(), _getContentBox().Width, UIScale);
 
@@ -164,6 +166,8 @@ public sealed partial class ChatOutputPanel : Control
         {
             _scrollBar.MoveToEnd();
         }
+
+        return id;
     }
 
     public void SetMessage(Index index, FormattedMessage message, Color? defaultColor = null)
@@ -175,11 +179,12 @@ public sealed partial class ChatOutputPanel : Control
     {
         var atBottom = !_scrollDownButton.Visible;
         var oldEntry = _entries[index];
+        oldEntry.RemoveControls();
         var font = _getFont();
         _totalContentHeight -= oldEntry.Height + font.GetLineSeparation(UIScale);
         _scrollBar.MaxValue = Math.Max(_scrollBar.Page, _totalContentHeight);
 
-        var entry = new ChatRichTextEntry(message, this, _tagManager, tagsAllowed, defaultColor);
+        var entry = new ChatRichTextEntry(message, this, _tagManager, tagsAllowed, defaultColor, oldEntry.Id);
         entry.Update(_tagManager, _getFont(), _getContentBox().Width, UIScale);
         _entries[index] = entry;
 
@@ -188,6 +193,20 @@ public sealed partial class ChatOutputPanel : Control
         _scrollBar.MaxValue = Math.Max(_scrollBar.Page, _totalContentHeight);
         if (atBottom)
             _scrollBar.Value = _scrollBar.MaxValue;
+    }
+
+    public bool SetMessage(uint id, FormattedMessage message, Type[]? tagsAllowed, Color? defaultColor = null)
+    {
+        for (var i = _entries.Count - 1; i >= 0; i--)
+        {
+            if (_entries[i].Id != id)
+                continue;
+
+            SetMessage(i, message, tagsAllowed, defaultColor);
+            return true;
+        }
+
+        return false;
     }
 
     private void AddNewItemHeight(Font font, in ChatRichTextEntry entry)

@@ -47,6 +47,7 @@ internal struct ChatRichTextEntry
     private readonly Type[]? _tagsAllowed;
 
     public readonly FormattedMessage Message;
+    public readonly uint Id;
 
     public int Height;
     public int Width;
@@ -60,7 +61,8 @@ internal struct ChatRichTextEntry
         FormattedMessage message,
         Control parent,
         MarkupTagManager tagManager,
-        Color? defaultColor = null) : this(message, parent, tagManager, DefaultTags, defaultColor)
+        Color? defaultColor = null,
+        uint id = 0) : this(message, parent, tagManager, DefaultTags, defaultColor, id)
     {
     }
 
@@ -69,9 +71,11 @@ internal struct ChatRichTextEntry
         Control parent,
         MarkupTagManager tagManager,
         Type[]? tagsAllowed,
-        Color? defaultColor = null)
+        Color? defaultColor = null,
+        uint id = 0)
     {
         Message = message;
+        Id = id;
         Height = 0;
         Width = 0;
         LineBreaks = default;

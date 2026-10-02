@@ -14,6 +14,10 @@
     data:
       proto: OneshotRobot
   # </Onyx-MechFeedback>
+  # <Onyx-SpeechTextReveal>
+  - type: SpeechTextReveal
+    speed: 25
+  # </Onyx-SpeechTextReveal>
   - type: DamageOnHighSpeedImpact
     damage:
       types:

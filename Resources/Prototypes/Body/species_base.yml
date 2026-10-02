@@ -205,6 +205,7 @@
   # </Onyx-InteractionVerbs>
   - type: Posing # <Onyx-Posing>
   - type: SpeechBarks # <Onyx-Barks>
+  - type: SpeechTextReveal # <Onyx-SpeechTextReveal>
   - type: ItemOffer # <Onyx-ItemOffer>
 
 - type: entity

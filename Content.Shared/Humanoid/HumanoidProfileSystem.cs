@@ -1,5 +1,6 @@
 using Content.Shared.Corvax.TTS;
 using Content.Shared._Onyx.SpeechBarks;
+using Content.Shared._Onyx.Speech; // <Onyx-SpeechTextReveal>
 using Content.Shared.Examine;
 using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.IdentityManagement;
@@ -51,13 +52,12 @@ public sealed partial class HumanoidProfileSystem : EntitySystem
             _TTSComponent.VoicePrototypeId = profile.TTSVoice;
         }
         // Corvax-TTS-end
-        // <Onyx-SpeechBubbleReveal-edited>
+        // <Onyx-Barks-edited>
         if (TryComp<SpeechBarksComponent>(ent, out var barks))
-        {
             barks.Data = profile.Bark.Copy();
-            barks.SpeechBubbleRevealSpeed = profile.SpeechBubbleRevealSpeed;
-        }
-        // </Onyx-SpeechBubbleReveal-edited>
+        // </Onyx-Barks-edited>
+        if (TryComp<SpeechTextRevealComponent>(ent, out var reveal)) // <Onyx-SpeechTextReveal>
+            reveal.Speed = profile.SpeechBubbleRevealSpeed; // <Onyx-SpeechTextReveal>
 
         Dirty(ent);
 

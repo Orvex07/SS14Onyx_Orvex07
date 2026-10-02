@@ -1,7 +1,6 @@
 using System.Numerics;
 using Content.Client.Chat.Managers;
 using Content.Client._Onyx.Humanoid; // <Onyx-MarkingBounds>
-using Content.Client._Onyx.SpeechBarks; // <Onyx-SpeechBubbleBarks>
 using Content.Shared.CCVar;
 using Content.Shared.Chat;
 using Content.Shared.Speech;
@@ -79,10 +78,10 @@ namespace Content.Client.Chat.UI
                     return new TextSpeechBubble(message, senderEntity, "emoteBox");
 
                 case SpeechType.Say:
-                    return new FancyTextSpeechBubble(message, senderEntity, "sayBox", revealWithBarks: true); // <Onyx-SpeechBubbleBarks-edited>
+                    return new FancyTextSpeechBubble(message, senderEntity, "sayBox", revealText: true); // <Onyx-SpeechTextReveal-edited>
 
                 case SpeechType.Whisper:
-                    return new FancyTextSpeechBubble(message, senderEntity, "whisperBox", revealWithBarks: true); // <Onyx-SpeechBubbleBarks-edited>
+                    return new FancyTextSpeechBubble(message, senderEntity, "whisperBox", revealText: true); // <Onyx-SpeechTextReveal-edited>
 
                 case SpeechType.Looc:
                     return new TextSpeechBubble(message, senderEntity, "emoteBox", Color.FromHex("#48d1cc"));
@@ -97,42 +96,39 @@ namespace Content.Client.Chat.UI
             }
         }
 
-        public SpeechBubble(ChatMessage message, EntityUid senderEntity, string speechStyleClass, Color? fontColor = null, bool revealWithBarks = false) // <Onyx-SpeechBubbleBarks-edited>
+        public SpeechBubble(ChatMessage message, EntityUid senderEntity, string speechStyleClass, Color? fontColor = null, bool revealText = false) // <Onyx-SpeechTextReveal-edited>
         {
             IoCManager.InjectDependencies(this);
             _senderEntity = senderEntity;
-            // <Onyx-SpeechBubbleBarks-edited>
-            var speechBarks = _entityManager.System<SpeechBarksSystem>();
-            RevealWithBarks = revealWithBarks &&
-                ConfigManager.GetCVar(CCVars.SpeechBubbleRevealEnabled) &&
-                speechBarks.CanRevealSpeechBubble(senderEntity);
-            // </Onyx-SpeechBubbleBarks-edited>
+            // <Onyx-SpeechTextReveal-edited>
+            RevealText = revealText &&
+                ConfigManager.GetCVar(CCVars.SpeechTextRevealEnabled) &&
+                message.RevealSpeed != null;
+            // </Onyx-SpeechTextReveal-edited>
             _transformSystem = _entityManager.System<SharedTransformSystem>();
             _spriteSystem = _entityManager.System<SpriteSystem>(); // <Onyx-MarkingBounds>
 
             // Use text clipping so new messages don't overlap old ones being pushed up.
             RectClipContent = true;
 
-            var bubble = BuildBubble(message, speechStyleClass, fontColor);
-
-            AddChild(bubble);
-
-            ForceRunStyleUpdate();
-
-            bubble.Measure(Vector2Helpers.Infinity);
-            ContentSize = bubble.DesiredSize;
-            _verticalOffsetAchieved = -ContentSize.Y;
+            // <Onyx-SpeechTextReveal-edited>
+            _bubble = BuildBubble(message, speechStyleClass, fontColor);
+            AddChild(_bubble);
+            UpdateContentSize();
             _deathTime = _timing.RealTime + TotalTime;
-            InitializeBarkReveal(message.Message); // <Onyx-SpeechBubbleBarks>
+            InitializeTextReveal(message.RevealSpeed);
+            _verticalOffsetAchieved = -ContentSize.Y;
+            // </Onyx-SpeechTextReveal-edited>
         }
 
-        protected bool RevealWithBarks { get; } // <Onyx-SpeechBubbleBarks>
+        protected bool RevealText { get; } // <Onyx-SpeechTextReveal>
 
         protected abstract Control BuildBubble(ChatMessage message, string speechStyleClass, Color? fontColor = null);
 
         protected override void FrameUpdate(FrameEventArgs args)
         {
             base.FrameUpdate(args);
+            FrameUpdateTextReveal(); // <Onyx-SpeechTextReveal>
 
             var timeLeft = (float)(_deathTime - _timing.RealTime).TotalSeconds;
             if (_entityManager.Deleted(_senderEntity) || timeLeft <= 0)
@@ -259,12 +255,12 @@ namespace Content.Client.Chat.UI
     public sealed class FancyTextSpeechBubble : SpeechBubble
     {
 
-        // <Onyx-SpeechBubbleBarks-edited>
-        public FancyTextSpeechBubble(ChatMessage message, EntityUid senderEntity, string speechStyleClass, Color? fontColor = null, bool revealWithBarks = false)
-            : base(message, senderEntity, speechStyleClass, fontColor, revealWithBarks)
+        // <Onyx-SpeechTextReveal-edited>
+        public FancyTextSpeechBubble(ChatMessage message, EntityUid senderEntity, string speechStyleClass, Color? fontColor = null, bool revealText = false)
+            : base(message, senderEntity, speechStyleClass, fontColor, revealText)
         {
         }
-        // </Onyx-SpeechBubbleBarks-edited>
+        // </Onyx-SpeechTextReveal-edited>
 
         protected override Control BuildBubble(ChatMessage message, string speechStyleClass, Color? fontColor = null)
         {
@@ -276,7 +272,7 @@ namespace Content.Client.Chat.UI
                     OutlineColorOverride = Color.Transparent, // Corvax-SpeechBubble
                 };
 
-                SetBarkRevealedMessage(label, ExtractAndFormatSpeechSubstring(message, "BubbleContent", fontColor)); // <Onyx-SpeechBubbleBarks-edited>
+                SetRevealedMessage(label, ExtractAndFormatSpeechSubstring(message, "BubbleContent", fontColor)); // <Onyx-SpeechTextReveal-edited>
 
                 var unfanciedPanel = new PanelContainer
                 {
@@ -305,7 +301,7 @@ namespace Content.Client.Chat.UI
 
             //We'll be honest. *Yes* this is hacky. Doing this in a cleaner way would require a bottom-up refactor of how saycode handles sending chat messages. -Myr
             bubbleHeader.SetMessage(ExtractAndFormatSpeechSubstring(message, "BubbleHeader", fontColor), tagsAllowed: null);
-            SetBarkRevealedMessage(bubbleContent, ExtractAndFormatSpeechSubstring(message, "BubbleContent", fontColor)); // <Onyx-SpeechBubbleBarks-edited>
+            SetRevealedMessage(bubbleContent, ExtractAndFormatSpeechSubstring(message, "BubbleContent", fontColor)); // <Onyx-SpeechTextReveal-edited>
 
             //As for below: Some day this could probably be converted to xaml. But that is not today. -Myr
             var mainPanel = new PanelContainer

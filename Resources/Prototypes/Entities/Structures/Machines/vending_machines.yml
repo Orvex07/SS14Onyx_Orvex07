@@ -7,6 +7,10 @@
   name: vending machine
   description: Just add capitalism!
   components:
+  # <Onyx-SpeechTextReveal>
+  - type: SpeechTextReveal
+    speed: 40
+  # </Onyx-SpeechTextReveal>
   - type: ActionGrant
     actions:
     - ActionVendingThrow
@@ -132,6 +136,10 @@
   name: vending machine
   abstract: true
   components:
+  # <Onyx-SpeechTextReveal>
+  - type: SpeechTextReveal
+    speed: 40
+  # </Onyx-SpeechTextReveal>
   - type: StationAiWhitelist
   - type: AmbientOnPowered
   - type: AmbientSound

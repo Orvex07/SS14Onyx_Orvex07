@@ -59,7 +59,13 @@ public partial class ChatBox : UIWidget, IEntityLinkClickHandler
         _controller.SendMessage(this, SelectedChannel);
     }
 
+    // <Onyx-SpeechTextReveal-edited>
     private void OnMessageAdded(ChatMessage msg)
+    {
+        AddMessage(msg, revealText: true);
+    }
+
+    private void AddMessage(ChatMessage msg, bool revealText)
     {
         _sawmill.Debug($"{msg.Channel}: {msg.Message}");
         if (!ChatInput.FilterButton.Popup.IsActive(msg.Channel))
@@ -73,14 +79,13 @@ public partial class ChatBox : UIWidget, IEntityLinkClickHandler
         if (msg is { Read: false, AudioPath: { } })
             _entManager.System<AudioSystem>().PlayGlobal(msg.AudioPath, Filter.Local(), false, AudioParams.Default.AddVolume(msg.AudioVolume));
 
-        msg.Read = true;
-
         var color = msg.MessageColorOverride ?? msg.Channel.TextColor();
 
-        // <Onyx-ChatCoalescing-edited>
-        if (!TryAddCoalescedMessage(msg, color))
+        var reveal = revealText && TryAddRevealedMessage(msg, color);
+        msg.Read = true;
+        if (!reveal && !TryAddCoalescedMessage(msg, color))
             AddLine(msg.WrappedMessage, color);
-        // </Onyx-ChatCoalescing-edited>
+        // </Onyx-SpeechTextReveal-edited>
     }
 
     private void OnHighlightsUpdated(string highlights)
@@ -96,13 +101,14 @@ public partial class ChatBox : UIWidget, IEntityLinkClickHandler
     public void Repopulate()
     {
         Contents.Clear();
+        ResetSpeechTextReveal(); // <Onyx-SpeechTextReveal>
         // <Onyx-ChatCoalescing>
         ResetChatCoalescing();
         // </Onyx-ChatCoalescing>
 
         foreach (var message in _controller.History)
         {
-            OnMessageAdded(message.Item2);
+            AddMessage(message.Item2, revealText: false); // <Onyx-SpeechTextReveal-edited>
         }
     }
 
@@ -123,13 +129,14 @@ public partial class ChatBox : UIWidget, IEntityLinkClickHandler
     private void OnChannelFilter(ChatChannel channel, bool active)
     {
         Contents.Clear();
+        ResetSpeechTextReveal(); // <Onyx-SpeechTextReveal>
         // <Onyx-ChatCoalescing>
         ResetChatCoalescing();
         // </Onyx-ChatCoalescing>
 
         foreach (var message in _controller.History)
         {
-            OnMessageAdded(message.Item2);
+            AddMessage(message.Item2, revealText: false); // <Onyx-SpeechTextReveal-edited>
         }
 
         if (active)

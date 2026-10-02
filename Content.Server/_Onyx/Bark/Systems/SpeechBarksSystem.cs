@@ -2,6 +2,7 @@ using Content.Shared.Chat;
 using Robust.Shared.Prototypes;
 using Content.Shared._Onyx.SpeechBarks;
 using Content.Server.Chat.Systems;
+using Content.Server.Radio.EntitySystems;
 using Robust.Shared.Configuration;
 using Content.Shared.CCVar;
 using Content.Server.Mind;
@@ -19,85 +20,29 @@ public sealed partial class SpeechBarksSystem : EntitySystem
     [Dependency] private IPrototypeManager _proto = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private ChatSystem _chat = default!;
 
     [Dependency] private MindSystem _mind = default!;
     [Dependency] private ISharedPlayerManager _player = default!;
     private bool _isEnabled = false;
-    private bool _isRevealEnabled;
 
     public override void Initialize()
     {
         base.Initialize();
 
         _cfg.OnValueChanged(CCVars.BarksEnabled, v => _isEnabled = v, true);
-        _cfg.OnValueChanged(CCVars.SpeechBubbleRevealEnabled, v => _isRevealEnabled = v, true);
 
-        SubscribeLocalEvent<SpeechBarksComponent, EntitySpokeEvent>(OnEntitySpoke);
+        SubscribeLocalEvent<EntitySpokeEvent>(OnEntitySpoke);
         SubscribeLocalEvent<WearingHeadsetComponent, HeadsetRadioReceiveRelayEvent>(OnHeadsetRadioReceive);
-        SubscribeLocalEvent<ActiveRadioComponent, RadioReceiveEvent>(OnRadioReceive);
+        SubscribeLocalEvent<ActiveRadioComponent, RadioReceiveEvent>(OnRadioReceive,
+            before: [typeof(HeadsetSystem), typeof(RadioDeviceSystem), typeof(RadioSystem)]);
     }
 
-    private void OnEntitySpoke(EntityUid uid, SpeechBarksComponent component, EntitySpokeEvent args)
+    private void OnEntitySpoke(EntitySpokeEvent args)
     {
-        if (!_isEnabled && !_isRevealEnabled)
-            return;
-
-        var ev = new TransformSpeakerBarkEvent(uid, component.Data.Copy());
-        RaiseLocalEvent(uid, ev);
-
-        if (!TryGetBarkData(ev.Data, out var soundSpecifier, out var pitch, out var minVar, out var maxVar))
-            return;
-
-        var message = args.Message;
-
-        foreach (var ent in _lookup.GetEntitiesInRange(Transform(uid).Coordinates, 10f))
-        {
-            if (!_mind.TryGetMind(ent, out _, out var mind) || mind.UserId == null || !_player.TryGetSessionById(mind.UserId, out var session))
-                continue;
-
-            RaiseNetworkEvent(new PlaySpeechBarksEvent(
-                        GetNetEntity(uid),
-                        message,
-                        soundSpecifier,
-                        pitch,
-                        minVar,
-                        maxVar,
-                        args.ObfuscatedMessage != null,
-                        revealSpeed: component.SpeechBubbleRevealSpeed,
-                        playAudio: _isEnabled), session);
-        }
-    }
-
-    private void OnHeadsetRadioReceive(Entity<WearingHeadsetComponent> ent, ref HeadsetRadioReceiveRelayEvent args)
-    {
-        if (!TryComp(ent.Owner, out ActorComponent? actor))
-            return;
-
-        SendRadioBark(args.RelayedEvent, ent.Comp.Headset, actor.PlayerSession);
-    }
-
-    private void OnRadioReceive(Entity<ActiveRadioComponent> ent, ref RadioReceiveEvent args)
-    {
-        // Headsets relay separately to their wearer. Only world radio speakers emit positional barks.
-        if (!TryComp<RadioSpeakerComponent>(ent, out var speaker) || !speaker.Enabled)
-            return;
-
-        foreach (var listener in _lookup.GetEntitiesInRange(Transform(ent).Coordinates, 10f))
-        {
-            if (!_mind.TryGetMind(listener, out _, out var mind) || mind.UserId == null || !_player.TryGetSessionById(mind.UserId, out var session))
-                continue;
-
-            SendRadioBark(args, ent, session);
-        }
-    }
-
-    private void SendRadioBark(RadioReceiveEvent args, EntityUid emitter, ICommonSession session)
-    {
-        if (!_isEnabled)
-            return;
-
-        var source = args.MessageSource;
-        if (!TryComp(source, out SpeechBarksComponent? component))
+        if (!_isEnabled ||
+            _chat.GetSpeechBarkSource(args.Source) is not { } source ||
+            !TryComp<SpeechBarksComponent>(source, out var component))
             return;
 
         var ev = new TransformSpeakerBarkEvent(source, component.Data.Copy());
@@ -106,17 +51,94 @@ public sealed partial class SpeechBarksSystem : EntitySystem
         if (!TryGetBarkData(ev.Data, out var soundSpecifier, out var pitch, out var minVar, out var maxVar))
             return;
 
+        var message = args.Message;
+
+        foreach (var ent in _lookup.GetEntitiesInRange(Transform(args.Source).Coordinates, 10f))
+        {
+            if (!_mind.TryGetMind(ent, out _, out var mind) || mind.UserId == null || !_player.TryGetSessionById(mind.UserId, out var session))
+                continue;
+
+            RaiseNetworkEvent(new PlaySpeechBarksEvent(
+                        GetNetEntity(args.Source),
+                        message,
+                        soundSpecifier,
+                        pitch,
+                        minVar,
+                        maxVar,
+                        args.ObfuscatedMessage != null), session);
+        }
+    }
+
+    private void OnHeadsetRadioReceive(Entity<WearingHeadsetComponent> ent, ref HeadsetRadioReceiveRelayEvent args)
+    {
+        if (!TryComp(ent.Owner, out ActorComponent? actor) ||
+            !TryGetRadioBark(args.RelayedEvent, out var sound, out var pitch, out var minVar, out var maxVar))
+            return;
+
+        SendRadioBark(args.RelayedEvent, ent.Comp.Headset, actor.PlayerSession, sound, pitch, minVar, maxVar);
+    }
+
+    private void OnRadioReceive(Entity<ActiveRadioComponent> ent, ref RadioReceiveEvent args)
+    {
+        ApplyRadioSpeechTextReveal(args);
+
+        // Headsets relay separately to their wearer. Only world radio speakers emit positional barks.
+        if (!TryComp<RadioSpeakerComponent>(ent, out var speaker) ||
+            !speaker.Enabled ||
+            !TryGetRadioBark(args, out var sound, out var pitch, out var minVar, out var maxVar))
+            return;
+
+        foreach (var listener in _lookup.GetEntitiesInRange(Transform(ent).Coordinates, 10f))
+        {
+            if (!_mind.TryGetMind(listener, out _, out var mind) || mind.UserId == null || !_player.TryGetSessionById(mind.UserId, out var session))
+                continue;
+
+            SendRadioBark(args, ent, session, sound, pitch, minVar, maxVar);
+        }
+    }
+
+    private bool TryGetRadioBark(
+        RadioReceiveEvent args,
+        out SoundSpecifier sound,
+        out float pitch,
+        out float minVar,
+        out float maxVar)
+    {
+        sound = default!;
+        pitch = default;
+        minVar = default;
+        maxVar = default;
+        if (!_isEnabled)
+            return false;
+
+        var source = args.MessageSource;
+        if (!TryComp(source, out SpeechBarksComponent? component))
+            return false;
+
+        var ev = new TransformSpeakerBarkEvent(source, component.Data.Copy());
+        RaiseLocalEvent(source, ev);
+        return TryGetBarkData(ev.Data, out sound, out pitch, out minVar, out maxVar);
+    }
+
+    private void SendRadioBark(
+        RadioReceiveEvent args,
+        EntityUid emitter,
+        ICommonSession session,
+        SoundSpecifier sound,
+        float pitch,
+        float minVar,
+        float maxVar)
+    {
         RaiseNetworkEvent(new PlaySpeechBarksEvent(
-            GetNetEntity(source),
+            GetNetEntity(args.MessageSource),
             args.Message,
-            soundSpecifier,
+            sound,
             pitch,
             minVar,
             maxVar,
             false,
             true,
-            GetNetEntity(emitter),
-            revealSpeed: component.SpeechBubbleRevealSpeed), session);
+            GetNetEntity(emitter)), session);
     }
 
     private bool TryGetBarkData(BarkData data, out SoundSpecifier sound, out float pitch, out float minVar, out float maxVar)

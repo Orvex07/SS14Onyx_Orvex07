@@ -13,7 +13,7 @@
     channels:
     - Handheld
     toggleOnInteract: false # <Onyx-Radio>
-    enabled: true # <Onyx-Radio>
+    enabled: false # <Onyx-Radio-edited>
   - type: Speech
     speechVerb: Robotic
   - type: Sprite
