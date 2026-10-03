@@ -69,6 +69,7 @@ namespace Content.Client.Lobby
             UpdateLobbyUi();
 
             Lobby.CharacterPreview.CharacterSetupButton.OnPressed += OnSetupPressed;
+            InitializeReadyManifest(); // <Onyx-ReadyManifest>
             Lobby.ReadyButton.OnPressed += OnReadyPressed;
             Lobby.ReadyButton.OnToggled += OnReadyToggled;
 
@@ -89,6 +90,7 @@ namespace Content.Client.Lobby
             _voteManager.ClearPopupContainer();
 
             Lobby!.CharacterPreview.CharacterSetupButton.OnPressed -= OnSetupPressed;
+            ShutdownReadyManifest(); // <Onyx-ReadyManifest>
             Lobby!.ReadyButton.OnPressed -= OnReadyPressed;
             Lobby!.ReadyButton.OnToggled -= OnReadyToggled;
 
@@ -182,11 +184,13 @@ namespace Content.Client.Lobby
 
         private void UpdateLobbyUi()
         {
+            UpdateReadyManifest(); // <Onyx-ReadyManifest>
             if (_gameTicker.IsGameStarted)
             {
                 Lobby!.ReadyButton.Text = Loc.GetString("lobby-state-ready-button-join-state");
                 Lobby!.ReadyButton.ToggleMode = false;
                 Lobby!.ReadyButton.Pressed = false;
+                Lobby!.ObserveButton.Visible = true; // <Onyx-ObserveButtonVisibility>
                 Lobby!.ObserveButton.Disabled = false;
             }
             else
@@ -196,7 +200,7 @@ namespace Content.Client.Lobby
                 Lobby!.ReadyButton.Text = Loc.GetString(Lobby!.ReadyButton.Pressed ? "lobby-state-player-status-ready": "lobby-state-player-status-not-ready");
                 Lobby!.ReadyButton.ToggleMode = true;
                 Lobby!.ReadyButton.Disabled = false;
-                Lobby!.ObserveButton.Disabled = true;
+                Lobby!.ObserveButton.Visible = false; // <Onyx-ObserveButtonVisibility-edited>
             }
 
             if (_gameTicker.ServerInfoBlob != null)

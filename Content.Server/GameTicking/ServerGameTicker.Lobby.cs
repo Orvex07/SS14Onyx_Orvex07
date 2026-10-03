@@ -4,6 +4,7 @@ using Robust.Shared.Network;
 using Robust.Shared.Player;
 using System.Text;
 using Content.Shared.Station.Components;
+using Content.Server._Onyx.ReadyManifest; // <Onyx-ReadyManifest>
 
 namespace Content.Server.GameTicking;
 
@@ -162,6 +163,7 @@ public sealed partial class ServerGameTicker
                 continue;
             RaiseNetworkEvent(GetStatusMsg(playerSession), playerSession.Channel);
         }
+        RaiseLocalEvent(new ReadyManifestChangedEvent()); // <Onyx-ReadyManifest>
     }
 
     public void ToggleReady(ICommonSession player, bool ready)
@@ -178,6 +180,7 @@ public sealed partial class ServerGameTicker
         }
 
         _playerGameStatuses[player.UserId] = ready ? PlayerGameStatus.ReadyToPlay : PlayerGameStatus.NotReadyToPlay;
+        RaiseLocalEvent(new ReadyManifestChangedEvent()); // <Onyx-ReadyManifest>
         RaiseNetworkEvent(GetStatusMsg(player), player.Channel);
         // update server info to reflect new ready count
         UpdateInfoText();

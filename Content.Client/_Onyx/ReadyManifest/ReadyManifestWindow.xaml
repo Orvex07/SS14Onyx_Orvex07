@@ -1,0 +1,14 @@
+<!-- SPDX-FileCopyrightText: 2026 Space Onyx Contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+
+<DefaultWindow xmlns="https://spacestation14.io"
+               Title="{Loc 'ready-manifest-window-title'}"
+               SetSize="450 550">
+    <BoxContainer HorizontalExpand="True" VerticalExpand="True">
+        <ScrollContainer VerticalExpand="True" HorizontalExpand="True">
+            <BoxContainer Name="ManifestContainer"
+                          Orientation="Vertical"
+                          HorizontalExpand="True" />
+        </ScrollContainer>
+    </BoxContainer>
+</DefaultWindow>

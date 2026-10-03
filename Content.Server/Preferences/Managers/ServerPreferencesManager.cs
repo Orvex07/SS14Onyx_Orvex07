@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Afk;
 using Content.Server._Onyx.Preferences; // <Onyx-MarkingCategories>
+using Content.Server._Onyx.ReadyManifest; // <Onyx-ReadyManifest>
 using Content.Corvax.Interfaces.Shared;
 using Content.Server.Database;
 using Content.Shared.Body;
@@ -48,6 +49,7 @@ namespace Content.Server.Preferences.Managers
         [Dependency] private IPrototypeManager _prototypeManager = default!;
         [Dependency] private MarkingManager _marking = default!;
         [Dependency] private ISerializationManager _serialization = default!;
+        [Dependency] private IEntityManager _entityManager = default!; // <Onyx-ReadyManifest>
         private ISharedSponsorsManager? _sponsors;
 
         // Cache player prefs on the server so we don't need as much async hell related to them.
@@ -271,6 +273,7 @@ namespace Content.Server.Preferences.Managers
             }
 
             prefsData.Prefs = new PlayerPreferences(curPrefs.Characters, index, curPrefs.AdminOOCColor, curPrefs.GhostSkin, curPrefs.ConstructionFavorites); // <Onyx-GhostSkins>
+            _entityManager.EventBus.RaiseEvent(EventSource.Local, new ReadyManifestChangedEvent()); // <Onyx-ReadyManifest>
             _afkManager.PlayerDidAction(message.MsgChannel);
 
             if (ShouldStorePrefs(message.MsgChannel.AuthType))
@@ -320,6 +323,7 @@ namespace Content.Server.Preferences.Managers
             };
 
             prefsData.Prefs = new PlayerPreferences(profiles, slot, curPrefs.AdminOOCColor, curPrefs.GhostSkin, curPrefs.ConstructionFavorites); // <Onyx-GhostSkins>
+            _entityManager.EventBus.RaiseEvent(EventSource.Local, new ReadyManifestChangedEvent()); // <Onyx-ReadyManifest>
 
             if (ShouldStorePrefs(session.Channel.AuthType))
                 await _db.SaveCharacterSlotAsync(userId, profile, slot);
@@ -423,6 +427,7 @@ namespace Content.Server.Preferences.Managers
             arr.Remove(slot);
 
             prefsData.Prefs = new PlayerPreferences(arr, nextSlot ?? curPrefs.SelectedCharacterIndex, curPrefs.AdminOOCColor, curPrefs.GhostSkin, curPrefs.ConstructionFavorites); // <Onyx-GhostSkins>
+            _entityManager.EventBus.RaiseEvent(EventSource.Local, new ReadyManifestChangedEvent()); // <Onyx-ReadyManifest>
             _afkManager.PlayerDidAction(message.MsgChannel);
 
             if (ShouldStorePrefs(message.MsgChannel.AuthType))
