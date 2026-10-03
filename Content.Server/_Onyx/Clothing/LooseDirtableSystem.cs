@@ -17,7 +17,8 @@ namespace Content.Server._Onyx.Clothing;
 
 public sealed partial class LooseDirtableSystem : EntitySystem
 {
-    private const string PuddleSolution = "puddle";
+    private const float SoakInterval = 1f;
+    private static readonly FixedPoint2 SoakTransferMultiplier = FixedPoint2.New(0.25f);
 
     [Dependency] private ClothingDirtSystem _dirt = default!;
     [Dependency] private SharedContainerSystem _container = default!;
@@ -26,6 +27,10 @@ public sealed partial class LooseDirtableSystem : EntitySystem
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
 
     private readonly HashSet<Entity<ClothingDirtableComponent>> _dirtables = [];
+    private readonly HashSet<EntityUid> _soaking = [];
+    private readonly HashSet<EntityUid> _initializedPuddles = [];
+    private readonly List<EntityUid> _soakingBuffer = [];
+    private float _soakAccumulator;
 
     public override void Initialize()
     {
@@ -34,45 +39,103 @@ public sealed partial class LooseDirtableSystem : EntitySystem
         SubscribeLocalEvent<ClothingDirtableComponent, MoveEvent>(OnDirtableMoved);
     }
 
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        if ((_soakAccumulator += frameTime) < SoakInterval)
+            return;
+
+        _soakAccumulator %= SoakInterval;
+        _soakingBuffer.Clear();
+        _soakingBuffer.AddRange(_soaking);
+        foreach (var uid in _soakingBuffer)
+        {
+            if (!TryComp(uid, out ClothingDirtableComponent? dirtable) ||
+                _container.IsEntityInContainer(uid) ||
+                !TryGetSource(uid, Transform(uid).Coordinates, out var source, out var solution))
+            {
+                _soaking.Remove(uid);
+                continue;
+            }
+
+            TryApply((uid, dirtable), solution, source.Comp.TransferAmount * SoakTransferMultiplier);
+        }
+
+        _soakingBuffer.Clear();
+        _soakingBuffer.AddRange(_initializedPuddles);
+        foreach (var uid in _soakingBuffer)
+        {
+            if (!HasComp<PuddleComponent>(uid))
+                _initializedPuddles.Remove(uid);
+        }
+    }
+
     private void OnPuddleChanged(Entity<PuddleComponent> ent, ref PuddleDirtChangedEvent args)
     {
-        if (!_solutions.TryGetSolution(ent.Owner, PuddleSolution, out _, out var solution))
+        if (!_initializedPuddles.Add(ent))
             return;
 
         _dirtables.Clear();
         _lookup.GetEntitiesInRange(Transform(ent).Coordinates, 0.45f, _dirtables,
             LookupFlags.Dynamic | LookupFlags.Sundries);
         foreach (var dirtable in _dirtables)
-            TryApply(dirtable, solution);
+        {
+            if (!_container.IsEntityInContainer(dirtable))
+                _soaking.Add(dirtable);
+        }
     }
 
     private void OnDirtableMoved(Entity<ClothingDirtableComponent> ent, ref MoveEvent args)
     {
-        if (args.OnlyRotation || _container.IsEntityInContainer(ent) || !args.NewPosition.IsValid(EntityManager))
+        if (args.OnlyRotation)
             return;
 
-        var xform = Transform(ent);
+        if (_container.IsEntityInContainer(ent) || !args.NewPosition.IsValid(EntityManager))
+        {
+            _soaking.Remove(ent);
+            return;
+        }
+
+        if (TryGetSource(ent, args.NewPosition, out var source, out var solution))
+        {
+            if (_soaking.Add(ent))
+                TryApply(ent, solution, source.Comp.TransferAmount * SoakTransferMultiplier);
+            return;
+        }
+
+        _soaking.Remove(ent);
+    }
+
+    private void TryApply(Entity<ClothingDirtableComponent> ent, Solution source, FixedPoint2 transferAmount)
+    {
+        if (transferAmount <= 0)
+            return;
+
+        _dirt.TryDirtyClothing(ent, source, FixedPoint2.Min(source.Volume, transferAmount), ent.Comp);
+    }
+
+    private bool TryGetSource(EntityUid dirtable, EntityCoordinates coordinates,
+        out Entity<SurfaceDirtSourceComponent> source, out Solution solution)
+    {
+        source = default;
+        solution = default!;
+        var xform = Transform(dirtable);
         if (xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid))
-            return;
+            return false;
 
-        var tile = _map.CoordinatesToTile(gridUid, grid, args.NewPosition);
+        var tile = _map.CoordinatesToTile(gridUid, grid, coordinates);
         var anchored = _map.GetAnchoredEntitiesEnumerator(gridUid, grid, tile);
         while (anchored.MoveNext(out var uid))
         {
-            if (!TryComp<SurfaceDirtSourceComponent>(uid, out var source) ||
-                !_solutions.TryGetSolution(uid.Value, source.Solution, out _, out var solution))
+            if (!TryComp(uid, out SurfaceDirtSourceComponent? component) ||
+                !_solutions.TryGetSolution(uid.Value, component.Solution, out _, out var foundSolution))
                 continue;
-            TryApply(ent, solution, source.TransferAmount);
-            return;
-        }
-    }
 
-    private void TryApply(Entity<ClothingDirtableComponent> ent, Solution source,
-        FixedPoint2 transferAmount = default)
-    {
-        if (transferAmount <= 0)
-            transferAmount = FixedPoint2.New(1);
-        if (!_container.IsEntityInContainer(ent))
-            _dirt.TryDirtyClothing(ent, source, FixedPoint2.Min(source.Volume, transferAmount), ent.Comp);
+            source = (uid.Value, component);
+            solution = foundSolution;
+            return true;
+        }
+
+        return false;
     }
 }

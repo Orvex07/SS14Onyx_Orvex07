@@ -22,9 +22,6 @@ using Content.Shared.Rejuvenate;
 using Content.Shared.StatusEffectNew;
 using Content.Shared.Bed.Components;
 using Content.Shared._Onyx.Wounds; // Onyx-WoundSystem-edited
-// <Onyx-ClothingDirt>
-using Content.Shared._Onyx.Clothing;
-// </Onyx-ClothingDirt>
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
@@ -45,9 +42,6 @@ public sealed partial class BloodstreamSystem : EntitySystem
     [Dependency] private AlertsSystem _alertsSystem = default!;
     [Dependency] private MobStateSystem _mobStateSystem = default!;
     [Dependency] private DamageableSystem _damageableSystem = default!;
-    // <Onyx-ClothingDirt>
-    [Dependency] private ClothingDirtSystem _clothingDirt = default!;
-    // </Onyx-ClothingDirt>
     [Dependency] private MetabolizerSystem _metabolizer = default!;
 
     public override void Update(float frameTime)
@@ -503,16 +497,7 @@ public sealed partial class BloodstreamSystem : EntitySystem
             bleed = Math.Min(bleed * 0.5f, remaining * entity.Comp.BloodReferenceSolution.Volume.Float());
         }
 
-        // <Onyx-ClothingDirt>
-        var dirtAmount = FixedPoint2.Min(FixedPoint2.New(bleed), FixedPoint2.New(1));
-        if (dirtAmount > 0)
-        {
-            var bloodDirt = entity.Comp.BloodReferenceSolution.Clone();
-            bloodDirt.SetReagentData(GetEntityBloodData(entity.AsNullable()));
-            bloodDirt.ScaleTo(dirtAmount);
-            _clothingDirt.TryDirtyWorn(entity.Owner, bloodDirt, dirtAmount, ClothingDirtSystem.BleedSlots);
-        }
-        // </Onyx-ClothingDirt>
+        DirtyFromBleeding(entity, bleed); // <Onyx-ClothingDirt-edited>
 
         TryBleedOut(entity.AsNullable(), bleed);
 

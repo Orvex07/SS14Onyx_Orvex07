@@ -39,8 +39,9 @@ public sealed partial class ShowerSystem : EntitySystem
             if (!shower.Enabled || (shower.WashAccumulator += frameTime) < shower.WashInterval)
                 continue;
             shower.WashAccumulator %= shower.WashInterval;
-            WashArea(uid, shower);
-            _puddle.TrySpillAt(uid, new Solution(shower.CleanerReagent, shower.PuddleAmount), out _, sound: false);
+            var runoff = new Solution(shower.CleanerReagent, shower.PuddleAmount);
+            WashArea(uid, shower, runoff);
+            _puddle.TrySpillAt(uid, runoff, out _, sound: false);
         }
     }
 
@@ -80,18 +81,18 @@ public sealed partial class ShowerSystem : EntitySystem
     private void OnExamined(Entity<ShowerComponent> ent, ref ExaminedEvent args)
         => args.PushMarkup(Loc.GetString(ent.Comp.Enabled ? "shower-component-examine-on" : "shower-component-examine-off"));
 
-    private void WashArea(EntityUid uid, ShowerComponent shower)
+    private void WashArea(EntityUid uid, ShowerComponent shower, Solution runoff)
     {
         _entities.Clear();
         _lookup.GetEntitiesInRange(Transform(uid).Coordinates, shower.WashRange, _entities, LookupFlags.Dynamic);
+        var cleaner = new ReagentId(shower.CleanerReagent, null);
         foreach (var wearer in _entities)
         {
-            _dirt.TryWashBody(wearer, new ReagentId(shower.CleanerReagent, null), shower.WashAmount,
-                DirtExposure.FullBody);
+            _dirt.TryWashBody(wearer, cleaner, shower.WashAmount, DirtExposure.FullBody, runoff);
             if (!_inventory.TryGetContainerSlotEnumerator(wearer, out var enumerator, shower.TargetSlots))
                 continue;
             while (enumerator.NextItem(out var item))
-                _dirt.TryAddCleanerToClothing(item, new ReagentId(shower.CleanerReagent, null), shower.WashAmount);
+                _dirt.TryWashClothing(item, cleaner, shower.WashAmount, runoff: runoff);
         }
     }
 }

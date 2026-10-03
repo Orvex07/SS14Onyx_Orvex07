@@ -14,6 +14,7 @@ using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Content.Shared._Onyx.Chemistry.Circulation;
+using Content.Shared._Onyx.Clothing;
 
 namespace Content.Shared._Onyx.Wounds;
 
@@ -26,11 +27,14 @@ public sealed partial class WoundBleedingSystem : EntitySystem
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private IConfigurationManager _configuration = default!;
     [Dependency] private CirculatoryStreamSystem _circulation = default!;
+    [Dependency] private ClothingDirtSystem _dirt = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private INetManager _net = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private WoundSystem _wounds = default!;
+
+    private readonly Dictionary<EntityUid, float> _dirtPartRates = new();
 
     public override void Initialize()
     {
@@ -42,6 +46,7 @@ public sealed partial class WoundBleedingSystem : EntitySystem
         SubscribeLocalEvent<WoundBleedingComponent, WoundStateChangedEvent>(OnWoundStateChanged);
         SubscribeLocalEvent<WoundBleedingComponent, WoundRemovedEvent>(OnWoundRemoved);
         SubscribeLocalEvent<WoundHostComponent, SleepStateChangedEvent>(OnSleepStateChanged);
+        SubscribeLocalEvent<WoundHostComponent, BleedingDirtEvent>(OnBleedingDirt);
     }
 
     private void OnBleedingShutdown(Entity<WoundBleedingComponent> wound, ref ComponentShutdown args)
@@ -83,6 +88,35 @@ public sealed partial class WoundBleedingSystem : EntitySystem
         foreach (var wound in GetAttachedBleedingWounds(body))
             RefreshWound((wound.Owner, wound.Comp2), false);
         RefreshBody(body);
+    }
+
+    private void OnBleedingDirt(Entity<WoundHostComponent> body, ref BleedingDirtEvent args)
+    {
+        if (!_net.IsServer || args.Amount <= 0)
+            return;
+
+        args.Handled = true;
+        _dirtPartRates.Clear();
+        foreach (var wound in GetAttachedBleedingWounds(body))
+        {
+            if (wound.Comp2.CurrentRate <= 0f)
+                continue;
+
+            var part = wound.Comp1.HoldingPart;
+            _dirtPartRates[part] = _dirtPartRates.GetValueOrDefault(part) + wound.Comp2.CurrentRate;
+        }
+
+        var totalRate = 0f;
+        foreach (var rate in _dirtPartRates.Values)
+            totalRate += rate;
+        if (totalRate <= 0f)
+            return;
+
+        foreach (var (part, rate) in _dirtPartRates)
+        {
+            var amount = args.Amount * (rate / totalRate);
+            _dirt.TryDirtyBodyPart(body, part, args.Source, amount);
+        }
     }
 
     internal void HandlePartDamageApplied(Entity<WoundableComponent> part, ref PartDamageAppliedEvent args)

@@ -43,8 +43,11 @@ public sealed class ClothingDirtTest : GameTest
             Assert.That(stored.GetTotalPrototypeQuantity("Vomit"), Is.EqualTo(FixedPoint2.New(5)));
             Assert.That(entityManager.GetComponent<ClothingDirtableComponent>(clothing).DirtColor, Is.Not.Null);
 
-            Assert.That(dirt.TryWashClothing(clothing, new ReagentId("Water", null), FixedPoint2.New(15)), Is.True);
+            var runoff = new Solution("Water", FixedPoint2.New(10));
+            Assert.That(dirt.TryWashClothing(clothing, new ReagentId("Water", null), FixedPoint2.New(15), runoff: runoff), Is.True);
             Assert.That(stored.Volume, Is.EqualTo(FixedPoint2.Zero));
+            Assert.That(runoff.GetTotalPrototypeQuantity(Blood), Is.EqualTo(FixedPoint2.New(10)));
+            Assert.That(runoff.GetTotalPrototypeQuantity(Vomit), Is.EqualTo(FixedPoint2.New(5)));
             Assert.That(entityManager.GetComponent<ClothingDirtableComponent>(clothing).DirtColor, Is.Null);
             Assert.That(dirt.TryWashClothing(clothing, new ReagentId("Water", null), FixedPoint2.New(1)), Is.True);
 

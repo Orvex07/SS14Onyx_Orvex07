@@ -25,4 +25,7 @@ public sealed partial class ClothingDirtableComponent : Component
     public float DryInterval = 30f;
 
     public float DryAccumulator;
+
+    internal int SolutionHash;
+    internal int SolutionContentsHash;
 }
