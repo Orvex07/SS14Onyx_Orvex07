@@ -42,6 +42,8 @@ public sealed partial class ChatSystem
             relayBarks ? speaker : null,
             TryComp<SpeechTextRevealComponent>(speaker, out var reveal) ? reveal.Speed : null);
 
+        var language = _language.GetCurrentLanguage(speaker);
+
         try
         {
             TrySendInGameICMessage(
@@ -50,7 +52,8 @@ public sealed partial class ChatSystem
                 type,
                 range,
                 nameOverride: name,
-                checkRadioPrefix: false);
+                checkRadioPrefix: false,
+                languageOverride: language.ID);
         }
         finally
         {

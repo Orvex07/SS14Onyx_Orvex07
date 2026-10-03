@@ -98,6 +98,7 @@ public sealed partial class RadioSystem : SharedRadioSystem
         var languageColor = language.Speech.Color is { } overrideColor
             ? Color.InterpolateBetween(Color.White, overrideColor, overrideColor.A)
             : channel.Color;
+        var verb = Loc.GetString(_random.Pick(speech.SpeechVerbStrings));
         var wrappedMessage = Loc.GetString(speech.Bold
                 ? "chat-radio-message-language-wrap-bold"
                 : "chat-radio-message-language-wrap",
@@ -106,12 +107,37 @@ public sealed partial class RadioSystem : SharedRadioSystem
             ("fontType", language.Speech.FontId ?? speech.FontId),
             ("boldFontType", language.Speech.BoldFontId ?? language.Speech.FontId ?? speech.FontId),
             ("fontSize", loudspeakerFontSize ?? language.Speech.FontSize ?? speech.FontSize),
-            ("verb", Loc.GetString(_random.Pick(speech.SpeechVerbStrings))),
+            ("verb", verb),
             ("channel", $"\\[{channel.LocalizedName}\\]"),
             ("name", radioName), // <Onyx-RadioJobTitles-edited>
             ("message", inlineFormattedMessage) // <Onyx-InlineActions>
         );
         // </Onyx-LanguageAppearance>
+        // <Onyx-Languages>
+        var protectedRadioMessage = InlineActionFormatter.ProtectActions(transmittedMessage, out var radioInlineReplacements, out _);
+        var obfuscatedRadioMessage = InlineActionFormatter.RestoreActions(_languages.Obfuscate(protectedRadioMessage, language), radioInlineReplacements);
+        var obfuscatedRadioContent = InlineActionFormatter.Format(FormattedMessage.EscapeText(obfuscatedRadioMessage));
+        var obfuscatedWrappedMessage = Loc.GetString(speech.Bold
+                ? "chat-radio-message-language-wrap-bold"
+                : "chat-radio-message-language-wrap",
+            ("color", channel.Color),
+            ("languageColor", languageColor),
+            ("fontType", language.Speech.FontId ?? speech.FontId),
+            ("boldFontType", language.Speech.BoldFontId ?? language.Speech.FontId ?? speech.FontId),
+            ("fontSize", loudspeakerFontSize ?? language.Speech.FontSize ?? speech.FontSize),
+            ("verb", verb),
+            ("channel", $"\\[{channel.LocalizedName}\\]"),
+            ("name", radioName),
+            ("message", obfuscatedRadioContent)
+        );
+        var obfuscatedChat = new ChatMessage(
+            ChatChannel.Radio,
+            obfuscatedRadioMessage,
+            obfuscatedWrappedMessage,
+            NetEntity.Invalid,
+            null);
+        var obfuscatedChatMsg = new MsgChatMessage { Message = obfuscatedChat };
+        // </Onyx-Languages>
 
         // most radios are relayed to chat, so lets parse the chat message beforehand
         var chat = new ChatMessage(
@@ -140,6 +166,15 @@ public sealed partial class RadioSystem : SharedRadioSystem
             if (attemptEv.Cancelled)
                 continue;
 
+            // <Onyx-Languages>
+            if (TryGetRadioListener(receiver, transform, out var radioListener) &&
+                !_languages.CanUnderstand(radioListener, language.ID))
+            {
+                var obfuscatedEv = ev with { ChatMsg = obfuscatedChatMsg };
+                RaiseLocalEvent(receiver, ref obfuscatedEv);
+                continue;
+            }
+            // </Onyx-Languages>
             // send the message
             RaiseLocalEvent(receiver, ref ev);
         }
@@ -154,5 +189,25 @@ public sealed partial class RadioSystem : SharedRadioSystem
         _replay.RecordServerMessage(chat);
         _messages.Remove(message);
     }
+
+    // <Onyx-Languages>
+    private bool TryGetRadioListener(EntityUid receiver, TransformComponent transform, out EntityUid listener)
+    {
+        if (HasComp<HeadsetComponent>(receiver))
+        {
+            listener = transform.ParentUid;
+            return listener.IsValid();
+        }
+
+        if (HasComp<IntrinsicRadioReceiverComponent>(receiver))
+        {
+            listener = receiver;
+            return true;
+        }
+
+        listener = EntityUid.Invalid;
+        return false;
+    }
+    // </Onyx-Languages>
 
 }
