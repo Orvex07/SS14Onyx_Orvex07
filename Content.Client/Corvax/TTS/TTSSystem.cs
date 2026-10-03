@@ -230,9 +230,13 @@ public sealed partial class TTSSystem : EntitySystem
         using var audioResource = new AudioResource();
         audioResource.Load(IoCManager.Instance!, Prefix / filePath);
 
+        // <Onyx-AnnouncementVolume-edited>
         var audioParams = AudioParams.Default
-            .WithVolume(AdjustVolume(ev.SourceUid == null, ev.IsWhisper, ev.IsRadio))
+            .WithVolume(ev.IsAnnouncement
+                ? MinimalVolume + SharedAudioSystem.GainToVolume(_cfg.GetCVar(CCVars.AnnouncementsVolume))
+                : AdjustVolume(ev.SourceUid == null, ev.IsWhisper, ev.IsRadio))
             .WithMaxDistance(AdjustDistance(ev.IsWhisper));
+        // </Onyx-AnnouncementVolume-edited>
 
         var soundSpecifier = new ResolvedPathSpecifier(Prefix / filePath);
 

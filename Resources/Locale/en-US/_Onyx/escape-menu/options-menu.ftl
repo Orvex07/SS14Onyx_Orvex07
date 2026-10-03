@@ -7,3 +7,4 @@ ui-options-log-in-chat = Log actions in the chat
 ui-options-coalesce-identical-messages = Coalesce identical messages
 
 ui-options-hud-theme-xenomorph = Xenomorph
+ui-options-announcements-volume = Announcement volume

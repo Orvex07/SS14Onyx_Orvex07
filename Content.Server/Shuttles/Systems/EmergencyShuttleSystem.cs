@@ -330,7 +330,7 @@ public sealed partial class EmergencyShuttleSystem : SharedEmergencyShuttleSyste
                 playDefaultSound: false);
 
             // TODO: Need filter extensions or something don't blame me.
-            _audio.PlayGlobal(stationShuttleComp.FailureAudio, Filter.Broadcast(), true);
+            _announcementSound.Play(stationShuttleComp.FailureAudio, Filter.Broadcast()); // <Onyx-AnnouncementVolume-edited>
             return;
         }
 
@@ -389,7 +389,7 @@ public sealed partial class EmergencyShuttleSystem : SharedEmergencyShuttleSyste
             : stationShuttleComp.DockedAudio;
 
         // TODO: Need filter extensions or something don't blame me.
-        _audio.PlayGlobal(audioFile, Filter.Broadcast(), true);
+        _announcementSound.Play(audioFile, Filter.Broadcast()); // <Onyx-AnnouncementVolume-edited>
     }
 
     private void OnStationInit(EntityUid uid, StationCentcommComponent component, MapInitEvent args)

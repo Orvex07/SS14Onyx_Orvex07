@@ -303,7 +303,7 @@ public sealed partial class EmergencyShuttleSystem
                 playSound: false, colorOverride: DangerColor);
 
         if (!CheckForLaunch(component))
-            _audio.PlayGlobal(AnnounceStartSound, Filter.Broadcast(), recordReplay: true);
+            _announcementSound.Play(AnnounceStartSound, Filter.Broadcast()); // <Onyx-AnnouncementVolume-edited>
 
         UpdateAllEmergencyConsoles();
     }
@@ -407,7 +407,7 @@ public sealed partial class EmergencyShuttleSystem
             playSound: false,
             colorOverride: DangerColor);
 
-        _audio.PlayGlobal(AnnounceStartSound, Filter.Broadcast(), recordReplay: true);
+        _announcementSound.Play(AnnounceStartSound, Filter.Broadcast()); // <Onyx-AnnouncementVolume-edited>
     }
 
     public bool DelayEmergencyRoundEnd()

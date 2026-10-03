@@ -83,7 +83,7 @@ public sealed partial class DragonRiftSystem : EntitySystem
                 var msg = Loc.GetString("carp-rift-warning",
                     ("location", FormattedMessage.RemoveMarkupOrThrow(_navMap.GetNearestBeaconString((uid, xform)))));
                 _chat.DispatchGlobalAnnouncement(msg, playSound: false, colorOverride: Color.Red);
-                _audio.PlayGlobal("/Audio/Misc/notice1.ogg", Filter.Broadcast(), true);
+                _announcementSound.Play("/Audio/Misc/notice1.ogg", Filter.Broadcast()); // <Onyx-AnnouncementVolume-edited>
                 _navMap.SetBeaconEnabled(uid, true);
             }
 

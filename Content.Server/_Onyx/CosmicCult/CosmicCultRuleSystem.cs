@@ -14,6 +14,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using Content.Server._Onyx.CosmicCult.Components;
+using Content.Server._Onyx.Audio;
 using Content.Server.Actions;
 using Content.Server.Administration.Logs;
 using Content.Server.Antag;
@@ -95,7 +96,7 @@ public sealed partial class CosmicCultRuleSystem : GameRuleSystem<CosmicCultRule
     [Dependency] private ActionsSystem _actions = default!;
     [Dependency] private AlertsSystem _alerts = default!;
     [Dependency] private AntagSelectionSystem _antag = default!;
-    [Dependency] private AudioSystem _audio = default!;
+    [Dependency] private AnnouncementSoundSystem _announcementSound = default!;
     [Dependency] private ChatSystem _chatSystem = default!;
     [Dependency] private EmergencyShuttleSystem _emergency = default!;
     [Dependency] private EuiManager _euiMan = default!;
@@ -218,7 +219,7 @@ public sealed partial class CosmicCultRuleSystem : GameRuleSystem<CosmicCultRule
                 false,
                 null,
                 Color.FromHex("#cae8e8"));
-            _audio.PlayGlobal(_tier3Sound, Filter.Broadcast(), false, AudioParams.Default);
+            _announcementSound.Play(_tier3Sound, Filter.Broadcast(), AudioParams.Default, false);
 
             EnsureComp<ParallaxComponent>(mapData, out var parallax);
             parallax.Parallax = "CosmicFinaleParallax";
@@ -263,7 +264,7 @@ public sealed partial class CosmicCultRuleSystem : GameRuleSystem<CosmicCultRule
                 false,
                 null,
                 Color.FromHex("#cae8e8"));
-            _audio.PlayGlobal(_tier2Sound, Filter.Broadcast(), false, AudioParams.Default);
+            _announcementSound.Play(_tier2Sound, Filter.Broadcast(), AudioParams.Default, false);
 
             for (var i = 0; i < component.TotalCrew / 4; i++) // spawn # malign rifts equal to 25% of the playercount
             {

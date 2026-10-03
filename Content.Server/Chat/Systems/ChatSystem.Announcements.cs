@@ -28,7 +28,7 @@ public sealed partial class ChatSystem
         if (playSound)
         {
             if (announcementSound == null && sender == Loc.GetString("admin-announce-announcer-default")) announcementSound = new SoundPathSpecifier(CentComAnnouncementSound); // <Onyx-AdminAnnouncements-edited>
-            _audio.PlayGlobal(announcementSound ?? DefaultAnnouncementSound, Filter.Broadcast(), true, AudioParams.Default.WithVolume(-2f));
+            SendAnnouncementSound(announcementSound ?? DefaultAnnouncementSound, Filter.Broadcast()); // <Onyx-AnnouncementVolume-edited>
         }
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Global station announcement from {sender}: {message}");
     }
@@ -50,7 +50,7 @@ public sealed partial class ChatSystem
         _chatManager.ChatMessageToManyFiltered(filter, ChatChannel.Radio, message, wrappedMessage, source ?? default, false, true, colorOverride);
         if (playSound)
         {
-            _audio.PlayGlobal(announcementSound ?? DefaultAnnouncementSound, filter, true, AudioParams.Default.WithVolume(-2f));
+            SendAnnouncementSound(announcementSound ?? DefaultAnnouncementSound, filter); // <Onyx-AnnouncementVolume-edited>
         }
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Station Announcement from {sender}: {message}");
     }
@@ -84,7 +84,7 @@ public sealed partial class ChatSystem
 
         if (playDefaultSound)
         {
-            _audio.PlayGlobal(announcementSound ?? DefaultAnnouncementSound, filter, true, AudioParams.Default.WithVolume(-2f));
+            SendAnnouncementSound(announcementSound ?? DefaultAnnouncementSound, filter); // <Onyx-AnnouncementVolume-edited>
         }
 
         _adminLogger.Add(LogType.Chat, LogImpact.Low, $"Station Announcement on {station} from {sender}: {message}");

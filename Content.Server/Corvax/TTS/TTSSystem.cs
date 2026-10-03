@@ -184,7 +184,7 @@ public sealed partial class TTSSystem : EntitySystem
             if (filter == null)
                 return;
 
-            RaiseNetworkEvent(new PlayTTSEvent(soundData),
+            RaiseNetworkEvent(new PlayTTSEvent(soundData, isAnnouncement: true), // <Onyx-AnnouncementVolume-edited>
                 filter,
                 recordReplay: false);
         });

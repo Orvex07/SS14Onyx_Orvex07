@@ -794,7 +794,7 @@ public sealed partial class ServerGameTicker
             _chatSystem.DispatchGlobalAnnouncement(Loc.GetString(proto.Message), playSound: true);
 
         if (proto.Sound != null)
-            Audio.PlayGlobal(proto.Sound, Filter.Broadcast(), true);
+            _announcementSound.Play(proto.Sound, Filter.Broadcast()); // <Onyx-AnnouncementVolume-edited>
     }
 
     private async void SendRoundStartedDiscordMessage()

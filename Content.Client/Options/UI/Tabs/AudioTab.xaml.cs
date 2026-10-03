@@ -30,6 +30,8 @@ public sealed partial class AudioTab : Control
             scale: ContentAudioSystem.MasterVolumeMultiplier);
         masterVolume.ImmediateValueChanged += OnMasterVolumeSliderChanged;
 
+        Control.AddOptionPercentSlider(CCVars.AnnouncementsVolume, SliderVolumeAnnouncements); // <Onyx-AnnouncementVolume>
+
         // Onyx Barks start
         Control.AddOptionPercentSlider(
             CCVars.BarksVolume,

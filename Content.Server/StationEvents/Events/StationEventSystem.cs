@@ -45,7 +45,7 @@ public abstract partial class StationEventSystem<T> : GameRuleSystem<T> where T 
         if (stationEvent.StartAnnouncement != null)
             ChatSystem.DispatchFilteredAnnouncement(allPlayersInGame, Loc.GetString(stationEvent.StartAnnouncement), playSound: false, colorOverride: stationEvent.StartAnnouncementColor);
 
-        Audio.PlayGlobal(stationEvent.StartAudio, allPlayersInGame, true);
+        AnnouncementSound.Play(stationEvent.StartAudio, allPlayersInGame); // <Onyx-AnnouncementVolume-edited>
     }
 
     /// <inheritdoc/>
@@ -88,7 +88,7 @@ public abstract partial class StationEventSystem<T> : GameRuleSystem<T> where T 
         if (stationEvent.EndAnnouncement != null)
             ChatSystem.DispatchFilteredAnnouncement(allPlayersInGame, Loc.GetString(stationEvent.EndAnnouncement), playSound: false, colorOverride: stationEvent.EndAnnouncementColor);
 
-        Audio.PlayGlobal(stationEvent.EndAudio, allPlayersInGame, true);
+        AnnouncementSound.Play(stationEvent.EndAudio, allPlayersInGame); // <Onyx-AnnouncementVolume-edited>
     }
 
     /// <summary>

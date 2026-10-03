@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Server.Antag;
+using Content.Server._Onyx.Audio;
 using Content.Server.Chat.Systems;
 using Content.Server.GameTicking;
 using Content.Server.GameTicking.Rules;
@@ -24,7 +25,6 @@ using Content.Shared.Nuke;
 using Content.Shared.RoundEnd;
 using Content.Shared.Station.Components;
 using Content.Shared.Station.Systems;
-using Robust.Server.Audio;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
@@ -47,7 +47,7 @@ public sealed partial class XenomorphsRuleSystem : GameRuleSystem<XenomorphsRule
     [Dependency] private PopupSystem _popup = default!;
     [Dependency] private RoundEndSystem _roundEnd = default!;
     [Dependency] private StationSystem _station = default!;
-    [Dependency] private AudioSystem _audio = default!;
+    [Dependency] private AnnouncementSoundSystem _announcementSound = default!;
 
     public override void Initialize()
     {
@@ -240,7 +240,7 @@ public sealed partial class XenomorphsRuleSystem : GameRuleSystem<XenomorphsRule
                     colorOverride: component.AnnouncementColor);
             }
 
-            _audio.PlayGlobal(component.XenomorphInfestationSound, Filter.Broadcast(), true);
+            _announcementSound.Play(component.XenomorphInfestationSound, Filter.Broadcast());
         }
 
         CheckRoundEnd(uid, component, gameRule);
@@ -301,7 +301,7 @@ public sealed partial class XenomorphsRuleSystem : GameRuleSystem<XenomorphsRule
             component.RoundEndTextSender,
             component.RoundEndTextShuttleCall,
             component.RoundEndTextAnnouncement);
-        _audio.PlayGlobal(component.XenomorphTakeoverSound, Filter.Broadcast(), true);
+        _announcementSound.Play(component.XenomorphTakeoverSound, Filter.Broadcast());
 
         component.WinType = WinType.XenoMinor;
         component.WinConditions.Add(WinCondition.XenoTakeoverStation);

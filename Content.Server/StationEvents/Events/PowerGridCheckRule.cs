@@ -149,7 +149,7 @@ namespace Content.Server.StationEvents.Events
             Timer.Spawn(3000,
                 () =>
             {
-                Audio.PlayGlobal(rule.Comp.PowerOnSound, Filter.Broadcast(), true);
+                AnnouncementSound.Play(rule.Comp.PowerOnSound, Filter.Broadcast()); // <Onyx-AnnouncementVolume-edited>
             },
                 rule.Comp.AnnounceCancelToken.Token);
             rule.Comp.Unpowered.Clear();
