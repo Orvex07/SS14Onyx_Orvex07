@@ -340,8 +340,7 @@ public sealed partial class MobThresholdSystem : EntitySystem
             if (CheckVitalDamage(target, damageableComponent) < threshold) // <Onyx-VitalDamage-edited>
                 continue;
 
-            mobState = AdjustStateForConsciousness(target, mobState); // <Onyx-Consciousness>
-            TriggerThreshold(target, mobState, mobStateComponent, thresholdsComponent, origin);
+            TriggerThreshold(target, AdjustStateForConsciousness(target, mobState), mobStateComponent, thresholdsComponent, origin); // <Onyx-Consciousness-edited>
             break;
         }
     }
