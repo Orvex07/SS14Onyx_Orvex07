@@ -123,6 +123,13 @@ namespace Content.Client.PDA
                 // </Onyx-StationTime-edited>
             };
 
+            // <Onyx-StationTime>
+            ShiftDurationButton.OnPressed += _ =>
+            {
+                _clipboard.SetText(FormatShiftDuration());
+            };
+            // </Onyx-StationTime>
+
             StationAlertLevelInstructionsButton.OnPressed += _ =>
             {
                 _clipboard.SetText(_instructions);

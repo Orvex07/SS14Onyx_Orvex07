@@ -93,6 +93,7 @@ public sealed partial class ModernPdaMenu : PdaWindow
         StationNameButton.OnPressed += _ => _clipboard.SetText(_stationName);
         StationAlertLevelButton.OnPressed += _ => _clipboard.SetText(_alertLevel);
         StatusTimeButton.OnPressed += _ => _clipboard.SetText(GetStationTime());
+        ShiftDurationButton.OnPressed += _ => _clipboard.SetText(GetShiftDuration());
         StationAlertLevelInstructionsButton.OnPressed += _ => _clipboard.SetText(_instructions);
         AddressCopyButton.OnPressed += _ => _clipboard.SetText(_address);
 
@@ -448,12 +449,18 @@ public sealed partial class ModernPdaMenu : PdaWindow
     private void UpdateStationTime()
     {
         StatusTimeLabel.Text = GetStationTime();
+
+        ShiftDurationLabel.SetMarkup(Loc.GetString("comp-pda-ui-station-time",
+            ("time", GetShiftDuration())));
+    }
+
+    private string GetShiftDuration()
+    {
         var duration = _gameTicker.RoundDuration();
         if (duration < TimeSpan.Zero)
             duration = TimeSpan.Zero;
 
-        ShiftDurationLabel.SetMarkup(Loc.GetString("comp-pda-ui-station-time",
-            ("time", $"{(int) duration.TotalHours:00}:{duration.Minutes:00}:{duration.Seconds:00}")));
+        return $"{(int) duration.TotalHours:00}:{duration.Minutes:00}:{duration.Seconds:00}";
     }
 
     protected override void Draw(DrawingHandleScreen handle)

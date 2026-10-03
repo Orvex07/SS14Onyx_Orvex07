@@ -153,6 +153,7 @@ public sealed partial class ClientGameTicker : GameTicker
         StartTime = message.StartTime;
         RoundStartTimeSpan = message.RoundStartTimeSpan;
         IsGameStarted = message.IsRoundStarted;
+        RunLevel = message.IsRoundStarted ? GameRunLevel.InRound : GameRunLevel.PreRoundLobby; // <Onyx-StationTime>
         AreWeReady = message.YouAreReady;
         LobbyBackground = message.LobbyBackground;
         Paused = message.Paused;

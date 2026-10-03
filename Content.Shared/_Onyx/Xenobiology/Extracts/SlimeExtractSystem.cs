@@ -1,4 +1,5 @@
 using Content.Shared._Onyx.Xenobiology.Slimes;
+using Content.Shared.Chemistry;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reaction;
 using Content.Shared.EntityEffects;
@@ -6,6 +7,7 @@ using Content.Shared.Examine;
 using Content.Shared.Tag;
 using Content.Shared.Chemistry.Components;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Shared._Onyx.Xenobiology.Extracts;
 
@@ -17,11 +19,13 @@ public sealed partial class SlimeExtractSystem : EntityEffectSystem<SlimeExtract
     [Dependency] private SharedEntityEffectsSystem _effects = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
     [Dependency] private TagSystem _tags = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<SlimeExtractComponent, ExaminedEvent>(OnExamined);
+        SubscribeLocalEvent<SlimeExtractComponent, SolutionChangedEvent>(OnSolutionChanged);
     }
 
     protected override void Effect(Entity<SlimeExtractComponent> entity, ref EntityEffectEvent<UseSlimeExtract> args)
@@ -72,6 +76,43 @@ public sealed partial class SlimeExtractSystem : EntityEffectSystem<SlimeExtract
     {
         if (entity.Comp.Used)
             args.PushText(Loc.GetString("xenobio-slime-extract-examine-used"));
+    }
+
+    private void OnSolutionChanged(Entity<SlimeExtractComponent> entity, ref SolutionChangedEvent args)
+    {
+        if (_timing.ApplyingState)
+            return;
+
+        if (entity.Comp.Used || entity.Comp.Processing)
+            return;
+
+        if (!TryComp<ReactiveComponent>(entity, out var reactive) || reactive.Reactions == null)
+            return;
+
+        if (!_solutions.TryGetRefillableSolution(entity.Owner, out _, out var contents) || contents.Volume == 0)
+            return;
+
+        foreach (var entry in reactive.Reactions)
+        {
+            if (entry.Reagents == null)
+                continue;
+
+            if (!entry.Methods.Contains(ReactionMethod.Touch)
+                && !entry.Methods.Contains(ReactionMethod.Injection))
+                continue;
+
+            var scale = 0f;
+            foreach (var reagent in entry.Reagents)
+            {
+                scale += contents.GetTotalPrototypeQuantity(reagent).Float();
+            }
+
+            if (scale <= 0f)
+                continue;
+
+            _effects.ApplyEffects(entity, entry.Effects, scale);
+            return;
+        }
     }
 }
 

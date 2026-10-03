@@ -382,8 +382,11 @@ public sealed partial class ClothingDirtSystem : EntitySystem
             if (removed <= 0)
                 continue;
 
-            dirt.RemoveReagent(cleaner.Reagent,
-                FixedPoint2.Min(cleaner.Quantity, removed / multiplier));
+            var toConsume = FixedPoint2.Min(cleaner.Quantity, removed / multiplier);
+            if (toConsume <= 0)
+                toConsume = FixedPoint2.Min(cleaner.Quantity, FixedPoint2.Epsilon);
+            if (toConsume > 0)
+                dirt.RemoveReagent(cleaner.Reagent, toConsume);
             changed = true;
         }
 
@@ -404,12 +407,28 @@ public sealed partial class ClothingDirtSystem : EntitySystem
             if (remaining <= 0 || IsCleaner(reagent.Reagent))
                 continue;
             var quantity = FixedPoint2.Min(reagent.Quantity / washable * original, remaining);
+            if (quantity <= 0)
+                quantity = FixedPoint2.Min(reagent.Quantity, remaining);
             var current = dirt.RemoveReagent(reagent.Reagent, quantity, preserveOrder: true);
             if (current > 0)
             {
                 runoff?.AddReagent(reagent.Reagent, current);
                 removed += current;
             }
+            remaining -= current;
+        }
+
+        foreach (var reagent in dirt.Contents.ToArray())
+        {
+            if (remaining <= 0)
+                break;
+            if (IsCleaner(reagent.Reagent))
+                continue;
+            var current = dirt.RemoveReagent(reagent.Reagent, remaining, preserveOrder: true);
+            if (current <= 0)
+                continue;
+            runoff?.AddReagent(reagent.Reagent, current);
+            removed += current;
             remaining -= current;
         }
 
