@@ -22,6 +22,12 @@ public partial struct StampDisplayInfo
 
     [DataField("stampedColor")]
     public Color StampedColor;
+
+    /// <summary>
+    /// Texture displayed as the stamp impression. A bare name supports legacy Goob map data.
+    /// </summary>
+    [DataField]
+    public string? StampLargeIcon; // <Onyx-StampImages>
 };
 
 [RegisterComponent]

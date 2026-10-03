@@ -195,6 +195,7 @@ public sealed partial class PaperSystem : EntitySystem
     {
         return new StampDisplayInfo
         {
+            StampLargeIcon = stamp.StampLargeIcon, // <Onyx-StampImages>
             StampedName = stamp.StampedName,
             StampedColor = stamp.StampedColor
         };

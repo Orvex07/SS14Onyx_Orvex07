@@ -25,6 +25,10 @@ public sealed partial class StampWidget : PanelContainer
 
     public StampDisplayInfo StampInfo {
         set {
+            // <Onyx-StampImages>
+            if (TrySetStampImage(value))
+                return;
+            // </Onyx-StampImages>
             StampedByLabel.Text = Loc.GetString(value.StampedName);
             StampedByLabel.FontColorOverride = value.StampedColor;
             ModulateSelfOverride = value.StampedColor;

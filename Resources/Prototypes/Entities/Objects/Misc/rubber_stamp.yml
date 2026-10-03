@@ -56,6 +56,7 @@
     stampedName: stamp-component-stamped-name-captain
     stampedColor: "#3681bb"
     stampState: "paper_stamp-cap"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-cap.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-cap
   - type: Item
@@ -79,6 +80,7 @@
     stampedName: stamp-component-stamped-name-centcom
     stampedColor: "#006600"
     stampState: "paper_stamp-centcom"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-centcom.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-centcom
   - type: Item
@@ -102,6 +104,7 @@
     stampedName: stamp-component-stamped-name-chaplain
     stampedColor: "#d70601"
     stampState: "paper_stamp-chaplain"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-chap.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-chaplain
   - type: Item
@@ -125,6 +128,7 @@
     stampedName: stamp-component-stamped-name-lawyer
     stampedColor: "#233D57"
     stampState: "paper_stamp-lawyer"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-law.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-lawyer
   - type: Item
@@ -148,6 +152,7 @@
     stampedName: stamp-component-stamped-name-clown
     stampedColor: "#ff33cc"
     stampState: "paper_stamp-clown"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-clown.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-clown
   - type: Item
@@ -171,6 +176,7 @@
     stampedName: stamp-component-stamped-name-ce
     stampedColor: "#c69b17"
     stampState: "paper_stamp-ce"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-ce.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-ce
   - type: Item
@@ -194,6 +200,7 @@
     stampedName: stamp-component-stamped-name-cmo
     stampedColor: "#33ccff"
     stampState: "paper_stamp-cmo"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-cmo.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-cmo
   - type: Item
@@ -217,6 +224,7 @@
     stampedName: stamp-component-stamped-name-hop
     stampedColor: "#6ec0ea"
     stampState: "paper_stamp-hop"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-hop.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-hop
   - type: Item
@@ -240,6 +248,7 @@
     stampedName: stamp-component-stamped-name-hos
     stampedColor: "#cc0000"
     stampState: "paper_stamp-hos"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-hos.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-hos
   - type: Item
@@ -263,6 +272,7 @@
     stampedName: stamp-component-stamped-name-mime
     stampedColor: "#777777"
     stampState: "paper_stamp-mime"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-mime.png # <Onyx-StampImages>
     sound: null
   - type: Sprite
     state: stamp-mime
@@ -287,6 +297,7 @@
     stampedName: stamp-component-stamped-name-qm
     stampedColor: "#a23e3e"
     stampState: "paper_stamp-qm"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-qm.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-qm
   - type: Item
@@ -310,6 +321,7 @@
     stampedName: stamp-component-stamped-name-rd
     stampedColor: "#1f66a0"
     stampState: "paper_stamp-rd"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-rd.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-rd
   - type: Item
@@ -355,6 +367,7 @@
     stampedName: stamp-component-stamped-name-syndicate
     stampedColor: "#850000"
     stampState: "paper_stamp-syndicate"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-syndicate.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-syndicate
   - type: StaticPrice
@@ -402,6 +415,7 @@
     stampedName: stamp-component-stamped-name-approved
     stampedColor: "#00be00"
     stampState: "paper_stamp-approve" # Corvax-IAA: paper_stamp-ok state is IAA!
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-ok.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-ok
   - type: Item
@@ -424,6 +438,7 @@
     stampedName: stamp-component-stamped-name-denied
     stampedColor: "#a23e3e"
     stampState: "paper_stamp-deny"
+    stampLargeIcon: /Textures/_Onyx/Interface/Paper/Stamps/large_stamp-deny.png # <Onyx-StampImages>
   - type: Sprite
     state: stamp-deny
   - type: Item
