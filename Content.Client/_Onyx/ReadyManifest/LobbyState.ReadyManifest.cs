@@ -24,7 +24,7 @@ public sealed partial class LobbyState
 
     private void UpdateReadyManifest()
     {
-        Lobby!.ReadyManifestButton.Disabled = _gameTicker.IsGameStarted;
+        Lobby!.ReadyManifestButton.Visible = !_gameTicker.IsGameStarted;
     }
 
     private void OnReadyManifestPressed(BaseButton.ButtonEventArgs args)
