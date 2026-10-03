@@ -71,6 +71,8 @@ public sealed partial class NerveSystem : EntitySystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private TraumaProtectionSystem _traumaProtection = default!;
 
+    private const float MinPainFeels = 0.2f;
+
     public override void Initialize()
     {
         base.Initialize();
@@ -126,6 +128,9 @@ public sealed partial class NerveSystem : EntitySystem
 
         var severity = PositiveDamage(args.Damage);
         if (severity < nerve.Comp.MinimumHitDamage || nerve.Comp.MaxDamage <= FixedPoint2.Zero)
+            return;
+
+        if (nerve.Comp.PainFeels < FixedPoint2.New(MinPainFeels))
             return;
 
         var protection = _traumaProtection.GetProtection(args.Body, part, TraumaType.NerveDamage);

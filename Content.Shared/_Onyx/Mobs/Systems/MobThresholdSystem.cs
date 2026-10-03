@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Shared._Onyx.Consciousness;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared.Body;
 using Content.Shared.Body.Part;
@@ -7,6 +8,7 @@ using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
+using Content.Shared.Mobs;
 
 namespace Content.Shared.Mobs.Systems;
 
@@ -47,5 +49,26 @@ public sealed partial class MobThresholdSystem
             result += systemic.Damage.GetTotal();
 
         return result;
+    }
+
+    /// <summary>
+    /// Reconciles a damage-threshold state with consciousness, so the threshold
+    /// system stays the single owner of recovery and stops fighting
+    /// ConsciousnessSystem (Alive flicker at zero vital damage).
+    /// Unconscious bodies never drop below Critical via thresholds;
+    /// ForceDead bodies never drop below Dead.
+    /// </summary>
+    public MobState AdjustStateForConsciousness(EntityUid target, MobState newState)
+    {
+        if (newState != MobState.Alive || !TryComp(target, out ConsciousnessComponent? consciousness))
+            return newState;
+
+        if (consciousness.ForceDead)
+            return MobState.Dead;
+
+        if (!consciousness.IsConscious)
+            return MobState.Critical;
+
+        return newState;
     }
 }

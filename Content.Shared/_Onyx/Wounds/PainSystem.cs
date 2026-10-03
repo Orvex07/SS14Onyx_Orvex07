@@ -56,6 +56,9 @@ public sealed partial class PainSystem : EntitySystem
     public const string AdminPainIdentifier = "AdminPain";
     public const string NerveDamageFeelsIdentifier = "NerveDamage";
 
+    private const float NerveDamagePainMultiplier = 1.4f;
+    private const float NerveDamageSecondsPerPoint = 2.4f;
+
     private static readonly FixedPoint2 DefaultPainCap = 200;
     private float _updateAccumulator;
 
@@ -680,7 +683,7 @@ public sealed partial class PainSystem : EntitySystem
         if (!Resolve(nerveUid, ref nerve, false))
             return pain;
 
-        var modifiedPain = pain * nerve.PainMultiplier * FixedPoint2.Max(FixedPoint2.Zero, nerve.PainFeels);
+        var modifiedPain = pain * nerve.PainMultiplier;
 
         var toMultiply = FixedPoint2.Zero;
         var matching = 0;
@@ -1036,16 +1039,35 @@ public sealed partial class PainSystem : EntitySystem
 
         if (args.Damage > FixedPoint2.Zero)
         {
+            var delta = args.Damage - args.OldDamage;
+            TimeSpan? duration = delta > FixedPoint2.Zero
+                ? TimeSpan.FromSeconds(Math.Max(1f, delta.Float() * NerveDamageSecondsPerPoint))
+                : null;
+
             if (!TryAddPainFeelsModifier(nerve.Owner, NerveDamageFeelsIdentifier, nerve.Owner,
-                    FixedPoint2.New(-0.28f), nerve.Comp))
+                    FixedPoint2.New(-0.28f), nerve.Comp, duration))
             {
                 TrySetPainFeelsModifier(nerve.Owner, NerveDamageFeelsIdentifier, nerve.Owner,
-                    FixedPoint2.New(-0.28f), null, nerve.Comp);
+                    FixedPoint2.New(-0.28f), duration, nerve.Comp);
+            }
+
+            if (TryComp(nerve.Comp.ParentedNerveSystem, out NervousSystemComponent? hub))
+            {
+                var hubUid = nerve.Comp.ParentedNerveSystem;
+                if (!TryAddPainMultiplier(hubUid, NerveDamageFeelsIdentifier,
+                        FixedPoint2.New(NerveDamagePainMultiplier), PainDamageTypes.WoundPain, hub, duration))
+                {
+                    TryChangePainMultiplier(hubUid, NerveDamageFeelsIdentifier,
+                        FixedPoint2.New(NerveDamagePainMultiplier), duration, PainDamageTypes.WoundPain, hub);
+                }
             }
         }
         else
         {
             TryRemovePainFeelsModifier(nerve.Owner, NerveDamageFeelsIdentifier, nerve.Owner, nerve.Comp);
+
+            if (TryComp(nerve.Comp.ParentedNerveSystem, out NervousSystemComponent? hub))
+                TryRemovePainMultiplier(nerve.Comp.ParentedNerveSystem, NerveDamageFeelsIdentifier, hub);
         }
     }
 
