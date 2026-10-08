@@ -24,6 +24,28 @@
             }
         },
         {
+            "label": "build-release",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "build",
+                "--configuration",
+                "Release",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:'ForceNoAlign;NoSummary'"
+            ],
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile",
+            "runOptions": {
+                "instanceLimit": 1
+            }
+        },
+        {
             "label": "build (C# Dev Kit)",
             "detail": "needs C# Dev Kit extention. use the (build) task instead if you dont have the extention.",
             "type": "dotnet",

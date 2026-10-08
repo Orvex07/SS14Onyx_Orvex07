@@ -14,6 +14,15 @@
             "stopAtEntry": false
         },
         {
+            "name": "Client (Release)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Content.Client/Content.Client.dll",
+            "args": [],
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
             "name": "Client (Compatibility renderer)",
             "type": "coreclr",
             "request": "launch",
@@ -24,6 +33,15 @@
         },
         {
             "name": "Server",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Content.Server/Content.Server.dll",
+            "args": [],
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Server (Release)",
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/bin/Content.Server/Content.Server.dll",
@@ -50,6 +68,14 @@
                 "Client"
             ],
             "preLaunchTask": "build"
+        },
+        {
+            "name": "Server/Client (Release)",
+            "configurations": [
+                "Server (Release)",
+                "Client (Release)"
+            ],
+            "preLaunchTask": "build-release"
         }
     ]
 }
