@@ -12,15 +12,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name != 'merge_group' }}
 
+permissions:
+  contents: read
+
+env:
+  # Optional override; defaults and process timeouts live in sharding.py.
+  ONYX_TEST_SHARDS: ${{ vars.ONYX_TEST_SHARDS }}
+
 jobs:
   build:
+    name: build (ubuntu-latest)
     if: github.actor != 'IanComradeBot' && github.event.pull_request.draft == false
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 50
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
 
     steps:
     - name: Checkout Master
@@ -46,32 +52,149 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
+    - name: Test Onyx CI tooling
+      run: python3 -m unittest discover -s Tools/_Onyx/ci -p 'test_*.py' -v
+
+    - name: Restore timing hints from successful master runs
+      uses: actions/cache/restore@v4
+      with:
+        path: .ci-timings
+        key: onyx-nunit-v2-master-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: onyx-nunit-v2-master-
+
     - name: Build Project
       run: dotnet build --configuration DebugOpt --no-restore /m
 
-    - name: Run Content.Tests
-      shell: pwsh
-      run: dotnet test --no-build --configuration DebugOpt Content.Tests/Content.Tests.csproj -- NUnit.ConsoleOut=0 NUnit.TestOutputXml="logs" NUnit.WorkDirectory="$(pwd)/test_results"
-
-    - name: Run Content.IntegrationTests
-      shell: pwsh
+    - name: Discover and plan tests
+      id: plan
       run: |
-        $env:DOTNET_gcServer=1
-        dotnet test --no-build --configuration DebugOpt Content.IntegrationTests/Content.IntegrationTests.csproj -- NUnit.ConsoleOut=0 NUnit.MapWarningTo=Failed NUnit.TestOutputXml="logs" NUnit.WorkDirectory="$(pwd)/test_results"
+        python3 Tools/_Onyx/ci/sharding.py prepare
+        echo "matrix=$(jq -c . .ci-plan/matrix.json)" >> "$GITHUB_OUTPUT"
 
-    - name: Archive NUnit3 test results.
+    - name: Pack test runtime
+      run: |
+        # Onyx source-contract tests also need the exact source snapshot.
+        tar --exclude='*/obj' --exclude='*/bin' -czf onyx-test-runtime.tar.gz \
+          .ci-plan Tools/_Onyx/ci/sharding.py \
+          bin/Content.Tests bin/Content.IntegrationTests \
+          Content.Client Content.Server Content.Shared Content.IntegrationTests \
+          Resources RobustToolbox/Resources
+
+    - name: Upload test runtime
+      uses: actions/upload-artifact@v4
+      with:
+        name: onyx-test-runtime
+        path: onyx-test-runtime.tar.gz
+        compression-level: 0
+        retention-days: 1
+
+    - name: Upload discovery diagnostics
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: nunit3-results-${{ matrix.os }}
-        path: test_results/*
+        name: onyx-test-discovery
+        path: .ci-plan
+        include-hidden-files: true
         retention-days: 7
-        compression-level: 9
+
+  tests:
+    name: ${{ matrix.suite }} (${{ matrix.shard }})
+    needs: build
+    runs-on: ubuntu-latest
+    # Includes time to download/unpack/upload, beyond the test process timeout.
+    timeout-minutes: ${{ matrix.suite == 'unit' && 25 || 45 }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.build.outputs.matrix) }}
+    steps:
+    - uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+    - uses: actions/download-artifact@v4
+      with:
+        name: onyx-test-runtime
+    - name: Unpack test runtime
+      run: |
+        tar -xzf onyx-test-runtime.tar.gz
+        mkdir -p bin/Content.Client bin/Content.Server
+    - name: Run tests
+      env:
+        SUITE: ${{ matrix.suite }}
+        ASSEMBLY: ${{ matrix.assembly }}
+        SHARD: ${{ matrix.shard }}
+        TEST_TIMEOUT: ${{ matrix.timeout }}
+      run: |
+        if [ "$SUITE" = integration ]; then export DOTNET_gcServer=1; fi
+        results="test_results/$SUITE/$SHARD"
+        test ! -e "$results"
+        mkdir -p "$results"
+        timeout --kill-after=30s "${TEST_TIMEOUT}s" dotnet test "bin/$ASSEMBLY/$ASSEMBLY.dll" \
+          --settings ".ci-plan/$SUITE/$SHARD.runsettings" \
+          --logger 'trx;LogFileName=results.trx' --results-directory "$results" \
+          --blame-hang --blame-hang-timeout 5min --blame-hang-dump-type mini \
+          -- NUnit.WorkDirectory="$PWD/$results" > "$results/test.log" 2>&1
+    - name: Upload shard results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: nunit3-${{ matrix.suite }}-results-${{ matrix.shard }}
+        path: test_results
+        if-no-files-found: error
+        retention-days: 7
+
+  verify:
+    needs: [build, tests]
+    if: always() && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: onyx-test-runtime
+    - name: Unpack accounting tools and plan
+      run: tar -xzf onyx-test-runtime.tar.gz .ci-plan Tools/_Onyx/ci/sharding.py
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: nunit3-*-results*
+        path: test_results
+        merge-multiple: true
+    - uses: actions/cache/restore@v4
+      with:
+        path: .ci-timings
+        key: onyx-nunit-v2-master-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: onyx-nunit-v2-master-
+    - name: Require successful workers
+      env:
+        TEST_RESULT: ${{ needs.tests.result }}
+      run: test "$TEST_RESULT" = success
+    - name: Verify complete coverage and collect timings
+      run: python3 Tools/_Onyx/ci/sharding.py verify
+    - name: Upload timing snapshot
+      uses: actions/upload-artifact@v4
+      with:
+        name: onyx-test-timings
+        path: .ci-timings/timings.json
+        include-hidden-files: true
+        retention-days: 7
+    - name: Save immutable timing snapshot from successful master push
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
+      uses: actions/cache/save@v4
+      with:
+        path: .ci-timings
+        key: onyx-nunit-v2-master-${{ github.run_id }}-${{ github.run_attempt }}
+
   ci-success:
     name: Build & Test Debug
-    needs:
-      - build
+    needs: [build, tests, verify]
+    if: always() && github.actor != 'IanComradeBot' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
-      - name: CI succeeded
-        run: exit 0
+    - name: Require every mandatory check
+      env:
+        BUILD_RESULT: ${{ needs.build.result }}
+        TEST_RESULT: ${{ needs.tests.result }}
+        VERIFY_RESULT: ${{ needs.verify.result }}
+      run: |
+        test "$BUILD_RESULT" = success
+        test "$TEST_RESULT" = success
+        test "$VERIFY_RESULT" = success
