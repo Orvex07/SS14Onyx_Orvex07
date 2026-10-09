@@ -70,6 +70,8 @@ surgery-popup-step-SurgeryStepRepairBruteTissue = { $user } is repairing damaged
 surgery-popup-step-SurgeryStepRepairBurnTissue = { $user } is repairing burned tissue on { $target }'s { $part }!
 surgery-popup-step-SurgeryStepClampWoundBleeding = { $user } is suturing the bleeding wound on { $target }'s { $part }.
 surgery-popup-step-SurgeryStepMendFracture = { $user } is mending the fracture on { $target }'s { $part }.
+surgery-popup-step-SurgeryStepReduceFracture = { $user } is setting the fracture on { $target }'s { $part }.
+surgery-popup-step-SurgeryStepReduceFrameFracture = { $user } is straightening the frame struts on { $target }'s { $part }.
 surgery-popup-step-SurgeryStepMendFrameFracture = { $user } is welding damaged frame struts on { $target }'s { $part }.
 surgery-popup-step-SurgeryStepHealAmputationConsequence = { $user } is repairing the amputation damage on { $target }'s { $part }.
 surgery-popup-step-SurgeryStepStopInternalBleeding = { $user } is stopping internal bleeding in { $target }'s { $part }.
@@ -283,8 +285,9 @@ surgery-infection-protection-examine-verb-text = Sterility
 surgery-infection-protection-examine-verb-message = Assess infection protection during surgery.
 surgery-infection-protection-examine =
     { $tier ->
-        [full] [color=green]This item is fully sterile: infection during surgery is ruled out.[/color]
-        [high] This item is almost fully sterile and reliably prevents infection ({ $protection }%).
-        [medium] This item is partially sterile and noticeably reduces the risk of infection ({ $protection }%).
-        *[low] This item is weakly sterile and only slightly reduces the risk of infection ({ $protection }%).
+        [full] [color=green]This item is fully sterile: infection during surgery is ruled out (sterility { $protection }).[/color]
+        [high] This item is almost fully sterile and reliably prevents infection (sterility { $protection }).
+        [medium] This item is partially sterile and noticeably reduces the risk of infection (sterility { $protection }).
+        *[low] This item is weakly sterile and only slightly reduces the risk of infection (sterility { $protection }).
     }
+surgery-infection-protection-examine-soiled = [color=red]This item is stained with someone else's blood: it grants no protection and lowers total sterility by { $penalty } when operating on other patients.[/color]

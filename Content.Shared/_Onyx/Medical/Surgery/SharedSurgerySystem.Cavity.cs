@@ -7,6 +7,16 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
+    private void InitializeCavity()
+    {
+        SubscribeLocalEvent<SurgeryCavityConditionComponent, SurgeryValidEvent>(OnCavityConditionValid);
+        SubscribeLocalEvent<SurgeryInsertCavityItemEffectComponent, SurgeryStepEvent>(OnInsertCavityItem);
+        SubscribeLocalEvent<SurgeryInsertCavityItemEffectComponent, SurgeryStepCompleteCheckEvent>(OnInsertCavityItemCheck);
+        SubscribeLocalEvent<SurgeryInsertCavityItemEffectComponent, SurgeryCanPerformStepEvent>(OnInsertCavityItemCanPerform);
+        SubscribeLocalEvent<SurgeryRemoveCavityItemEffectComponent, SurgeryStepEvent>(OnRemoveCavityItem);
+        SubscribeLocalEvent<SurgeryRemoveCavityItemEffectComponent, SurgeryStepCompleteCheckEvent>(OnRemoveCavityItemCheck);
+    }
+
     private void OnCavityConditionValid(Entity<SurgeryCavityConditionComponent> ent, ref SurgeryValidEvent args)
     {
         if (CavityOccupied(args.Part) != ent.Comp.Occupied)

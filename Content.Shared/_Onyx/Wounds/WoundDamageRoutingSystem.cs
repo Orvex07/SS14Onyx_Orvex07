@@ -24,6 +24,12 @@ using Robust.Shared.Random;
 
 namespace Content.Shared._Onyx.Wounds;
 
+/// <summary>
+/// Routes body damage to woundable parts: targeted, distributed, explosion and lethal paths.
+/// Vanilla <see cref="DamageableSystem"/> stays the transport; this system intercepts,
+/// splits and re-applies damage per part, then projects it back for visuals and thresholds.
+/// Re-entrancy is guarded by the routing/applied flag sets below.
+/// </summary>
 public sealed partial class WoundDamageRoutingSystem : EntitySystem
 {
     [Dependency] private DamageableSystem _damage = default!;
@@ -45,8 +51,8 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
     private readonly HashSet<EntityUid> _explosionDamage = new();
     private readonly Dictionary<EntityUid, EntityUid> _explosionAmputationCandidates = new();
     private readonly Dictionary<EntityUid, float> _woundSeverityMultipliers = new();
-    private readonly Dictionary<EntityUid, IReadOnlySet<TreatmentCapability>> _treatmentCapabilities = new();
-    private readonly Dictionary<EntityUid, DamageSpecifier> _pendingExplosionDamage = new();
+    private readonly Dictionary<EntityUid, Stack<IReadOnlySet<TreatmentCapability>>> _treatmentCapabilities = new();
+    private readonly Dictionary<EntityUid, Queue<DamageSpecifier>> _pendingExplosionDamage = new();
     private readonly HashSet<EntityUid> _vanillaExplosionDamage = new();
     private readonly HashSet<EntityUid> _skipPartArmor = new();
 
@@ -63,8 +69,14 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
 
     private void OnBeforeExplode(Entity<WoundHostComponent> ent, ref BeforeExplodeEvent args)
     {
-        if (_net.IsServer && HasComp<DamageableComponent>(ent))
-            _pendingExplosionDamage[ent] = args.Damage;
+        if (!_net.IsServer || !HasComp<DamageableComponent>(ent))
+            return;
+
+        if (!_pendingExplosionDamage.TryGetValue(ent, out var queue))
+            _pendingExplosionDamage[ent] = queue = new();
+        while (queue.Count >= 8)
+            queue.Dequeue();
+        queue.Enqueue(args.Damage);
     }
 
     private void OnDamageChanged(Entity<WoundHostComponent> ent, ref DamageChangedEvent args)
@@ -91,11 +103,27 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
             return;
 
         _vanillaExplosionDamage.Remove(ent);
-        if (_pendingExplosionDamage.Remove(ent, out var explosionDamage) &&
-            ReferenceEquals(explosionDamage, args.Damage))
+        if (_pendingExplosionDamage.TryGetValue(ent, out var queue) && queue.Count > 0)
         {
-            _vanillaExplosionDamage.Add(ent);
-            return;
+            var matched = false;
+            var remaining = queue.Count;
+            for (var i = 0; i < remaining; i++)
+            {
+                var candidate = queue.Dequeue();
+                if (!matched && ReferenceEquals(candidate, args.Damage))
+                {
+                    matched = true;
+                    continue;
+                }
+                queue.Enqueue(candidate);
+            }
+            if (queue.Count == 0)
+                _pendingExplosionDamage.Remove(ent);
+            if (matched)
+            {
+                _vanillaExplosionDamage.Add(ent);
+                return;
+            }
         }
 
         if (ResolveDamagePart(ent, null) is null)
@@ -115,6 +143,9 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         RouteAppliedDamage(ent, damage, args.Origin, args.InterruptsDoAfters);
     }
 
+    /// <summary>
+    /// Applies the deferred explosion split after vanilla damage. Server only.
+    /// </summary>
     public bool ApplyExplosionDamageAfterVanilla(
         EntityUid body,
         DamageSpecifier damage,
@@ -158,16 +189,23 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// Runs an action with temporary treatment capabilities for the body (healing item context).
+    /// </summary>
     public void WithTreatmentCapabilities(EntityUid body, IReadOnlySet<TreatmentCapability> capabilities, Action action)
     {
-        _treatmentCapabilities[body] = capabilities;
+        if (!_treatmentCapabilities.TryGetValue(body, out var stack))
+            _treatmentCapabilities[body] = stack = new();
+        stack.Push(capabilities);
         try
         {
             action();
         }
         finally
         {
-            _treatmentCapabilities.Remove(body);
+            stack.Pop();
+            if (stack.Count == 0)
+                _treatmentCapabilities.Remove(body);
         }
     }
 
@@ -182,6 +220,9 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
             args.Damage.DamageDict[type] = amount;
     }
 
+    /// <summary>
+    /// Routes damage to a wound host, optionally forcing a requested part. Server only.
+    /// </summary>
     public bool TryApplyDamage(
         EntityUid body,
         DamageSpecifier damage,
@@ -213,6 +254,9 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// Routes damage and reports the resulting delta. Server only.
+    /// </summary>
     public bool TryApplyOriginDamage(
         EntityUid body,
         DamageSpecifier damage,
@@ -262,6 +306,9 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         return true;
     }
 
+    /// <summary>
+    /// Applies damage to a specific part of the body. Thin wrapper over <see cref="TryApplyDamage"/>.
+    /// </summary>
     public bool TryApplyPartDamage(
         EntityUid body,
         EntityUid part,
@@ -284,6 +331,10 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
         var hadRequestedPart = _requestedParts.Remove(body, out var requestedPart);
         var hadAppliedDamage = _applied.Remove(body);
         var skippedWoundHealing = _skipWoundHealing.Remove(body);
+        var hadExplosion = _explosionDamage.Remove(body);
+        var hadExplosionCandidate = _explosionAmputationCandidates.Remove(body, out var explosionCandidate);
+        var hadSeverityMultiplier = _woundSeverityMultipliers.Remove(body, out var severityMultiplier);
+        var skippedPartArmor = _skipPartArmor.Remove(body);
         try
         {
             return TryApplyDamage(body, damage.Clone(), requestedPart: parent);
@@ -297,6 +348,14 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
                 _applied.Add(body);
             if (skippedWoundHealing)
                 _skipWoundHealing.Add(body);
+            if (hadExplosion)
+                _explosionDamage.Add(body);
+            if (hadExplosionCandidate)
+                _explosionAmputationCandidates[body] = explosionCandidate;
+            if (hadSeverityMultiplier)
+                _woundSeverityMultipliers[body] = severityMultiplier;
+            if (skippedPartArmor)
+                _skipPartArmor.Add(body);
         }
     }
 
@@ -1021,9 +1080,10 @@ public sealed partial class WoundDamageRoutingSystem : EntitySystem
 
     private bool CanTreatPart(EntityUid body, EntityUid part)
     {
-        if (!_treatmentCapabilities.TryGetValue(body, out var capabilities))
+        if (!_treatmentCapabilities.TryGetValue(body, out var stack) || stack.Count == 0)
             return true;
 
+        var capabilities = stack.Peek();
         return TryComp(part, out WoundableComponent? woundable) &&
                _prototypes.TryIndex(woundable.Profile, out var profile) &&
                profile.TreatmentCapabilities.Overlaps(capabilities);

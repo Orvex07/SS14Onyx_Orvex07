@@ -7,6 +7,21 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
+    private void InitializeConditions()
+    {
+        SubscribeLocalEvent<SurgeryMarkerConditionComponent, SurgeryValidEvent>(OnMarkerConditionValid);
+        SubscribeLocalEvent<SurgerySpeciesConditionComponent, SurgeryValidEvent>(OnSpeciesConditionValid);
+        SubscribeLocalEvent<SurgeryOrganTagConditionComponent, SurgeryValidEvent>(OnOrganTagConditionValid);
+        SubscribeLocalEvent<SurgeryOrganTagConditionComponent, SurgeryCanPerformStepEvent>(OnOrganTagConditionCanPerform);
+        SubscribeLocalEvent<SurgeryPartConditionComponent, SurgeryValidEvent>(OnPartConditionValid);
+        SubscribeLocalEvent<SurgeryMissingPartConditionComponent, SurgeryValidEvent>(OnMissingPartConditionValid);
+        SubscribeLocalEvent<SurgeryDetachablePartConditionComponent, SurgeryValidEvent>(OnDetachablePartConditionValid);
+        SubscribeLocalEvent<SurgeryComponentConditionComponent, SurgeryValidEvent>(OnComponentConditionValid);
+        SubscribeLocalEvent<SurgeryComponentConditionComponent, SurgeryCanPerformStepEvent>(OnComponentConditionCanPerform);
+        SubscribeLocalEvent<SurgeryOrganConditionComponent, SurgeryValidEvent>(OnOrganConditionValid);
+        SubscribeLocalEvent<SurgeryBloodstreamConditionComponent, SurgeryValidEvent>(OnBloodstreamConditionValid);
+    }
+
     private void OnMarkerConditionValid(Entity<SurgeryMarkerConditionComponent> ent, ref SurgeryValidEvent args)
     {
         var markers = CompOrNull<SurgeryMarkerComponent>(args.Part)?.Markers;

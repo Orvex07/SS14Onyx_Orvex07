@@ -26,9 +26,6 @@ public abstract partial class SharedArmorSystem : EntitySystem
 
         SubscribeLocalEvent<ArmorComponent, InventoryRelayedEvent<CoefficientQueryEvent>>(OnCoefficientQuery);
         SubscribeLocalEvent<ArmorComponent, InventoryRelayedEvent<DamageModifyEvent>>(OnDamageModify);
-        // <Onyx-WoundSystem>
-        SubscribeLocalEvent<ArmorComponent, InventoryRelayedEvent<PartDamageModifyEvent>>(OnPartDamageModify);
-        // </Onyx-WoundSystem>
         SubscribeLocalEvent<ArmorComponent, BorgModuleRelayedEvent<DamageModifyEvent>>(OnBorgDamageModify);
         SubscribeLocalEvent<ArmorComponent, GetVerbsEvent<ExamineVerb>>(OnArmorVerbExamine);
     }
@@ -55,79 +52,17 @@ public abstract partial class SharedArmorSystem : EntitySystem
             return;
 
         // <Onyx-WoundSystem-edited>
-        // Wound hosts apply equipped armor to systemic (whole body) damage here;
-        // localized part damage is armored after the struck body part is resolved via PartDamageModifyEvent.
-        if (TryComp(args.Owner, out WoundHostComponent? host))
+        // Wound hosts are armored by the wound armor system; this keeps the vanilla path.
+        if (HasComp<WoundHostComponent>(args.Owner))
         {
-            args.Args.Damage = ApplyWoundSystemicArmor(args.Args.Damage, component.Modifiers, host);
+            if (TryComp(args.Owner, out WoundHostComponent? host))
+                args.Args.Damage = WoundArmorSystem.ApplyWoundSystemicArmor(args.Args.Damage, component.Modifiers, host);
             return;
         }
         // </Onyx-WoundSystem-edited>
 
         args.Args.Damage = DamageSpecifier.ApplyModifierSet(args.Args.Damage, component.Modifiers);
     }
-
-    // <Onyx-WoundSystem>
-    /// <summary>
-    /// Applies armor modifiers to a wound host's systemic damage only. Localized part
-    /// damage is left untouched so it can be armored after the struck part is resolved.
-    /// </summary>
-    private static DamageSpecifier ApplyWoundSystemicArmor(
-        DamageSpecifier damage,
-        DamageModifierSet modifiers,
-        WoundHostComponent host)
-    {
-        var systemic = new DamageSpecifier(damage);
-        var hasSystemic = false;
-        foreach (var (type, value) in damage.DamageDict)
-        {
-            if (host.LocalizedDamageTypes.Contains(type))
-                systemic.DamageDict.Remove(type);
-            else if (value != 0)
-                hasSystemic = true;
-        }
-
-        if (!hasSystemic)
-            return damage;
-
-        var reduced = DamageSpecifier.ApplyModifierSet(systemic, modifiers);
-
-        var result = damage.Clone();
-        foreach (var (type, _) in systemic.DamageDict)
-        {
-            if (reduced.DamageDict.TryGetValue(type, out var value))
-                result.DamageDict[type] = value;
-            else
-                result.DamageDict.Remove(type);
-        }
-
-        return result;
-    }
-    // </Onyx-WoundSystem>
-
-    // <Onyx-WoundSystem>
-    private void OnPartDamageModify(EntityUid uid, ArmorComponent component, InventoryRelayedEvent<PartDamageModifyEvent> args)
-    {
-        if (TryComp<MaskComponent>(uid, out var mask) && mask.IsToggled)
-            return;
-
-        foreach (var profile in component.PartModifiers)
-        {
-            if (profile.Parts.Count != 0 && !profile.Parts.Contains(args.Args.PartType) ||
-                profile.Symmetry.Count != 0 && !profile.Symmetry.Contains(args.Args.Symmetry))
-                continue;
-
-            args.Args.Damage = DamageSpecifier.ApplyModifierSet(args.Args.Damage, profile.Modifiers);
-            return;
-        }
-
-        // <Onyx-ArmorGlobalProtection-edited>
-        // The armor's global modifiers protect the whole body; they are never skipped
-        // for an individual body part that is not listed in @Coverage/@CoverageSymmetry.
-        args.Args.Damage = DamageSpecifier.ApplyModifierSet(args.Args.Damage, component.Modifiers);
-        // </Onyx-ArmorGlobalProtection-edited>
-    }
-    // </Onyx-WoundSystem>
 
     private void OnBorgDamageModify(EntityUid uid, ArmorComponent component,
         ref BorgModuleRelayedEvent<DamageModifyEvent> args)

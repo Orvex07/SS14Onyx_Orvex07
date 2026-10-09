@@ -28,6 +28,7 @@ public sealed class WoundFractureTest : GameTest
   - type: Damageable
   - type: MovementSpeedModifier
   - type: WoundHost
+  - type: SurgeryTarget
   - type: InitialBody
     organs:
       Chest: WoundFractureTorso

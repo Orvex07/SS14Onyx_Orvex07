@@ -5,6 +5,14 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
+    private void InitializeDamage()
+    {
+        SubscribeLocalEvent<SurgeryDamageEffectComponent, SurgeryStepEvent>(OnDamageEffect);
+        SubscribeLocalEvent<SurgeryFailureDamageComponent, SurgeryStepFailedEvent>(OnFailureDamage);
+        SubscribeLocalEvent<SurgeryBloodFilterEffectComponent, SurgeryStepEvent>(OnBloodFilter);
+        SubscribeLocalEvent<SurgeryBloodFilterEffectComponent, SurgeryStepCompleteCheckEvent>(OnBloodFilterCheck);
+    }
+
     private void OnDamageEffect(Entity<SurgeryDamageEffectComponent> effect, ref SurgeryStepEvent args)
     {
         ApplySurgeryDamage(args.Body, args.Part, args.User, effect.Comp.Target, effect.Comp.Damage,
@@ -32,21 +40,6 @@ public abstract partial class SharedSurgerySystem
     private void ApplySurgeryDamage(EntityUid body, EntityUid part, EntityUid user, SurgeryEntityTarget target,
         Content.Shared.Damage.DamageSpecifier damage, bool healWounds)
     {
-        if (!_net.IsServer || damage.Empty)
-            return;
-
-        var change = new Content.Shared.Damage.DamageSpecifier(damage);
-        switch (target)
-        {
-            case SurgeryEntityTarget.Body:
-                _woundDamage.TryApplyDamage(body, change, user, healWounds: healWounds);
-                break;
-            case SurgeryEntityTarget.Part:
-                _woundDamage.TryApplyPartDamage(body, part, change, user, healWounds: healWounds);
-                break;
-            case SurgeryEntityTarget.User:
-                _damageable.TryChangeDamage(user, change, origin: body);
-                break;
-        }
+        _bridge.ApplySurgeryDamage(body, part, user, target, damage, healWounds);
     }
 }

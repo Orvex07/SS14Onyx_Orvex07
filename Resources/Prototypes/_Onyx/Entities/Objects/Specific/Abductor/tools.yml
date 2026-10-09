@@ -77,6 +77,9 @@
     speedModifiers:
       Retractor: 0.35
       Hemostat: 0.6
+    successModifiers:
+      Retractor: 0.6
+      Hemostat: 0.75
     startSound:
       path: /Audio/Items/wirecutter.ogg
       params:
@@ -131,6 +134,9 @@
     speedModifiers:
       Retractor: 0.45
       Tending: 0.65
+    successModifiers:
+      Retractor: 0.65
+      Tending: 0.8
     startSound:
       collection: Screwdriver
     endSound:

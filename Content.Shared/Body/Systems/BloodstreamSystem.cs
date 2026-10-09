@@ -21,7 +21,7 @@ using Content.Shared.Random.Helpers;
 using Content.Shared.Rejuvenate;
 using Content.Shared.StatusEffectNew;
 using Content.Shared.Bed.Components;
-using Content.Shared._Onyx.Wounds; // Onyx-WoundSystem-edited
+using Content.Shared._Onyx.Wounds; // <Onyx-WoundSystem>
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
@@ -194,9 +194,11 @@ public sealed partial class BloodstreamSystem : EntitySystem
     [SubscribeLocalEvent]
     private void OnDamageChanged(Entity<BloodstreamComponent> ent, ref DamageChangedEvent args)
     {
-        // Onyx-WoundSystem-edited: wound sources project bleeding for migrated bodies.
+        // <Onyx-WoundSystem>
+        // Wound sources project bleeding for migrated bodies.
         if (HasComp<WoundHostComponent>(ent))
             return;
+        // </Onyx-WoundSystem>
 
         // The incoming state from the server raises a DamageChangedEvent as well.
         // But the changes to the bloodstream have also been dirtied,
@@ -502,9 +504,11 @@ public sealed partial class BloodstreamSystem : EntitySystem
         TryBleedOut(entity.AsNullable(), bleed);
 
         // Bleed rate is reduced by the bleed reduction amount in the bloodstream component.
-        // Onyx-WoundSystem-edited: clotting is distributed to wound sources by WoundBleedingSystem.
+        // <Onyx-WoundSystem-edited>
+        // Clotting is distributed to wound sources by WoundBleedingSystem.
         if (!HasComp<WoundHostComponent>(entity))
             TryModifyBleedAmount(entity.AsNullable(), -ev.BleedReductionAmount);
+        // </Onyx-WoundSystem-edited>
     }
 
     /// <summary>

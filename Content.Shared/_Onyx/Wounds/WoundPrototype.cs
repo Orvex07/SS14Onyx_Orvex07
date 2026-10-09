@@ -9,6 +9,9 @@ using Content.Shared._Onyx.Chemistry.Circulation;
 
 namespace Content.Shared._Onyx.Wounds;
 
+/// <summary>
+/// Wound definition: damage conversion, merge policy, severity stages and behavior bricks.
+/// </summary>
 [Prototype]
 public sealed partial class WoundPrototype : IPrototype
 {
@@ -310,3 +313,4 @@ public enum WoundVisibility : byte
     Hidden,
     Visible,
 }
+

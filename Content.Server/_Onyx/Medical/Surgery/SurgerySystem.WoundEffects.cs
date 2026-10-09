@@ -8,20 +8,27 @@ using Robust.Shared.Random;
 
 namespace Content.Server._Onyx.Medical.Surgery;
 
+/// <summary>
+/// Incision part of the server surgery system: bleed, clamp, close and emote steps.
+/// </summary>
 public sealed partial class SurgerySystem
 {
+    /// <summary>Wound prototype opened by incision steps.</summary>
     private static readonly ProtoId<WoundPrototype> SurgicalIncision = "SurgicalIncisionWound";
 
+    /// <summary>Opens the surgical incision wound on step completion.</summary>
     private void OnStepBleedComplete(Entity<SurgeryStepBleedEffectComponent> ent, ref SurgeryStepEvent args)
     {
         _wounds.CreateOrMergeWound(args.Part, SurgicalIncision, ent.Comp.Damage);
     }
 
+    /// <summary>Clamps incision bleeding on step completion.</summary>
     private void OnStepClampBleedComplete(Entity<SurgeryClampBleedEffectComponent> ent, ref SurgeryStepEvent args)
     {
         _bleeding.TreatPart(args.Part, BleedingTreatment.Clamped, SurgicalIncision);
     }
 
+    /// <summary>Closes open incisions, optionally scarring, then removes the wound.</summary>
     private void OnCloseIncisionComplete(Entity<SurgeryCloseIncisionEffectComponent> ent, ref SurgeryStepEvent args)
     {
         var chance = Math.Clamp(_configuration.GetCVar(CCVars.SurgeryScarChance), 0f, 1f);
@@ -42,6 +49,7 @@ public sealed partial class SurgerySystem
         }
     }
 
+    /// <summary>Plays the configured emote on the patient on step completion.</summary>
     private void OnStepEmoteComplete(Entity<SurgeryStepEmoteEffectComponent> ent, ref SurgeryStepEvent args)
     {
         _chat.TryEmoteWithChat(args.Body, ent.Comp.Emote);

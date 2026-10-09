@@ -36,7 +36,7 @@ public sealed partial class AbductorSystem : SharedAbductorSystem
     {
         if (args.HitEntities.Count != 1) return;
         var target = args.HitEntities[0];
-        if (!HasComp<SurgeryTargetComponent>(target)) return;
+        if (!TryComp(target, out SurgeryTargetComponent? surgeryTarget) || !surgeryTarget.CanOperate) return;
         GizmoUse(ent, target, args.User);
     }
 
@@ -54,7 +54,7 @@ public sealed partial class AbductorSystem : SharedAbductorSystem
             return;
         }
 
-        if (HasComp<SurgeryTargetComponent>(args.Target))
+        if (TryComp(args.Target, out SurgeryTargetComponent? surgeryTarget) && surgeryTarget.CanOperate)
             GizmoUse(ent, args.Target.Value, args.User);
     }
 

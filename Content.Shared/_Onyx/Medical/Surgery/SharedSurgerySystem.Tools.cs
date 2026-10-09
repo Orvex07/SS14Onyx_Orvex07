@@ -10,6 +10,14 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
+    private void InitializeTools()
+    {
+        SubscribeLocalEvent<SurgeryStepComponent, SurgeryStepEvent>(OnToolStep);
+        SubscribeLocalEvent<SurgeryStepComponent, SurgeryStepCompleteCheckEvent>(OnToolCheck);
+        SubscribeLocalEvent<SurgeryStepComponent, SurgeryCanPerformStepEvent>(OnToolCanPerform);
+        SubscribeLocalEvent<SurgeryStepPainInflicterComponent, SurgeryStepEvent>(OnPainInflicterStep);
+    }
+
     private void OnToolStep(Entity<SurgeryStepComponent> ent, ref SurgeryStepEvent args)
     {
         if (ent.Comp.ToolQuality is { } quality && !AnyHaveQuality(args.Tools, quality, out _))
@@ -165,6 +173,9 @@ public abstract partial class SharedSurgerySystem
         args.Popup = Loc.GetString("surgery-ui-reason-material");
     }
 
+    /// <summary>
+    /// Computes the step success chance from the worst valid tool modifier.
+    /// </summary>
     protected float GetSurgerySuccessRate(EntityUid step, IEnumerable<EntityUid>? validTools)
     {
         if (validTools == null || !TryComp(step, out SurgeryStepComponent? surgeryStep) || surgeryStep.Tool == null)
@@ -184,6 +195,9 @@ public abstract partial class SharedSurgerySystem
         return successRate;
     }
 
+    /// <summary>
+    /// Returns the surgeon's active hand item as the candidate tool list.
+    /// </summary>
     protected List<EntityUid> GetActiveTool(EntityUid surgeon)
     {
         var tools = new List<EntityUid>(1);
@@ -264,9 +278,10 @@ public abstract partial class SharedSurgerySystem
         {
             if (TerminatingOrDeleted(entity))
                 return false;
-
-            QueueDel(entity);
         }
+
+        foreach (var entity in entities)
+            QueueDel(entity);
 
         return true;
     }

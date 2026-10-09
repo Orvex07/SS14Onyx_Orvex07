@@ -90,6 +90,7 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
             StatusDoll.Visible = false;
             WholeBodyButton.Visible = false;
             NoDataTex.Visible = true;
+            WoundDiagnosticPanel.Visible = false;
             ScanModeLabel.Text = Loc.GetString("health-analyzer-window-entity-unknown-text");
             ScanModeLabel.FontColorOverride = Color.Red;
             StatusLabel.Text = Loc.GetString("health-analyzer-window-entity-unknown-text");
@@ -128,7 +129,7 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
         // <Onyx-HealthAnalyzer-Interface>
         IsHumanoid = _entityManager.HasComponent<HumanoidProfileComponent>(target.Value);
         SpeciesLabel.Visible = IsHumanoid;
-        WoundDiagnosticPanel.Visible = IsHumanoid;
+        WoundDiagnosticPanel.Visible = _entityManager.HasComponent<WoundHostComponent>(target.Value);
         // </Onyx-HealthAnalyzer-Interface>
         DrawDiseases(target.Value); // <Onyx-DiseaseHealthAnalyzer-edited>
         if (_selectedPart is { } selected && (state.PartDamage == null || !state.PartDamage.ContainsKey(selected)))
@@ -231,10 +232,17 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
     }
 
     // <Onyx-HealthAnalyzer-StatusDoll>
-    private void OnPartSelected(TargetBodyPart part) => SelectPart(part);
+    private void OnPartSelected(TargetBodyPart part)
+    {
+        if (!IsHumanoid)
+            return;
+        SelectPart(part);
+    }
 
     private void SelectPart(TargetBodyPart? part)
     {
+        if (!IsHumanoid)
+            return;
         if (_target is not { } target || _state.PartDamage == null || part is { } selected && !_state.PartDamage.ContainsKey(selected))
             return;
 
@@ -268,7 +276,9 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
 
         DrawDiagnosticGroups(
             groups.OrderByDescending(damage => damage.Value).ToDictionary(x => x.Key, x => x.Value),
-            types);
+            types,
+            _state.Bleeding == true && (_state.WoundDiagnostics == null ||
+                !_state.WoundDiagnostics.Parts.Values.Any(diagnostic => diagnostic.BleedingRate > 0f)));
     }
 
     private static string PartKey(TargetBodyPart part) => part.ToString()
@@ -608,9 +618,21 @@ public sealed partial class HealthAnalyzerControl : BoxContainer
 
     private void DrawDiagnosticGroups(
         Dictionary<ProtoId<DamageGroupPrototype>, FixedPoint2> groups,
-        IReadOnlyDictionary<ProtoId<DamageTypePrototype>, FixedPoint2> damageDict)
+        IReadOnlyDictionary<ProtoId<DamageTypePrototype>, FixedPoint2> damageDict,
+        bool bleeding)
     {
         GroupsContainer.RemoveAllChildren();
+
+        if (bleeding)
+        {
+            var bleedingLabel = new RichTextLabel
+            {
+                MaxWidth = 300,
+            };
+            bleedingLabel.SetMessage(FormattedMessage.FromMarkupPermissive(
+                Loc.GetString("health-analyzer-window-entity-bleeding-text")));
+            GroupsContainer.AddChild(bleedingLabel);
+        }
 
         foreach (var (damageGroupId, damageAmount) in groups)
         {

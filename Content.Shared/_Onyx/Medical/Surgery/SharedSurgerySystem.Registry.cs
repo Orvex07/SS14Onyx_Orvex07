@@ -17,6 +17,9 @@ public abstract partial class SharedSurgerySystem
         return _surgeryPrototypes.ContainsKey(surgery) ? GetOrSpawnPrototypeEntity(surgery) : null;
     }
 
+    /// <summary>
+    /// Returns the singleton entity for a surgery step prototype, if it is a valid step.
+    /// </summary>
     public EntityUid? GetSurgeryStepEntity(EntProtoId step)
     {
         return _stepPrototypes.Contains(step) ? GetOrSpawnPrototypeEntity(step) : null;

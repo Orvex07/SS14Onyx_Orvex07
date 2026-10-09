@@ -117,6 +117,7 @@
     damageContainer: SiliconIpc
   # <Onyx-IPCSurgeryTargeting>
   - type: SurgeryTarget
+    infectionImmune: true
   - type: Targeting
   # </Onyx-IPCSurgeryTargeting>
   - type: DamageVisuals

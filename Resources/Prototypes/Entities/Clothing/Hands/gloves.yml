@@ -182,6 +182,10 @@
   - type: Fiber
     fiberMaterial: fibers-latex
   - type: FingerprintMask
+  # <Onyx-SurgeryInfection>
+  - type: SurgeryInfectionProtection
+    protection: 30
+  # </Onyx-SurgeryInfection>
 
 - type: entity
   parent: ClothingHandsButcherable
@@ -196,6 +200,10 @@
   - type: Fiber
     fiberMaterial: fibers-nitrile
   - type: FingerprintMask
+  # <Onyx-SurgeryInfection>
+  - type: SurgeryInfectionProtection
+    protection: 40
+  # </Onyx-SurgeryInfection>
 
 - type: entity
   parent: ClothingHandsButcherable

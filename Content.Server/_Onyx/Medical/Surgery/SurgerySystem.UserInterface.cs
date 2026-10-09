@@ -153,7 +153,7 @@ public sealed partial class SurgerySystem
 
     protected override void RefreshUI(EntityUid body)
     {
-        if (!HasComp<SurgeryTargetComponent>(body))
+        if (!TryComp(body, out SurgeryTargetComponent? surgeryTarget) || !surgeryTarget.CanOperate)
             return;
 
         var surgeries = new Dictionary<NetEntity, List<EntProtoId>>();
@@ -198,6 +198,7 @@ public sealed partial class SurgerySystem
     {
         if (!args.CanAccess ||
             !args.CanInteract ||
+            !ent.Comp.CanOperate ||
             TryComp(ent, out BodyPartComponent? part) && (part.Body != null || part.Parent != null) ||
             (args.User == ent.Owner && !_configuration.GetCVar(CCVars.SurgerySelfEnabled)) ||
             args.Using is not { } tool ||
@@ -225,6 +226,9 @@ public sealed partial class SurgerySystem
 
     private void TryOpenSurgeryUi(Entity<SurgeryTargetComponent> target, EntityUid user)
     {
+        if (!target.Comp.CanOperate)
+            return;
+
         if (target.Owner == user && !_configuration.GetCVar(CCVars.SurgerySelfEnabled))
             return;
 

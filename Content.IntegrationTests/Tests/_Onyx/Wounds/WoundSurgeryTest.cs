@@ -45,6 +45,7 @@ public sealed class WoundSurgeryTest : GameTest
   - type: Body
   - type: Damageable
   - type: WoundHost
+  - type: SurgeryTarget
   - type: InitialBody
     organs:
       Chest: WoundSurgeryTestTorso

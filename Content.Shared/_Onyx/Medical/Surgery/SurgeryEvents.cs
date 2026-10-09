@@ -27,6 +27,7 @@ public sealed partial class SurgeryDoAfterEvent : SimpleDoAfterEvent
     }
 }
 
+/// <summary>Why a step cannot be performed right now. None means the step is available.</summary>
 public enum StepInvalidReason
 {
     None,
@@ -41,6 +42,7 @@ public enum StepInvalidReason
     IncompatibleTransplantType,
 }
 
+/// <summary>Raised on step and surgery singletons to veto a procedure. Cancel to reject.</summary>
 [ByRefEvent]
 public record struct SurgeryValidEvent(
     EntityUid Body,
@@ -49,7 +51,9 @@ public record struct SurgeryValidEvent(
     IReadOnlyList<EntityUid>? Tools = null,
     bool Cancelled = false);
 [ByRefEvent] public record struct SurgeryStepEvent(EntityUid User, EntityUid Body, EntityUid Part, List<EntityUid> Tools);
+/// <summary>Raised when a step do-after fails its success roll.</summary>
 [ByRefEvent] public readonly record struct SurgeryStepFailedEvent(EntityUid User, EntityUid Body, EntityUid Part);
+/// <summary>Raised on step singletons to report completion. Cancel to mark incomplete.</summary>
 [ByRefEvent] public record struct SurgeryStepCompleteCheckEvent(EntityUid Body, EntityUid Part, bool Cancelled = false);
 [ByRefEvent] public record struct SurgeryOrganInsertedEvent(EntityUid User, EntityUid Body, EntityUid Part);
 [ByRefEvent] public record struct SurgeryGetStepSequenceContextEvent(EntityUid Body, EntityUid Part, List<EntityUid> Tools, EntityUid? Context = null);

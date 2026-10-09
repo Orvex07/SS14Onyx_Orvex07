@@ -38,11 +38,15 @@
                 <BoxContainer Name="DiagnosticTabs" Orientation="Vertical" Margin="8 6" HorizontalExpand="True" VerticalExpand="True">
                     <ScrollContainer Name="BodyTab" HorizontalExpand="True" VerticalExpand="True" HScrollEnabled="False">
                         <BoxContainer Orientation="Vertical" HorizontalExpand="True">
-                            <BoxContainer Orientation="Vertical" SeparationOverride="2" HorizontalExpand="True">
-                                <Label Name="VitalDamageLabel" Text="{Loc 'health-analyzer-window-entity-vital-damage-text'}" StyleClasses="LabelHeading" ClipText="True" />
-                                <Label Name="VitalDamageValueLabel" StyleClasses="LabelHeading" ClipText="True" />
-                                <Label Name="DamageScopeLabel" Text="{Loc 'health-analyzer-window-entity-damage-total-text'}" StyleClasses="LabelWeak" ClipText="True" />
-                                <Label Name="DamageLabel" ClipText="True" />
+                            <BoxContainer Orientation="Vertical" SeparationOverride="0" HorizontalExpand="True">
+                                <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                                    <Label Name="VitalDamageLabel" Text="{Loc 'health-analyzer-window-entity-vital-damage-text'}" StyleClasses="LabelWeak" />
+                                    <Label Name="VitalDamageValueLabel" />
+                                </BoxContainer>
+                                <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                                    <Label Name="DamageScopeLabel" Text="{Loc 'health-analyzer-window-entity-damage-total-text'}" StyleClasses="LabelWeak" />
+                                    <Label Name="DamageLabel" />
+                                </BoxContainer>
                             </BoxContainer>
                             <controls:Separator Margin="0 8" StyleClasses="LowDivider" />
                             <controls:Separator Name="AlertsDivider" Visible="False" StyleClasses="LowDivider" />

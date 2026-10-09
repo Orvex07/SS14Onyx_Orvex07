@@ -18,8 +18,12 @@ using Content.Shared._Onyx.Clothing;
 
 namespace Content.Shared._Onyx.Wounds;
 
+/// <summary>
+/// External bleeding: per-wound rates, treatments, automatic clotting and body aggregation.
+/// </summary>
 public sealed partial class WoundBleedingSystem : EntitySystem
 {
+    /// <summary>Fallback wound used for systemic bleeding without a part.</summary>
     private static readonly ProtoId<WoundPrototype> SystemicBleedingWound = "SystemicBleedingWound";
 
     [Dependency] private SharedBodySystem _body = default!;
@@ -33,8 +37,6 @@ public sealed partial class WoundBleedingSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private WoundSystem _wounds = default!;
-
-    private readonly Dictionary<EntityUid, float> _dirtPartRates = new();
 
     public override void Initialize()
     {
@@ -96,23 +98,23 @@ public sealed partial class WoundBleedingSystem : EntitySystem
             return;
 
         args.Handled = true;
-        _dirtPartRates.Clear();
+        var dirtPartRates = new Dictionary<EntityUid, float>();
         foreach (var wound in GetAttachedBleedingWounds(body))
         {
             if (wound.Comp2.CurrentRate <= 0f)
                 continue;
 
             var part = wound.Comp1.HoldingPart;
-            _dirtPartRates[part] = _dirtPartRates.GetValueOrDefault(part) + wound.Comp2.CurrentRate;
+            dirtPartRates[part] = dirtPartRates.GetValueOrDefault(part) + wound.Comp2.CurrentRate;
         }
 
         var totalRate = 0f;
-        foreach (var rate in _dirtPartRates.Values)
+        foreach (var rate in dirtPartRates.Values)
             totalRate += rate;
         if (totalRate <= 0f)
             return;
 
-        foreach (var (part, rate) in _dirtPartRates)
+        foreach (var (part, rate) in dirtPartRates)
         {
             var amount = args.Amount * (rate / totalRate);
             _dirt.TryDirtyBodyPart(body, part, args.Source, amount);
@@ -141,6 +143,10 @@ public sealed partial class WoundBleedingSystem : EntitySystem
         }
     }
 
+    private const float ProjectionReconcileInterval = 5f;
+    private const float ProjectionMismatchTolerance = 0.001f;
+    private float _reconcileTimer;
+
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
@@ -159,8 +165,37 @@ public sealed partial class WoundBleedingSystem : EntitySystem
             if (_prototypes.TryIndex(wound.Prototype, out var prototype))
                 RefreshWound((uid, bleeding), wound, prototype);
         }
+
+        _reconcileTimer += frameTime;
+        if (_reconcileTimer < ProjectionReconcileInterval)
+            return;
+        _reconcileTimer = 0f;
+        ReconcileBodyProjections();
     }
 
+    private void ReconcileBodyProjections()
+    {
+        var bodies = EntityQueryEnumerator<WoundHostComponent, BloodstreamComponent>();
+        while (bodies.MoveNext(out var body, out _, out var bloodstream))
+        {
+            var expected = 0f;
+            foreach (var wound in GetAttachedBleedingWounds(body))
+            {
+                if (TryComp(wound.Comp1.HoldingPart, out WoundableComponent? woundable) &&
+                    _circulation.GetPartStream((wound.Comp1.HoldingPart, woundable)) ==
+                    CirculatoryStreamPrototype.PrimaryStream)
+                    expected += wound.Comp2.CurrentRate;
+            }
+
+            expected = Math.Clamp(expected, 0f, bloodstream.MaxBleedAmount);
+            if (Math.Abs(expected - bloodstream.BleedAmount) > ProjectionMismatchTolerance)
+                RefreshBody(body);
+        }
+    }
+
+    /// <summary>
+    /// Sets the bleeding treatment of a wound and refreshes its rate.
+    /// </summary>
     public bool SetTreatment(Entity<WoundComponent?> wound, BleedingTreatment treatment)
     {
         if (!_net.IsServer || !Resolve(wound, ref wound.Comp, false) ||
@@ -172,6 +207,9 @@ public sealed partial class WoundBleedingSystem : EntitySystem
         return true;
     }
 
+    /// <summary>
+    /// Reduces the bleeding severity of a wound, refreshing rates and body totals.
+    /// </summary>
     public bool ReduceBleeding(Entity<WoundComponent?> wound, FixedPoint2 amount)
     {
         if (!_net.IsServer || amount <= FixedPoint2.Zero || !Resolve(wound, ref wound.Comp, false) ||
@@ -303,6 +341,9 @@ public sealed partial class WoundBleedingSystem : EntitySystem
         return treated;
     }
 
+    /// <summary>
+    /// Returns the aggregated bleeding rate of a part.
+    /// </summary>
     public float GetPartRate(Entity<WoundableComponent?> part)
     {
         if (!Resolve(part, ref part.Comp, false))
@@ -318,10 +359,16 @@ public sealed partial class WoundBleedingSystem : EntitySystem
         return rate;
     }
 
+    /// <summary>
+    /// Recomputes wound and body bleeding after structural changes (part insert/remove).
+    /// </summary>
     public void OnPartChanged(EntityUid body) => RefreshBody(body);
 
     public void OnPartInserted(EntityUid part, EntityUid body) => RefreshBody(body, part);
 
+    /// <summary>
+    /// Recomputes the aggregated bleeding rate of a body, optionally accounting for a new part.
+    /// </summary>
     public void RefreshBody(EntityUid body, EntityUid? insertedPart = null)
     {
         if (!_net.IsServer || !HasComp<WoundHostComponent>(body) ||
@@ -363,6 +410,9 @@ public sealed partial class WoundBleedingSystem : EntitySystem
 
     }
 
+    /// <summary>
+    /// Recomputes a single wound rate and, by default, its body total.
+    /// </summary>
     public void RefreshWound(Entity<WoundBleedingComponent> wound, bool refreshBody = true)
     {
         if (!_net.IsServer || !TryComp(wound, out WoundComponent? core) ||

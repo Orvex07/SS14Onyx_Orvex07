@@ -13,6 +13,21 @@ public abstract partial class SharedSurgerySystem
     public override void Initialize()
     {
         base.Initialize();
+        InitializeLifecycle();
+        InitializePipeline();
+        InitializeConditions();
+        InitializeTools();
+        InitializeBodyParts();
+        InitializeOrgans();
+        InitializeCavity();
+        InitializeComponents();
+        InitializeDamage();
+        InitializeStatusEffects();
+        LoadSurgeryPrototypes();
+    }
+
+    private void InitializeLifecycle()
+    {
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestartCleanup);
         SubscribeLocalEvent<EntityTerminatingEvent>(OnEntityTerminating);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
@@ -20,62 +35,11 @@ public abstract partial class SharedSurgerySystem
         SubscribeLocalEvent<BodyPartComponent, ComponentShutdown>(OnBodyPartShutdown);
         SubscribeLocalEvent<SurgeryTargetComponent, ComponentStartup>(OnSurgeryTargetStartup);
         SubscribeLocalEvent<SurgeryTargetComponent, ComponentShutdown>(OnSurgeryTargetShutdown);
-        SubscribeLocalEvent<SurgeryTargetComponent, SurgeryDoAfterEvent>(OnTargetDoAfter);
-        SubscribeLocalEvent<SurgeryMarkerConditionComponent, SurgeryValidEvent>(OnMarkerConditionValid);
-        SubscribeLocalEvent<SurgerySpeciesConditionComponent, SurgeryValidEvent>(OnSpeciesConditionValid);
-        SubscribeLocalEvent<SurgeryOrganTagConditionComponent, SurgeryValidEvent>(OnOrganTagConditionValid);
-        SubscribeLocalEvent<SurgeryOrganTagConditionComponent, SurgeryCanPerformStepEvent>(OnOrganTagConditionCanPerform);
-        SubscribeLocalEvent<SurgeryPartConditionComponent, SurgeryValidEvent>(OnPartConditionValid);
-        SubscribeLocalEvent<SurgeryMissingPartConditionComponent, SurgeryValidEvent>(OnMissingPartConditionValid);
-        SubscribeLocalEvent<SurgeryDetachablePartConditionComponent, SurgeryValidEvent>(OnDetachablePartConditionValid);
-        SubscribeLocalEvent<SurgeryComponentConditionComponent, SurgeryValidEvent>(OnComponentConditionValid);
-        SubscribeLocalEvent<SurgeryComponentConditionComponent, SurgeryCanPerformStepEvent>(OnComponentConditionCanPerform);
-        SubscribeLocalEvent<SurgeryOrganConditionComponent, SurgeryValidEvent>(OnOrganConditionValid);
-        SubscribeLocalEvent<SurgeryBloodstreamConditionComponent, SurgeryValidEvent>(OnBloodstreamConditionValid);
-        SubscribeLocalEvent<SurgeryOrganHealEffectComponent, SurgeryValidEvent>(OnOrganHealValid);
-        SubscribeLocalEvent<SurgeryOrganHealEffectComponent, SurgeryStepEvent>(OnOrganHeal);
-        SubscribeLocalEvent<SurgeryOrganHealEffectComponent, SurgeryStepCompleteCheckEvent>(OnOrganHealCheck);
-        SubscribeLocalEvent<SurgeryCavityConditionComponent, SurgeryValidEvent>(OnCavityConditionValid);
-        SubscribeLocalEvent<SurgeryComponentEffectComponent, SurgeryStepEvent>(OnComponentEffect);
-        SubscribeLocalEvent<SurgeryComponentEffectComponent, SurgeryStepCompleteCheckEvent>(OnComponentEffectCheck);
-        SubscribeLocalEvent<SurgeryMutingConditionComponent, SurgeryValidEvent>(OnMutingConditionValid);
-        SubscribeLocalEvent<SurgeryMutingEffectComponent, SurgeryStepEvent>(OnMutingEffect);
-        SubscribeLocalEvent<SurgeryMutingEffectComponent, SurgeryStepCompleteCheckEvent>(OnMutingEffectCheck);
-        SubscribeLocalEvent<SurgeryStepComponent, SurgeryStepEvent>(OnToolStep);
-        SubscribeLocalEvent<SurgeryStepComponent, SurgeryStepCompleteCheckEvent>(OnToolCheck);
-        SubscribeLocalEvent<SurgeryStepComponent, SurgeryCanPerformStepEvent>(OnToolCanPerform);
-        SubscribeLocalEvent<SurgeryStepPainInflicterComponent, SurgeryStepEvent>(OnPainInflicterStep);
-        SubscribeLocalEvent<SurgeryDamageEffectComponent, SurgeryStepEvent>(OnDamageEffect);
-        SubscribeLocalEvent<SurgeryFailureDamageComponent, SurgeryStepFailedEvent>(OnFailureDamage);
-        SubscribeLocalEvent<SurgeryBloodFilterEffectComponent, SurgeryStepEvent>(OnBloodFilter);
-        SubscribeLocalEvent<SurgeryBloodFilterEffectComponent, SurgeryStepCompleteCheckEvent>(OnBloodFilterCheck);
-        SubscribeLocalEvent<SurgeryDetachPartEffectComponent, SurgeryStepEvent>(OnDetachPart);
-        SubscribeLocalEvent<SurgeryDetachPartEffectComponent, SurgeryStepCompleteCheckEvent>(OnDetachPartCheck);
-        SubscribeLocalEvent<SurgeryAttachPartEffectComponent, SurgeryStepEvent>(OnAttachPart);
-        SubscribeLocalEvent<SurgeryAttachPartEffectComponent, SurgeryStepCompleteCheckEvent>(OnAttachPartCheck);
-        SubscribeLocalEvent<SurgeryAttachPartEffectComponent, SurgeryCanPerformStepEvent>(OnAttachPartCanPerform);
-        SubscribeLocalEvent<SurgeryAttachPartEffectComponent, SurgeryGetStepSequenceContextEvent>(OnAttachPartGetSequenceContext);
-        SubscribeLocalEvent<SurgeryMendAttachedPartEffectComponent, SurgeryStepEvent>(OnMendAttachedPart);
-        SubscribeLocalEvent<SurgeryMendAttachedPartEffectComponent, SurgeryStepCompleteCheckEvent>(OnMendAttachedPartCheck);
-        SubscribeLocalEvent<SurgerySutureAttachedPartEffectComponent, SurgeryStepEvent>(OnSutureAttachedPart);
-        SubscribeLocalEvent<SurgerySutureAttachedPartEffectComponent, SurgeryStepCompleteCheckEvent>(OnSutureAttachedPartCheck);
-        SubscribeLocalEvent<SurgeryRemoveOrganEffectComponent, SurgeryStepEvent>(OnRemoveOrgan);
-        SubscribeLocalEvent<SurgeryRemoveOrganEffectComponent, SurgeryStepCompleteCheckEvent>(OnRemoveOrganCheck);
-        SubscribeLocalEvent<SurgeryInsertOrganEffectComponent, SurgeryStepEvent>(OnInsertOrgan);
-        SubscribeLocalEvent<SurgeryInsertOrganEffectComponent, SurgeryStepCompleteCheckEvent>(OnInsertOrganCheck);
-        SubscribeLocalEvent<SurgeryInsertOrganEffectComponent, SurgeryCanPerformStepEvent>(OnInsertOrganCanPerform);
-        SubscribeLocalEvent<SurgeryInsertOrganEffectComponent, SurgeryGetStepSequenceContextEvent>(OnInsertOrganGetSequenceContext);
-        SubscribeLocalEvent<SurgeryInsertCavityItemEffectComponent, SurgeryStepEvent>(OnInsertCavityItem);
-        SubscribeLocalEvent<SurgeryInsertCavityItemEffectComponent, SurgeryStepCompleteCheckEvent>(OnInsertCavityItemCheck);
-        SubscribeLocalEvent<SurgeryInsertCavityItemEffectComponent, SurgeryCanPerformStepEvent>(OnInsertCavityItemCanPerform);
-        SubscribeLocalEvent<SurgeryRemoveCavityItemEffectComponent, SurgeryStepEvent>(OnRemoveCavityItem);
-        SubscribeLocalEvent<SurgeryRemoveCavityItemEffectComponent, SurgeryStepCompleteCheckEvent>(OnRemoveCavityItemCheck);
         SubscribeLocalEvent<SurgeryTargetComponent, StandAttemptEvent>(OnTargetStandAttempt);
         SubscribeLocalEvent<SurgeryTargetComponent, AccessibleOverrideEvent>(OnTargetAccessible);
-
-        LoadSurgeryPrototypes();
     }
 
+    // Detached parts are standalone surgery targets, so transplant surgery can work on them.
     private void OnBodyPartStartup(Entity<BodyPartComponent> ent, ref ComponentStartup args)
     {
         EnsureComp<SurgeryTargetComponent>(ent);

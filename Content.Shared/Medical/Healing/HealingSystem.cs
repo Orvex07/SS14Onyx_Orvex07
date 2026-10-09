@@ -37,7 +37,7 @@ public sealed partial class HealingSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popupSystem = default!;
     [Dependency] private SharedSolutionContainerSystem _solutionContainerSystem = default!;
     [Dependency] private TargetResolverSystem _targetResolver = default!;
-    [Dependency] private WoundHealingSystem _woundHealing = default!; // Onyx-WoundSystem-edited
+    [Dependency] private WoundHealingSystem _woundHealing = default!; // <Onyx-WoundSystem>
 
     public override void Initialize()
     {
@@ -58,7 +58,7 @@ public sealed partial class HealingSystem : EntitySystem
             return;
 
         // <Onyx-WoundTreatment>
-        // Onyx-WoundSystem-edited: localized healing belongs to the selected part, never the body projection.
+        // Localized healing belongs to the selected part, never the body projection.
         if (HasComp<WoundHostComponent>(target))
         {
             EntityUid? requestedPart = args.RequestedPart is { } netPart ? GetEntity(netPart) : null;
@@ -185,43 +185,9 @@ public sealed partial class HealingSystem : EntitySystem
         EntityUid? requestedPart = null)
     {
         // <Onyx-WoundSystem-edited>
-        if (TryComp(target, out WoundHostComponent? host))
-        {
-            var resolve = new ResolveHealingPartEvent(target, healing.Comp.Damage, healing.Comp.DamageContainers,
-                healing.Comp.TreatmentCapabilities, healing.Comp.AllowedWoundStages,
-                healing.Comp.BloodlossModifier, requestedPart, healing.Comp.HealWounds);
-            RaiseLocalEvent(target, ref resolve);
-            if (!resolve.Accepted)
-                return false;
-
-            if (healing.Comp.HealDamage)
-            {
-                foreach (var (type, amount) in healing.Comp.Damage.DamageDict)
-                {
-                    var source = host.LocalizedDamageTypes.Contains(type) ? resolve.Part : target.Owner;
-                    if (amount < 0 && source is { } entity &&
-                        _damageable.GetAllDamage(entity).DamageDict.GetValueOrDefault(type) > 0)
-                        return true;
-                }
-            }
-
-            if (healing.Comp.HealWounds && resolve.Part is { } woundPart &&
-                _woundHealing.HasTreatableWounds(woundPart, healing.Comp.Damage, healing.Comp.AllowedWoundStages))
-                return true;
-
-            if (resolve.Part is { } bleedingPart && healing.Comp.BloodlossModifier < 0 &&
-                _woundHealing.CanTreatBleeding(bleedingPart))
-                return true;
-
-            if (TryComp<BloodstreamComponent>(target, out var hostBloodstream) &&
-                healing.Comp.ModifyBloodLevel > 0 &&
-                _solutionContainerSystem.ResolveSolution(target.Owner, hostBloodstream.BloodSolutionName,
-                    ref hostBloodstream.BloodSolution, out _) &&
-                _bloodstreamSystem.GetBloodLevel((target, hostBloodstream)) < 1)
-                return true;
-
-            return false;
-        }
+        // Wound hosts resolve healing against body parts; the check lives in the wound domain.
+        if (HasComp<WoundHostComponent>(target))
+            return _woundHealing.HasWoundDamage(target, healing, requestedPart);
         // </Onyx-WoundSystem-edited>
 
         var damageableDict = _damageable.GetAllDamage(target.AsNullable()).DamageDict;
@@ -325,7 +291,7 @@ public sealed partial class HealingSystem : EntitySystem
             return false;
 
         // <Onyx-WoundTreatment>
-        // Onyx-WoundSystem-edited: public explicit-part entry point for future Targeting.
+        // Public explicit-part entry point for future Targeting.
         var woundHost = HasComp<WoundHostComponent>(target);
         var resolvedPart = false;
         if (woundHost)

@@ -9,7 +9,6 @@
   <FTLTextpart Key="guidebook-onyx-wounds-electrical"/>
   <Box>
     <GuideEntityEmbed Entity="Gauze"/>
-    <GuideEntityEmbed Entity="Bonesetter"/>
   </Box>
   <FTLTextpart Key="guidebook-onyx-wounds-special-heading"/>
   <FTLTextpart Key="guidebook-onyx-wounds-fracture"/>

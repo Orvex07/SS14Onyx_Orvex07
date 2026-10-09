@@ -8,10 +8,14 @@ using Content.Shared.Popups;
 using Content.Shared.Verbs;
 using Robust.Server.GameObjects;
 using Robust.Shared.Configuration;
+using Robust.Shared.Network;
 using Robust.Shared.Random;
 
 namespace Content.Server._Onyx.Medical.Surgery;
 
+/// <summary>
+/// Server surgery implementation: verbs, incision wounds, patient-state UI refresh and infection hooks.
+/// </summary>
 public sealed partial class SurgerySystem : SharedSurgerySystem
 {
     [Dependency] private SharedBodySystem _body = default!;
@@ -20,6 +24,7 @@ public sealed partial class SurgerySystem : SharedSurgerySystem
     [Dependency] private WoundBleedingSystem _bleeding = default!;
     [Dependency] private WoundScarSystem _scars = default!;
     [Dependency] private IConfigurationManager _configuration = default!;
+    [Dependency] private INetManager _net = default!;
     [Dependency] private SurgeryInfectionSystem _infection = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private IRobustRandom _random = default!;
@@ -52,6 +57,14 @@ public sealed partial class SurgerySystem : SharedSurgerySystem
     {
         if (!HasComp<MechanicalSurgeryStepComponent>(ent))
             _infection.OnStep(ref args);
+    }
+
+    protected override void OnSurgeryStepStarted(EntityUid user, EntityUid body, EntityUid part)
+    {
+        if (!_net.IsServer)
+            return;
+
+        _infection.SoilFromBleeding(user, body, part);
     }
 
 }

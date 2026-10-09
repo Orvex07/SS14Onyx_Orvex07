@@ -39,7 +39,7 @@ public sealed partial class BodyInventorySlotSystem : EntitySystem
 
     private void OnPartChanged(Entity<BodyPartComponent> ent, ref OrganGotRemovedEvent args)
     {
-        if (TerminatingOrDeleted(ent) || TerminatingOrDeleted(args.Target))
+        if (TerminatingOrDeleted(args.Target))
             return;
 
         _inventory.RefreshBodySlots(args.Target);

@@ -18,7 +18,6 @@
   </Box>
   <FTLTextpart Key="guidebook-onyx-wound-treatment-fractures"/>
   <Box>
-    <GuideEntityEmbed Entity="Bonesetter"/>
     <GuideEntityEmbed Entity="BoneGel"/>
   </Box>
   <FTLTextpart Key="guidebook-onyx-wound-treatment-mechanical"/>

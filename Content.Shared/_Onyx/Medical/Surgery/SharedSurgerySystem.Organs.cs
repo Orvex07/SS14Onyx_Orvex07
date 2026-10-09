@@ -9,6 +9,19 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
+    private void InitializeOrgans()
+    {
+        SubscribeLocalEvent<SurgeryRemoveOrganEffectComponent, SurgeryStepEvent>(OnRemoveOrgan);
+        SubscribeLocalEvent<SurgeryRemoveOrganEffectComponent, SurgeryStepCompleteCheckEvent>(OnRemoveOrganCheck);
+        SubscribeLocalEvent<SurgeryInsertOrganEffectComponent, SurgeryStepEvent>(OnInsertOrgan);
+        SubscribeLocalEvent<SurgeryInsertOrganEffectComponent, SurgeryStepCompleteCheckEvent>(OnInsertOrganCheck);
+        SubscribeLocalEvent<SurgeryInsertOrganEffectComponent, SurgeryCanPerformStepEvent>(OnInsertOrganCanPerform);
+        SubscribeLocalEvent<SurgeryInsertOrganEffectComponent, SurgeryGetStepSequenceContextEvent>(OnInsertOrganGetSequenceContext);
+        SubscribeLocalEvent<SurgeryOrganHealEffectComponent, SurgeryValidEvent>(OnOrganHealValid);
+        SubscribeLocalEvent<SurgeryOrganHealEffectComponent, SurgeryStepEvent>(OnOrganHeal);
+        SubscribeLocalEvent<SurgeryOrganHealEffectComponent, SurgeryStepCompleteCheckEvent>(OnOrganHealCheck);
+    }
+
     private void OnRemoveOrgan(Entity<SurgeryRemoveOrganEffectComponent> ent, ref SurgeryStepEvent args)
     {
         if (!_net.IsServer ||

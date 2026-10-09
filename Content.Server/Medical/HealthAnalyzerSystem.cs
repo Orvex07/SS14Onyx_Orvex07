@@ -1,7 +1,6 @@
 using System.Linq;
 using Content.Server.Medical.Components;
 // <Onyx-HealthAnalyzer-StatusDoll>
-using Content.Shared._Onyx.Medical.Surgery;
 using Content.Shared._Onyx.Medical;
 using Content.Shared._Onyx.Targeting;
 using Content.Shared._Onyx.Wounds;
@@ -11,6 +10,8 @@ using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint; // <Onyx-HealthAnalyzerPain>
 // </Onyx-HealthAnalyzer-StatusDoll>
 using Content.Shared.Body.Components;
+using Content.Shared.Body; // <Onyx-HealthAnalyzer-StatusDoll>
+using Content.Shared.Humanoid; // <Onyx-HealthAnalyzer-StatusDoll>
 using Content.Shared.Chemistry.Components; // <Onyx-HealthAnalyzerChemicals>
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Damage.Components;
@@ -327,7 +328,7 @@ if (TryComp<UnrevivableComponent>(entity, out var unrevivableComp) && unrevivabl
     // <Onyx-HealthAnalyzer-StatusDoll>
     public Dictionary<TargetBodyPart, DamageSpecifier>? BuildPartDamage(EntityUid body)
     {
-        if (!HasComp<SurgeryTargetComponent>(body))
+        if (!HasComp<BodyComponent>(body) || !HasComp<HumanoidProfileComponent>(body))
             return null;
 
         var result = new Dictionary<TargetBodyPart, DamageSpecifier>();
@@ -348,7 +349,7 @@ if (TryComp<UnrevivableComponent>(entity, out var unrevivableComp) && unrevivabl
 
     public HealthAnalyzerWoundDiagnostics? BuildWoundDiagnostics(EntityUid body)
     {
-        if (!HasComp<SurgeryTargetComponent>(body))
+        if (!HasComp<BodyComponent>(body))
             return null;
 
         var result = new Dictionary<TargetBodyPart, HealthAnalyzerWoundDiagnostic>();
@@ -459,7 +460,7 @@ if (TryComp<UnrevivableComponent>(entity, out var unrevivableComp) && unrevivabl
     // <Onyx-HealthAnalyzerOrgans-edited>
     private List<HealthAnalyzerOrganInfo>? BuildOrganInfo(EntityUid body)
     {
-        if (!HasComp<SurgeryTargetComponent>(body))
+        if (!HasComp<BodyComponent>(body))
             return null;
 
         var result = new List<HealthAnalyzerOrganInfo>();

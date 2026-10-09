@@ -1,13 +1,14 @@
 - type: weightedRandom
   id: DiseaseBehaviorsSurgicalSiteInfection
   weights:
-    DiseaseBehaviorPoison: 1
-    DiseaseBehaviorBlunt: 0.75
+    DiseaseBehaviorTemperature: 2.5
     DiseaseBehaviorFeelUnwell: 2
+    DiseaseBehaviorCold: 1
     DiseaseBehaviorHeadache: 1
-    DiseaseBehaviorTemperature: 1.5
-    DiseaseBehaviorCold: 0.5
-    DiseaseBehaviorSluggish: 0.75
+    DiseaseBehaviorSluggish: 1
+    DiseaseBehaviorPoison: 0.75
+    DiseaseBehaviorVomit: 0.75
+    DiseaseBehaviorDrowsiness: 0.75
 
 - type: entity
   id: DiseaseSurgicalSiteInfection

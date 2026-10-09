@@ -5,6 +5,12 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
+    private void InitializeComponents()
+    {
+        SubscribeLocalEvent<SurgeryComponentEffectComponent, SurgeryStepEvent>(OnComponentEffect);
+        SubscribeLocalEvent<SurgeryComponentEffectComponent, SurgeryStepCompleteCheckEvent>(OnComponentEffectCheck);
+    }
+
     private void OnComponentEffect(Entity<SurgeryComponentEffectComponent> ent, ref SurgeryStepEvent args)
     {
         if (!_net.IsServer)

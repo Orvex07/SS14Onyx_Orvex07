@@ -83,6 +83,7 @@
 #      groups:
 #        Brute: -0.14
   - type: SurgeryTarget
+  - type: SurgeryClothingBypass
   - type: Bloodstream
     bloodReferenceSolution:
       reagents:

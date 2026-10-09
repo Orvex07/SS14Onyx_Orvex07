@@ -13,4 +13,4 @@
   - type: Clothing
     sprite: _Onyx/Clothing/Abductor/abductor_uniform.rsi
   - type: SurgeryInfectionProtection
-    chanceMultiplier: 0
+    protection: 150

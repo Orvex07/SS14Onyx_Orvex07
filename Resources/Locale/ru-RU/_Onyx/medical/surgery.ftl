@@ -70,6 +70,8 @@ surgery-popup-step-SurgeryStepRepairBruteTissue = { $user } восстанавл
 surgery-popup-step-SurgeryStepRepairBurnTissue = { $user } восстанавливает обожжённые ткани на { $part } у { $target }!
 surgery-popup-step-SurgeryStepClampWoundBleeding = { $user } зашивает кровоточащую рану на { $part } у { $target }.
 surgery-popup-step-SurgeryStepMendFracture = { $user } сращивает кости на { $part } у { $target }.
+surgery-popup-step-SurgeryStepReduceFracture = { $user } вправляет перелом на { $part } у { $target }.
+surgery-popup-step-SurgeryStepReduceFrameFracture = { $user } выправляет элементы каркаса на { $part } у { $target }.
 surgery-popup-step-SurgeryStepMendFrameFracture = { $user } сваривает повреждённые элементы каркаса на { $part } у { $target }.
 surgery-popup-step-SurgeryStepHealAmputationConsequence = { $user } обрабатывает последствия ампутации на { $part } у { $target }.
 surgery-popup-step-SurgeryStepStopInternalBleeding = { $user } останавливает внутреннее кровотечение на { $part } у { $target }.
@@ -283,8 +285,9 @@ surgery-infection-protection-examine-verb-text = Стерильность
 surgery-infection-protection-examine-verb-message = Оценить защиту от заражения при операции.
 surgery-infection-protection-examine =
     { $tier ->
-        [full] [color=green]Предмет полностью стерилен: заражение при операции исключено.[/color]
-        [high] Предмет почти полностью стерилен и надёжно защищает от заражения ({ $protection }%).
-        [medium] Предмет частично стерилен и заметно снижает риск заражения ({ $protection }%).
-        *[low] Предмет слабо стерилен и лишь немного снижает риск заражения ({ $protection }%).
+        [full] [color=green]Предмет полностью стерилен: заражение при операции исключено (стерильность { $protection }).[/color]
+        [high] Предмет почти полностью стерилен и надёжно защищает от заражения (стерильность { $protection }).
+        [medium] Предмет частично стерилен и заметно снижает риск заражения (стерильность { $protection }).
+        *[low] Предмет слабо стерилен и лишь немного снижает риск заражения (стерильность { $protection }).
     }
+surgery-infection-protection-examine-soiled = [color=red]Предмет испачкан чужой кровью: защиты не даёт и снижает общую стерильность на { $penalty } при операциях других пациентов.[/color]

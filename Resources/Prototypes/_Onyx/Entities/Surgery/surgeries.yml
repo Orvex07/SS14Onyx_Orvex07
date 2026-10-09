@@ -1190,12 +1190,14 @@
       default:
         steps:
         - SurgeryOpenIncision
+        - SurgeryStepReduceFracture
         - SurgeryStepMendFracture
       cybernetic:
         required:
         - type: Cybernetics
         steps:
         - SurgeryOpenIncision
+        - SurgeryStepReduceFrameFracture
         - SurgeryStepMendFrameFracture
   - type: SurgeryFractureGradeCondition
 

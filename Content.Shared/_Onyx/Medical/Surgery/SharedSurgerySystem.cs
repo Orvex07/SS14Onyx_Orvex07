@@ -3,7 +3,6 @@ using Content.Shared._Onyx.Body.Systems;
 using Content.Shared._Onyx.Wounds;
 using Content.Shared.Body.Systems;
 using Content.Shared.DoAfter;
-using Content.Shared.Damage.Systems;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Inventory;
@@ -25,6 +24,9 @@ using Robust.Shared.Random;
 
 namespace Content.Shared._Onyx.Medical.Surgery;
 
+/// <summary>
+/// Shared surgery framework: procedure registry, step validation, do-after pipeline and UI refresh.
+/// </summary>
 public abstract partial class SharedSurgerySystem : EntitySystem
 {
     [Dependency] private SharedAudioSystem _audio = default!;
@@ -34,7 +36,6 @@ public abstract partial class SharedSurgerySystem : EntitySystem
     [Dependency] private IComponentFactory _compFactory = default!;
     [Dependency] private IConfigurationManager _configuration = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
-    [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedItemSystem _item = default!;
@@ -42,7 +43,7 @@ public abstract partial class SharedSurgerySystem : EntitySystem
     [Dependency] private INetManager _net = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private PainSystem _pain = default!;
-    [Dependency] private WoundDamageRoutingSystem _woundDamage = default!;
+    [Dependency] private SurgeryWoundBridgeSystem _bridge = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private RotateToFaceSystem _rotateToFace = default!;
@@ -57,6 +58,7 @@ public abstract partial class SharedSurgerySystem : EntitySystem
 
     private const string CavityContainer = "surgery_cavity";
     private static readonly EntProtoId SurgicallyMutedEffect = "StatusEffectSurgicallyMuted";
+
     protected readonly Dictionary<(EntityUid Body, EntityUid Part), ActiveSurgerySite> ActiveSurgerySites = new();
     private List<PendingSurgeryRepeat> _pendingSurgeryRepeats = new();
     private List<PendingSurgeryRepeat> _processingSurgeryRepeats = new();
@@ -71,4 +73,11 @@ public abstract partial class SharedSurgerySystem : EntitySystem
         EntProtoId Surgery,
         EntProtoId Step,
         uint Token);
+
+    /// <summary>
+    /// Called when step work starts after validation. Server overrides for infection hooks.
+    /// </summary>
+    protected virtual void OnSurgeryStepStarted(EntityUid user, EntityUid body, EntityUid part)
+    {
+    }
 }

@@ -617,7 +617,7 @@
     sprite: Clothing/Head/Hats/surgcap_blue.rsi
   # <Onyx-SurgeryInfection>
   - type: SurgeryInfectionProtection
-    chanceMultiplier: 0.8
+    protection: 20
   # </Onyx-SurgeryInfection>
   # <Onyx-SurgeryPPE>
   - type: Tag
@@ -646,7 +646,7 @@
     sprite: Clothing/Head/Hats/surgcap_green.rsi
   # <Onyx-SurgeryInfection>
   - type: SurgeryInfectionProtection
-    chanceMultiplier: 0.8
+    protection: 20
   # </Onyx-SurgeryInfection>
   # <Onyx-SurgeryPPE>
   - type: Tag
@@ -670,7 +670,7 @@
     sprite: Clothing/Head/Hats/surgcap_purple.rsi
   # <Onyx-SurgeryInfection>
   - type: SurgeryInfectionProtection
-    chanceMultiplier: 0.8
+    protection: 20
   # </Onyx-SurgeryInfection>
   # <Onyx-SurgeryPPE>
   - type: Tag

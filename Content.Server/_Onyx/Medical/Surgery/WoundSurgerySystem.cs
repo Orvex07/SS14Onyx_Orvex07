@@ -11,12 +11,17 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Server._Onyx.Medical.Surgery;
 
+/// <summary>
+/// Bridge implementation: wound-related surgery conditions and effects.
+/// All handlers no-op on parts without wounds, so these steps stay inert
+/// on bodies outside the wound domain.
+/// </summary>
 public sealed partial class WoundSurgerySystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private WoundBleedingSystem _bleeding = default!;
     [Dependency] private DamageableSystem _damage = default!;
-    [Dependency] private WoundDamageRoutingSystem _damageRouting = default!;
+    [Dependency] private SurgeryWoundBridgeSystem _bridge = default!;
     [Dependency] private WoundFractureSystem _fractures = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private WoundSystem _wounds = default!;
@@ -26,15 +31,17 @@ public sealed partial class WoundSurgerySystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<SurgeryHasWoundConditionComponent, SurgeryValidEvent>(OnHasWoundValid);
+        SubscribeLocalEvent<SurgeryFractureGradeConditionComponent, SurgeryValidEvent>(OnFractureGradeValid);
+        SubscribeLocalEvent<SurgeryNerveDamageConditionComponent, SurgeryValidEvent>(OnNerveDamageValid);
+        SubscribeLocalEvent<SurgeryWoundedConditionComponent, SurgeryValidEvent>(OnWoundedValid);
         SubscribeLocalEvent<SurgeryClampBleedingEffectComponent, SurgeryStepEvent>(OnClampBleeding);
         SubscribeLocalEvent<SurgeryClampBleedingEffectComponent, SurgeryStepCompleteCheckEvent>(OnClampBleedingCheck);
-        SubscribeLocalEvent<SurgeryFractureGradeConditionComponent, SurgeryValidEvent>(OnFractureGradeValid);
+        SubscribeLocalEvent<SurgeryReduceFractureEffectComponent, SurgeryStepEvent>(OnReduceFracture);
+        SubscribeLocalEvent<SurgeryReduceFractureEffectComponent, SurgeryStepCompleteCheckEvent>(OnReduceFractureCheck);
         SubscribeLocalEvent<SurgeryMendFractureEffectComponent, SurgeryStepEvent>(OnMendFracture);
         SubscribeLocalEvent<SurgeryMendFractureEffectComponent, SurgeryStepCompleteCheckEvent>(OnMendFractureCheck);
-        SubscribeLocalEvent<SurgeryNerveDamageConditionComponent, SurgeryValidEvent>(OnNerveDamageValid);
         SubscribeLocalEvent<SurgeryRepairNerveEffectComponent, SurgeryStepEvent>(OnRepairNerve);
         SubscribeLocalEvent<SurgeryRepairNerveEffectComponent, SurgeryStepCompleteCheckEvent>(OnRepairNerveCheck);
-        SubscribeLocalEvent<SurgeryWoundedConditionComponent, SurgeryValidEvent>(OnWoundedValid);
         SubscribeLocalEvent<SurgeryTendWoundsEffectComponent, SurgeryStepEvent>(OnTendWounds);
         SubscribeLocalEvent<SurgeryTendWoundsEffectComponent, SurgeryStepCompleteCheckEvent>(OnTendWoundsCheck);
         SubscribeLocalEvent<SurgeryTreatWoundEffectComponent, SurgeryStepEvent>(OnTreatWound);
@@ -72,6 +79,28 @@ public sealed partial class WoundSurgerySystem : EntitySystem
     {
         if (_fractures.GetFracture(args.Part) is { } fracture)
             _fractures.TryMend(fracture.Owner);
+    }
+
+    private void OnReduceFracture(Entity<SurgeryReduceFractureEffectComponent> ent, ref SurgeryStepEvent args)
+    {
+        if (_fractures.GetFracture(args.Part) is not { } fracture ||
+            !_fractures.TryGetProfile(args.Part, out var profile) ||
+            fracture.Comp2.Grade < profile.ReductionMinimumGrade ||
+            fracture.Comp2.Treatment != FractureTreatment.None)
+            return;
+
+        _fractures.TryReduce(fracture.Owner);
+    }
+
+    private void OnReduceFractureCheck(Entity<SurgeryReduceFractureEffectComponent> ent, ref SurgeryStepCompleteCheckEvent args)
+    {
+        if (_fractures.GetFracture(args.Part) is not { } fracture ||
+            !_fractures.TryGetProfile(args.Part, out var profile) ||
+            fracture.Comp2.Grade < profile.ReductionMinimumGrade ||
+            fracture.Comp2.Treatment != FractureTreatment.None)
+            return;
+
+        args.Cancelled = true;
     }
 
     private void OnMendFractureCheck(Entity<SurgeryMendFractureEffectComponent> ent, ref SurgeryStepCompleteCheckEvent args)
@@ -156,7 +185,7 @@ public sealed partial class WoundSurgerySystem : EntitySystem
             }
 
             if (!damage.Empty)
-                _damageRouting.TryApplyPartDamage(args.Body, args.Part, damage, args.User, healWounds: false);
+                _bridge.ApplySurgeryDamage(args.Body, args.Part, args.User, SurgeryEntityTarget.Part, damage, false);
         }
 
         if (ent.Comp.HealWounds && !treatment.Empty)
@@ -176,7 +205,7 @@ public sealed partial class WoundSurgerySystem : EntitySystem
             _wounds.TreatWound(wound.Owner, ent.Comp.Amount);
 
         if (!ent.Comp.Damage.Empty)
-            _damageRouting.TryApplyPartDamage(args.Body, args.Part, ent.Comp.Damage, args.User, healWounds: false);
+            _bridge.ApplySurgeryDamage(args.Body, args.Part, args.User, SurgeryEntityTarget.Part, ent.Comp.Damage, false);
     }
 
     private void OnTreatWoundCheck(Entity<SurgeryTreatWoundEffectComponent> ent, ref SurgeryStepCompleteCheckEvent args)
@@ -186,6 +215,9 @@ public sealed partial class WoundSurgerySystem : EntitySystem
             args.Cancelled = true;
     }
 
+    /// <summary>
+    /// Sums severities of non-scar wounds on the part whose prototype reacts to the damage group.
+    /// </summary>
     private FixedPoint2 GetGroupSeverity(EntityUid part, ProtoId<DamageGroupPrototype> groupId)
     {
         if (!_prototypes.TryIndex(groupId, out var group))
@@ -206,6 +238,9 @@ public sealed partial class WoundSurgerySystem : EntitySystem
         return severity;
     }
 
+    /// <summary>
+    /// Finds the most severe non-scar wound matching the filters. Null filters match anything.
+    /// </summary>
     private Entity<WoundComponent>? FindWound(
         Entity<WoundableComponent?> part,
         ProtoId<WoundPrototype>? prototype = null,

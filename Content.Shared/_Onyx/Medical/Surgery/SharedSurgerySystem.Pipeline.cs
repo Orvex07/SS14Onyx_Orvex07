@@ -11,6 +11,11 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
+    private void InitializePipeline()
+    {
+        SubscribeLocalEvent<SurgeryTargetComponent, SurgeryDoAfterEvent>(OnTargetDoAfter);
+    }
+
     private void OnTargetDoAfter(Entity<SurgeryTargetComponent> ent, ref SurgeryDoAfterEvent args)
     {
         if (!_net.IsServer || args.Handled || args.Target != ent.Owner)
@@ -29,7 +34,8 @@ public abstract partial class SharedSurgerySystem
             return;
 
         ActiveSurgerySites.Remove(site);
-        if (args.Cancelled)
+        if (args.Cancelled || TerminatingOrDeleted(args.User) || TerminatingOrDeleted(ent.Owner) ||
+            TerminatingOrDeleted(targetPart))
         {
             RefreshUI(ent);
             return;
@@ -157,6 +163,8 @@ public abstract partial class SharedSurgerySystem
         if (!_doAfter.TryStartDoAfter(doAfter))
             return false;
 
+        OnSurgeryStepStarted(user, target.Owner, part.Owner);
+
         var userName = Identity.Entity(user, EntityManager);
         var targetName = Identity.Entity(target, EntityManager);
         var procedureKey = $"surgery-popup-procedure-{surgery}-step-{stepId}";
@@ -208,8 +216,15 @@ public abstract partial class SharedSurgerySystem
             var site = (pending.Body, pending.Part);
             if (!ActiveSurgerySites.TryGetValue(site, out var active) ||
                 active.Token != pending.Token ||
-                active.User != pending.User)
+                active.User != pending.User ||
+                TerminatingOrDeleted(pending.Body) ||
+                TerminatingOrDeleted(pending.Part) ||
+                TerminatingOrDeleted(pending.User))
+            {
+                if (ActiveSurgerySites.TryGetValue(site, out var stale) && stale.Token == pending.Token)
+                    RemoveSurgerySite(site, pending.Token);
                 continue;
+            }
 
             var tools = GetActiveTool(pending.User);
             if (!TryComp(pending.Body, out SurgeryTargetComponent? targetComp) ||

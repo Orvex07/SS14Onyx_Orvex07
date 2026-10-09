@@ -1,3 +1,4 @@
+using Content.Shared._Onyx.Medical.Surgery;
 using Content.Shared.Body.Part;
 using Content.Shared.Armor;
 using Content.Shared.Damage.Components;
@@ -9,6 +10,9 @@ using Robust.Shared.Random;
 
 namespace Content.Shared._Onyx.Wounds;
 
+/// <summary>
+/// Bone fractures: creation from blunt trauma, grades, reduction and mending.
+/// </summary>
 public sealed partial class WoundFractureSystem : EntitySystem
 {
     [Dependency] private INetManager _net = default!;
@@ -23,7 +27,10 @@ public sealed partial class WoundFractureSystem : EntitySystem
 
     internal void HandlePartDamageApplied(Entity<WoundableComponent> part, ref PartDamageAppliedEvent args)
     {
-        if (!_net.IsServer || !TryGetProfile(part.Owner, out var profile) ||
+        // Fractures are surgical conditions: only bodies marked operable can sustain them,
+        // so a fracture is never created where surgery cannot treat it.
+        if (!_net.IsServer || !HasComp<SurgeryTargetComponent>(args.Body) ||
+            !TryGetProfile(part.Owner, out var profile) ||
             profile.SeverityMultiplier <= 0f ||
             !args.Damage.DamageDict.TryGetValue(profile.DamageType, out var damage) || damage <= FixedPoint2.Zero)
             return;
@@ -44,7 +51,9 @@ public sealed partial class WoundFractureSystem : EntitySystem
         if (damage < FixedPoint2.Max(FixedPoint2.Zero, profile.MinimumHitDamage))
             return;
 
-        var protection = _traumaProtection.GetProtection(args.Body, Comp<BodyPartComponent>(part), TraumaType.Fracture);
+        var protection = TryComp(part.Owner, out BodyPartComponent? bodyPart)
+            ? _traumaProtection.GetProtection(args.Body, bodyPart, TraumaType.Fracture)
+            : 0f;
         var effectiveTrauma = GetEffectiveTrauma(part.Owner, profile, damage);
         var hitGrade = GetGrade(profile, effectiveTrauma);
         if (hitGrade == FractureGrade.None ||
@@ -83,6 +92,9 @@ public sealed partial class WoundFractureSystem : EntitySystem
             SetGrade((wound, core, wound.Comp), grade);
     }
 
+    /// <summary>
+    /// Returns the fracture wound on the part, if any.
+    /// </summary>
     public Entity<WoundComponent, WoundFractureComponent>? GetFracture(Entity<WoundableComponent?> part)
     {
         if (!Resolve(part, ref part.Comp, false))

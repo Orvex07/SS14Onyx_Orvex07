@@ -1046,6 +1046,28 @@
 
 - type: entity
   parent: SurgeryStepBase
+  id: SurgeryStepReduceFracture
+  name: Set fracture
+  components:
+  - type: SurgeryStep
+    duration: 4
+  - type: SurgeryReduceFractureEffect
+  - type: SurgeryStepPainInflicter
+    amount: 15
+    sleepModifier: 0
+
+- type: entity
+  parent: SurgeryStepBase
+  id: SurgeryStepReduceFrameFracture
+  name: Straighten frame struts
+  components:
+  - type: SurgeryStep
+    duration: 4
+  - type: SurgeryReduceFractureEffect
+  - type: MechanicalSurgeryStep
+
+- type: entity
+  parent: SurgeryStepBase
   id: SurgeryStepMendFrameFracture
   name: Weld frame fracture
   components:

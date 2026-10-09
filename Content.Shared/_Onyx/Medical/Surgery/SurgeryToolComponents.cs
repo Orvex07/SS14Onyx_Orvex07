@@ -3,6 +3,9 @@ using Robust.Shared.GameStates;
 
 namespace Content.Shared._Onyx.Medical.Surgery;
 
+/// <summary>
+/// Tool quality profile: per-task speed and success modifiers plus examine hints and sounds.
+/// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 [Access(typeof(SharedSurgerySystem), typeof(SurgeryToolExamineSystem))]
 public sealed partial class SurgeryToolComponent : Component
@@ -10,7 +13,9 @@ public sealed partial class SurgeryToolComponent : Component
     [DataField, AutoNetworkedField] public Dictionary<string, float> SpeedModifiers = new();
     [DataField, AutoNetworkedField] public Dictionary<string, float> SuccessModifiers = new();
     [DataField, AutoNetworkedField] public List<LocId> CustomUses = new();
+    /// <summary>Sound played when a step starts with this tool.</summary>
     [DataField, AutoNetworkedField] public SoundSpecifier? StartSound;
+    /// <summary>Sound played when a step finishes with this tool.</summary>
     [DataField, AutoNetworkedField] public SoundSpecifier? EndSound;
 }
 

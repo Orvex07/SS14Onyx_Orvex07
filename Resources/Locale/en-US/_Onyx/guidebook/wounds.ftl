@@ -157,6 +157,18 @@ guidebook-onyx-surgery-tools =
     A scalpel makes an incision. A hemostat clamps vessels. A retractor opens access. A cautery seals tissue. Bones require bone gel. A wrong tool can harm the patient.
     Improvised tools can satisfy the same task but work slower and have a lower success rate. A failed invasive step causes additional localized trauma instead of silently doing nothing.
 
+guidebook-onyx-surgery-sterility =
+    ## Sterility and sepsis
+    Every surgery step can infect the wound. With no protection the infection chance is 70% per step.
+    Protection is counted in sterility points. You need 100 points — then infection is ruled out.
+    1. Sterile mask — 40 points.
+    2. Gloves: nitrile — 40, latex — 30.
+    3. Surgical cap — 20.
+    A full set of nitrile gloves, mask, and cap gives exactly 100. A latex set gives 90 — a small risk remains.
+    Bare hands remove 25 points — never operate with them. Each item's sterility is shown on examination.
+    A patient's blood soils gloves. It cannot harm that same patient, but such gloves infect the next ones: they grant no points and remove 25 more. Change gloves between operations.
+    Signs of infection: fever, chills, malaise, headache, weakness, vomiting, drowsiness.
+
 guidebook-onyx-surgery-diagnostics =
     ## Reading the analyzer
     Each affected part is shown as a separate block. Wounds, fracture grade, external and internal bleeding rate, pain, nerve condition, and lost function appear on separate lines.

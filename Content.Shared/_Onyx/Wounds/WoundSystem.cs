@@ -14,6 +14,9 @@ using Robust.Shared.Random;
 
 namespace Content.Shared._Onyx.Wounds;
 
+/// <summary>
+/// Core wound lifecycle: creation and merging, severity, states, treatment and removal.
+/// </summary>
 public sealed partial class WoundSystem : EntitySystem
 {
     [Dependency] private SharedBodySystem _body = default!;
@@ -96,6 +99,9 @@ public sealed partial class WoundSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// Returns true if parts with this profile can bleed (positive bleeding multiplier).
+    /// </summary>
     public bool CanBleed(Entity<WoundableComponent?> part)
     {
         if (!Resolve(part, ref part.Comp, false) ||
@@ -105,6 +111,10 @@ public sealed partial class WoundSystem : EntitySystem
         return profile.BleedingMultiplier > 0f;
     }
 
+    /// <summary>
+    /// Returns true if the wound prototype may be created on the part
+    /// (accepted damage type and supported-wounds profile checks).
+    /// </summary>
     public bool CanCreateWound(Entity<WoundableComponent?> part, ProtoId<WoundPrototype> prototype,
         ProtoId<DamageTypePrototype>? damageType = null)
     {
@@ -148,6 +158,9 @@ public sealed partial class WoundSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// Enumerates live wounds held in the part's wounds container.
+    /// </summary>
     public IEnumerable<Entity<WoundComponent>> GetWounds(Entity<WoundableComponent?> part)
     {
         if (!Resolve(part, ref part.Comp, false) ||
@@ -159,6 +172,9 @@ public sealed partial class WoundSystem : EntitySystem
                 yield return (wound, component);
     }
 
+    /// <summary>
+    /// Creates a wound or merges into the existing one of the same prototype. Server only.
+    /// </summary>
     public EntityUid? CreateOrMergeWound(
         Entity<WoundableComponent?> part,
         ProtoId<WoundPrototype> prototypeId,
@@ -268,6 +284,9 @@ public sealed partial class WoundSystem : EntitySystem
             RemComp<WoundFunctionalityComponent>(wound);
     }
 
+    /// <summary>
+    /// Re-syncs symptom components (bleeding, internal bleeding, functionality) with severity and state.
+    /// </summary>
     public void RefreshRuntimeComponents(Entity<WoundComponent?> wound)
     {
         if (!Resolve(wound, ref wound.Comp, false) ||
@@ -277,6 +296,9 @@ public sealed partial class WoundSystem : EntitySystem
         SyncRuntimeComponents((wound.Owner, wound.Comp), prototype);
     }
 
+    /// <summary>
+    /// Shifts severity, raising change events. Zero severity heals and removes the wound.
+    /// </summary>
     public bool ChangeSeverity(Entity<WoundComponent?> wound, FixedPoint2 delta)
     {
         if (!_net.IsServer || !Resolve(wound, ref wound.Comp, false) ||
@@ -309,6 +331,10 @@ public sealed partial class WoundSystem : EntitySystem
         return true;
     }
 
+    /// <summary>
+    /// Treats a wound by the given amount. Partial treatment stabilizes the remainder.
+    /// Cancellable via <see cref="WoundTreatmentAttemptEvent"/>.
+    /// </summary>
     public bool TreatWound(Entity<WoundComponent?> wound, FixedPoint2 amount)
     {
         if (amount <= FixedPoint2.Zero || !Resolve(wound, ref wound.Comp, false))
@@ -331,6 +357,9 @@ public sealed partial class WoundSystem : EntitySystem
         return ChangeSeverity(wound, -amount);
     }
 
+    /// <summary>
+    /// Transitions the wound to a new state, raising state-changed events. Server only.
+    /// </summary>
     public bool SetWoundState(Entity<WoundComponent?> wound, WoundState state)
     {
         if (!_net.IsServer || !Resolve(wound, ref wound.Comp, false) || wound.Comp.State == state)
@@ -347,8 +376,12 @@ public sealed partial class WoundSystem : EntitySystem
         return true;
     }
 
+    /// <summary>Moves an open wound to the closed state.</summary>
     public bool CloseWound(Entity<WoundComponent?> wound) => SetWoundState(wound, WoundState.Closed);
 
+    /// <summary>
+    /// Removes the wound entity, raising removal events. Scarred wounds are never removed here.
+    /// </summary>
     public bool RemoveWound(Entity<WoundComponent?> wound)
     {
         if (!_net.IsServer || !Resolve(wound, ref wound.Comp, false) || HasComp<WoundScarComponent>(wound))
@@ -368,6 +401,9 @@ public sealed partial class WoundSystem : EntitySystem
         return true;
     }
 
+    /// <summary>
+    /// Removes every wound from the part. Server only.
+    /// </summary>
     public void ClearWounds(Entity<WoundableComponent?> part)
     {
         if (!_net.IsServer || !Resolve(part, ref part.Comp, false) ||
@@ -393,6 +429,9 @@ public sealed partial class WoundSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// Heals matching wounds with a negative-damage spec, honoring stage filters. Server only.
+    /// </summary>
     public bool TryHealWounds(Entity<WoundableComponent?> part, DamageSpecifier healing,
         IReadOnlySet<string>? allowedStages = null)
     {
@@ -427,6 +466,9 @@ public sealed partial class WoundSystem : EntitySystem
         return changed;
     }
 
+    /// <summary>
+    /// Estimates how much of a healing spec can actually be absorbed by treatable wounds.
+    /// </summary>
     public FixedPoint2 GetHealingPotential(Entity<WoundableComponent?> part, DamageSpecifier healing,
         IReadOnlySet<string>? allowedStages = null)
     {

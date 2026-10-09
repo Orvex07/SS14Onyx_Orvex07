@@ -2,6 +2,7 @@
   <FTLTextpart Key="guidebook-onyx-surgery-content"/>
   <FTLTextpart Key="guidebook-onyx-surgery-procedure"/>
   <FTLTextpart Key="guidebook-onyx-surgery-tools"/>
+  <FTLTextpart Key="guidebook-onyx-surgery-sterility"/>
   <FTLTextpart Key="guidebook-onyx-surgery-diagnostics"/>
   <Box>
     <GuideEntityEmbed Entity="Scalpel"/>
@@ -11,7 +12,6 @@
   </Box>
   <FTLTextpart Key="guidebook-onyx-surgery-access"/>
   <Box>
-    <GuideEntityEmbed Entity="Bonesetter"/>
     <GuideEntityEmbed Entity="BoneGel"/>
   </Box>
   <FTLTextpart Key="guidebook-onyx-surgery-synthetics"/>

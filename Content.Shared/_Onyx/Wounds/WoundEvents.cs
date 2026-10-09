@@ -10,9 +10,11 @@ using Robust.Shared.GameStates;
 
 namespace Content.Shared._Onyx.Wounds;
 
+/// <summary>Raised on the part and the wound when a wound is created.</summary>
 [ByRefEvent]
 public readonly record struct WoundCreatedEvent(EntityUid Part, EntityUid Wound, ProtoId<WoundPrototype> Prototype);
 
+/// <summary>Raised on the part and the wound when severity changes.</summary>
 [ByRefEvent]
 public readonly record struct WoundChangedEvent(
     EntityUid Part,
@@ -30,6 +32,7 @@ public readonly record struct WoundStateChangedEvent(
 [ByRefEvent]
 public readonly record struct WoundRemovedEvent(EntityUid Part, EntityUid Wound, ProtoId<WoundPrototype> Prototype);
 
+/// <summary>Raised before treatment applies. Cancel to block healing of this wound.</summary>
 [ByRefEvent]
 public record struct WoundTreatmentAttemptEvent(EntityUid Part, EntityUid Wound, FixedPoint2 Amount, bool Cancelled = false);
 
@@ -127,6 +130,10 @@ public readonly record struct NervousSystemRebuiltEvent(EntityUid NerveSystem);
 [ByRefEvent]
 public readonly record struct NervousSystemRemovedEvent(EntityUid NerveSystem);
 
+/// <summary>
+/// Raised when damage is applied to a single part. Wound, fracture and nerve systems
+/// consume it to convert damage into symptoms.
+/// </summary>
 [ByRefEvent]
 public readonly record struct PartDamageAppliedEvent(
     EntityUid Body,
@@ -237,3 +244,4 @@ public sealed class PartDamageModifyEvent(
     public DamageSpecifier Damage = damage;
     public SlotFlags TargetSlots => SlotFlags.WITHOUT_POCKET;
 }
+

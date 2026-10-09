@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Systems;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Prototypes;
@@ -15,6 +16,8 @@ namespace Content.Shared._Onyx.Wounds;
 public sealed partial class WoundHealingSystem : EntitySystem
 {
     [Dependency] private SharedBodySystem _body = default!;
+    [Dependency] private BloodstreamSystem _bloodstream = default!;
+    [Dependency] private SharedSolutionContainerSystem _solution = default!;
     [Dependency] private DamageableSystem _damage = default!;
     [Dependency] private WoundBleedingSystem _bleeding = default!;
     [Dependency] private WoundDamageRoutingSystem _routing = default!;
@@ -87,6 +90,54 @@ public sealed partial class WoundHealingSystem : EntitySystem
     }
 
     public bool CanTreatBleeding(EntityUid part) => _bleeding.GetPartRate(part) > 0f;
+
+    /// <summary>
+    /// Wound-host variant of the healing availability check.
+    /// Returns false when the body is not a wound host, so callers fall back to vanilla logic.
+    /// </summary>
+    public bool HasWoundDamage(
+        Entity<DamageableComponent> target,
+        Entity<HealingComponent> healing,
+        EntityUid? requestedPart = null)
+    {
+        if (!TryComp(target, out WoundHostComponent? host))
+            return false;
+
+        var resolve = new ResolveHealingPartEvent(target, healing.Comp.Damage, healing.Comp.DamageContainers,
+            healing.Comp.TreatmentCapabilities, healing.Comp.AllowedWoundStages,
+            healing.Comp.BloodlossModifier, requestedPart, healing.Comp.HealWounds);
+        RaiseLocalEvent(target, ref resolve);
+        if (!resolve.Accepted)
+            return false;
+
+        if (healing.Comp.HealDamage)
+        {
+            foreach (var (type, amount) in healing.Comp.Damage.DamageDict)
+            {
+                var source = host.LocalizedDamageTypes.Contains(type) ? resolve.Part : target.Owner;
+                if (amount < 0 && source is { } entity &&
+                    _damage.GetAllDamage(entity).DamageDict.GetValueOrDefault(type) > 0)
+                    return true;
+            }
+        }
+
+        if (healing.Comp.HealWounds && resolve.Part is { } woundPart &&
+            HasTreatableWounds(woundPart, healing.Comp.Damage, healing.Comp.AllowedWoundStages))
+            return true;
+
+        if (resolve.Part is { } bleedingPart && healing.Comp.BloodlossModifier < 0 &&
+            CanTreatBleeding(bleedingPart))
+            return true;
+
+        if (TryComp<BloodstreamComponent>(target, out var hostBloodstream) &&
+            healing.Comp.ModifyBloodLevel > 0 &&
+            _solution.ResolveSolution(target.Owner, hostBloodstream.BloodSolutionName,
+                ref hostBloodstream.BloodSolution, out _) &&
+            _bloodstream.GetBloodLevel((target, hostBloodstream)) < 1)
+            return true;
+
+        return false;
+    }
 
     public bool HasTreatableWounds(EntityUid part, DamageSpecifier healing, IReadOnlySet<string>? allowedStages) =>
         _wounds.GetHealingPotential(part, healing, allowedStages) > FixedPoint2.Zero;

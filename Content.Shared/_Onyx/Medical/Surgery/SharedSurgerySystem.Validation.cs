@@ -11,13 +11,17 @@ namespace Content.Shared._Onyx.Medical.Surgery;
 
 public abstract partial class SharedSurgerySystem
 {
+    /// <summary>
+    /// Checks that the surgery, step and part are valid and raises gates on step and surgery singletons.
+    /// </summary>
     protected bool IsSurgeryValid(EntityUid user, EntityUid body, EntityUid targetPart, EntProtoId surgery, EntProtoId stepId, List<EntityUid> tools, out Entity<SurgeryComponent> surgeryEnt, out Entity<BodyPartComponent> part, out EntityUid step)
     {
         surgeryEnt = default;
         part = default;
         step = default;
 
-        if (!HasComp<SurgeryTargetComponent>(body) || !IsReadyForSurgery(body) ||
+        if (!TryComp(body, out SurgeryTargetComponent? surgeryTarget) || !surgeryTarget.CanOperate ||
+            !IsReadyForSurgery(body) ||
             !TryComp(targetPart, out BodyPartComponent? partComp) || !IsPartOfTarget(body, targetPart) ||
             GetSurgeryEntity(surgery) is not { } surgeryEntId || !TryComp(surgeryEntId, out SurgeryComponent? surgeryComp) ||
             !GetSurgerySteps(body, targetPart, (surgeryEntId, surgeryComp), tools).Contains(stepId) ||
@@ -61,6 +65,9 @@ public abstract partial class SharedSurgerySystem
                strap.Position == StrapPosition.Down;
     }
 
+    /// <summary>
+    /// Returns true if the body can be operated on: a detached part, or a lying patient.
+    /// </summary>
     public bool IsReadyForSurgery(EntityUid entity)
     {
         return TryComp(entity, out BodyPartComponent? part)
@@ -68,6 +75,9 @@ public abstract partial class SharedSurgerySystem
             : IsLyingDown(entity);
     }
 
+    /// <summary>
+    /// Returns true if the part belongs to the surgery target.
+    /// </summary>
     protected bool IsPartOfTarget(EntityUid target, EntityUid part)
     {
         return TryComp(target, out BodyPartComponent? targetPart)
@@ -92,6 +102,9 @@ public abstract partial class SharedSurgerySystem
         Entity<SurgeryComponent> surgery, List<EntityUid> tools)
         => GetSurgerySequence(body, part, surgery, tools);
 
+    /// <summary>
+    /// Resolves the next incomplete step of a procedure, descending into nested surgeries.
+    /// </summary>
     protected bool TryGetNextProcedureStep(EntityUid body, EntityUid part, EntProtoId surgeryId,
         EntityUid? user, List<EntityUid> tools, out EntProtoId owner, out EntProtoId step)
     {
@@ -153,6 +166,9 @@ public abstract partial class SharedSurgerySystem
             .FirstOrDefault() ?? fallback;
     }
 
+    /// <summary>
+    /// Returns true if a surgery item (nested surgery or single step) is fully complete.
+    /// </summary>
     protected bool IsSurgeryItemComplete(EntityUid body, EntityUid part, EntProtoId item, List<EntityUid> tools)
     {
         if (GetSurgeryEntity(item) is { } surgery && TryComp(surgery, out SurgeryComponent? surgeryComp))
@@ -162,6 +178,9 @@ public abstract partial class SharedSurgerySystem
         return IsStepComplete(body, part, item);
     }
 
+    /// <summary>
+    /// Returns true if a single step reports completion.
+    /// </summary>
     protected bool IsStepComplete(EntityUid body, EntityUid part, EntProtoId stepId)
     {
         if (GetSurgeryStepEntity(stepId) is not { } step)
@@ -172,6 +191,9 @@ public abstract partial class SharedSurgerySystem
         return !ev.Cancelled;
     }
 
+    /// <summary>
+    /// Checks range, clothing and per-step gates, reporting the failure reason.
+    /// </summary>
     protected bool CanPerformStep(EntityUid user, EntityUid body, EntityUid targetPart, BodyPartType part, EntityUid step, bool doPopup, out string? popup, out StepInvalidReason reason, out HashSet<EntityUid>? validTools)
     {
         if (!_interaction.InRangeUnobstructed(user, body, popup: doPopup))
@@ -192,7 +214,7 @@ public abstract partial class SharedSurgerySystem
             _ => SlotFlags.NONE,
         };
 
-        if (slot != SlotFlags.NONE && TryComp(body, out InventoryComponent? inventory))
+        if (slot != SlotFlags.NONE && !HasClothingBypass(user) && TryComp(body, out InventoryComponent? inventory))
         {
             var equipped = new InventorySystem.InventorySlotEnumerator(inventory, slot);
             if (equipped.NextItem(out _))
@@ -225,4 +247,12 @@ public abstract partial class SharedSurgerySystem
     }
 
     protected virtual void RefreshUI(EntityUid body) { }
+
+    private bool HasClothingBypass(EntityUid user)
+    {
+        if (HasComp<SurgeryClothingBypassComponent>(user))
+            return true;
+
+        return _hands.GetActiveItem(user) is { } tool && HasComp<SurgeryClothingBypassComponent>(tool);
+    }
 }

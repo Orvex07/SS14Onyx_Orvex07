@@ -24,18 +24,25 @@ public sealed partial class SurgeryInfectionProtectionExamineSystem : EntitySyst
         if (!args.CanInteract || !args.CanAccess)
             return;
 
-        var protection = MathF.Round((1f - ent.Comp.ChanceMultiplier) * 100f);
+        var soiled = HasComp<SurgerySoiledComponent>(ent);
+        var protection = MathF.Round(ent.Comp.Protection);
         var tier = protection switch
         {
             >= 100f => "full",
-            >= 60f => "high",
-            >= 30f => "medium",
+            >= 40f => "high",
+            >= 25f => "medium",
             _ => "low",
         };
 
         var message = new FormattedMessage();
         message.AddMarkupOrThrow(Loc.GetString("surgery-infection-protection-examine",
             ("tier", tier), ("protection", protection)));
+        if (soiled)
+        {
+            message.PushNewline();
+            message.AddMarkupOrThrow(Loc.GetString("surgery-infection-protection-examine-soiled",
+                ("penalty", MathF.Round(SurgerySterility.SoiledPenalty))));
+        }
         var user = args.User;
         var target = args.Target;
 
